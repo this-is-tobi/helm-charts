@@ -64,10 +64,10 @@ server:
   initContainers: []
   # - name: wait-for-keycloak
   #   image: docker.io/curlimages/curl:latest
-  #   command: 
+  #   command:
   #   - "/bin/sh"
   #   - "-c"
-  #   args: 
+  #   args:
   #   - "while [ $(curl -sw '%{http_code}' http://webserver.svc.cluster.local -o /dev/null) -ne 200 ]; do sleep 5; echo 'Waiting for the webserver...'; done"
   #   volumeMounts:
   #   - mountPath: /custom-volume
@@ -98,7 +98,7 @@ server:
   envFrom: []
   # - configMapRef:
   #     name: my-config
-  # - secretRef: 
+  # - secretRef:
   #     name: my-secret
   # -- server container env variables, it will be injected into a configmap and loaded into the container.
   env: {}
@@ -221,7 +221,7 @@ server:
       title: Home
       navLinks:
         - title: GitHub
-          path: https://github.com/this-is-tobi/homelab
+          path: https://github.com/this-is-tobi
     # appConfig:
     #   theme: adventure-basic
     #   startingView: default
