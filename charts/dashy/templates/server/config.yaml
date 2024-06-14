@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-%s" (include "template.fullname" .) "server-config" }}
+  labels: {{- include "template.server.labels" . | nindent 4 }}
+data:
+  conf.yml: |
+{{- with .Values.server.config }}
+  {{- toYaml . | nindent 4 }}
+{{- end }}

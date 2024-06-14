@@ -4,8 +4,9 @@ This repository hosts a set of personal Helm Charts and exposes a Helm Repositor
 
 ## Chart list
 
-| Name | Description |
-| ---- | ----------- |
+| Chart                          | Application                               | Description                         |
+| ------------------------------ | ----------------------------------------- | ----------------------------------- |
+| [charts/dashy](./charts/dashy) | [dashy](https://github.com/lissy93/dashy) | A self-hostable personal dashboard. |
 
 ## Usage
 

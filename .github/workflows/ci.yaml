@@ -7,41 +7,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  path-filter:
-    runs-on: ubuntu-latest
-    if: ${{ !github.event.pull_request.draft }}
-    outputs:
-      charts: ${{ steps.filter.outputs.charts }}
-    steps:
-      - name: Checks-out repository
-        uses: actions/checkout@v4
-
-      - name: Check updated files paths
-        uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            charts:
-              - 'charts/**'
-
-  lint-docs:
-    if: ${{ needs.path-filter.outputs.charts == 'true' }}
-    runs-on: ubuntu-latest
-    needs:
-      - path-filter
-    steps:
-      - name: Checks-out repository
-        uses: actions/checkout@v4
-
-      - name: Run helm-docs
-        run: ./ci/scripts/helm-docs.sh
-
   lint-chart:
-    if: ${{ needs.path-filter.outputs.charts == 'true' }}
+    name: Lint chart
     runs-on: ubuntu-latest
-    needs:
-      - path-filter
-      - lint-docs
     steps:
       - name: Checks-out repository
         uses: actions/checkout@v4
@@ -49,7 +17,8 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v4
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
           check-latest: true
@@ -58,10 +27,20 @@ jobs:
         uses: helm/chart-testing-action@main
 
       - name: Run chart-testing (lint)
-        run: ct lint --target-branch ${{ github.event.repository.default_branch }}
+        run: ct lint --target-branch ${{ github.head_ref }}
 
       - name: Create kind cluster
         uses: helm/kind-action@v1
 
       - name: Run chart-testing (install)
-        run: ct install --target-branch ${{ github.event.repository.default_branch }}
+        run: ct install --target-branch ${{ github.head_ref }}
+
+  lint-docs:
+    name: Lint docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checks-out repository
+        uses: actions/checkout@v4
+
+      - name: Run helm-docs
+        run: ./ci/scripts/helm-docs.sh
