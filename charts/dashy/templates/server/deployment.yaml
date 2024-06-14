@@ -33,18 +33,20 @@ spec:
       - name: {{ include "template.name" . }}-pullsecret
       {{- end }}
       serviceAccountName: {{ include "template.server.serviceAccountName" . }}
+      {{- if .Values.server.podSecurityContext }}
       securityContext:
         {{- toYaml .Values.server.podSecurityContext | nindent 8 }}
-      {{- if or .Values.server.plugins .Values.server.initContainers }}
-      initContainers:
-      {{- if .Values.server.initContainers }}
-        {{- tpl (toYaml .Values.server.initContainers) . | nindent 8 }}
       {{- end }}
+      {{- if .Values.server.initContainers }}
+      initContainers:
+        {{- tpl (toYaml .Values.server.initContainers) . | nindent 8 }}
       {{- end }}
       containers:
       - name: server
+        {{- if .Values.server.container.securityContext }}
         securityContext:
           {{- toYaml .Values.server.container.securityContext | nindent 12 }}
+        {{- end }}
         image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.server.image.pullPolicy }}
         {{- if .Values.server.container.command }}
@@ -63,10 +65,14 @@ spec:
           - containerPort: {{ .Values.server.container.port }}
             protocol: TCP
         envFrom:
+        {{- if or .Values.server.env .Values.global.env }}
         - configMapRef:
             name: {{ printf "%s-%s" (include "template.fullname" .) "server" }}
+        {{- end }}
+        {{- if or .Values.server.secrets .Values.global.secrets -}}
         - secretRef:
             name: {{ printf "%s-%s" (include "template.fullname" .) "server" }}
+        {{- end }}
         {{- if .Values.server.envFrom }}
           {{- toYaml .Values.server.envFrom | nindent 8 }}
         {{- end }}
