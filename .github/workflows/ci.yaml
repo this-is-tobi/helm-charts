@@ -27,13 +27,13 @@ jobs:
         uses: helm/chart-testing-action@main
 
       - name: Run chart-testing (lint)
-        run: ct lint --target-branch ${{ github.head_ref }}
+        run: ct lint --target-branch ${{ github.base_ref }}
 
       - name: Create kind cluster
         uses: helm/kind-action@v1
 
       - name: Run chart-testing (install)
-        run: ct install --target-branch ${{ github.head_ref }}
+        run: ct install --target-branch ${{ github.base_ref }}
 
   lint-docs:
     name: Lint docs
