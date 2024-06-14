@@ -1,0 +1,26 @@
+apiVersion: v1
+entries:
+  dashy:
+  - apiVersion: v2
+    appVersion: 3.1.0
+    created: "2024-06-14T10:28:47.178950408Z"
+    dependencies:
+    - condition: keycloak.enabled
+      name: keycloak
+      repository: https://charts.bitnami.com/bitnami
+      version: 21.4.1
+    digest: 4bfddc653c12818c5e3b648ff498d41dfc70effa5c03bd813a68fadf8e67a572
+    home: https://dashy.to
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: Tobi
+      url: https://this-is-tobi.com
+    name: dashy
+    sources:
+    - https://github.com/thi-is-tobi/helm-charts
+    - https://github.com/Lissy93/dashy
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/dashy-0.1.1/dashy-0.1.1.tgz
+    version: 0.1.1
+generated: "2024-06-14T10:28:47.178959314Z"
