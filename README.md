@@ -32,7 +32,26 @@ sources:
     values: ""
 ```
 
-## Contribution
+## Template
+
+A [template folder](./template/) is available for easy integration of new chart, to use it follow the steps bellow :
+
+1. Copy the template directory :
+    ```sh
+    cp -R ./template ./charts/<chart_name>
+    ```
+
+2. Update `./charts/<chart_name>/Chart.yaml` and `./charts/<chart_name>/values.yaml` files.
+
+3. Optionally add other services :
+    ```sh
+    cp -R ./charts/<chart_name>/templates/server ./charts/<chart_name>/templates/<service_name>
+    find ./charts/<chart_name>/templates/<service_name> -type f -exec perl -pi -e 's/"server"/"<service_name>"/g' {} \;
+    ```
+    
+    Next, add the appropriate block to the `./charts/<chart_name>/values.yaml` file.
+
+## Contributions
 
 - Each PR is associated with a pipeline that checks the `lint` + `helm-docs`.
 - When a merge is performed on the `main` branch, the release pipeline publishes the new version of the chart(s) affected and updates the Helm Repo (`gh-pages` branch).
