@@ -1,6 +1,9 @@
 # Helm charts :anchor:
 
-This repository hosts a set of personal Helm Charts and exposes a Helm Repository on [https://this-is-tobi.github.io/helm-charts](https://this-is-tobi.github.io/helm-charts/index.yaml) thanks to Github Pages and the Github Action [chart releaser](https://github.com/helm/chart-releaser-action).
+This repository hosts a set of personal Helm Charts and exposes a Helm Repository at [https://this-is-tobi.github.io/helm-charts](https://this-is-tobi.github.io/helm-charts) thanks to Github Pages and the Github Action [chart releaser](https://github.com/helm/chart-releaser-action).
+
+> [!TIP]
+> See charts details [here](https://this-is-tobi.github.io/helm-charts/index.yaml).
 
 ## Chart list
 
