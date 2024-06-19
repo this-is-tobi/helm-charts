@@ -117,7 +117,7 @@ spec:
           {{- toYaml .Values.server.resources | nindent 10 }}
         volumeMounts:
         - name: server-config
-          mountPath: /app/user-data
+          mountPath: {{ .Values.server.configMountPath }}
         {{- range $volumeMount := .Values.server.extraVolumeMounts }}
         - name: {{ $volumeMount.name }}
           mountPath: {{ $volumeMount.mountPath }}

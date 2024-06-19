@@ -1,6 +1,6 @@
 # dashy
 
-![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.0](https://img.shields.io/badge/AppVersion-3.1.0-informational?style=flat-square)
+![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.0](https://img.shields.io/badge/AppVersion-3.1.0-informational?style=flat-square)
 
 A Helm chart to deploy Dashy, a self-hostable personal dashboard that includes status-checking, widgets, themes, icon packs, a UI editor etc...
 
@@ -69,9 +69,8 @@ A Helm chart to deploy Dashy, a self-hostable personal dashboard that includes s
 | server.autoscaling.minReplicas | int | `1` | Minimum number of replicas for the server [HPA]. |
 | server.autoscaling.targetCPUUtilizationPercentage | int | `80` | Average CPU utilization percentage for the server [HPA]. |
 | server.autoscaling.targetMemoryUtilizationPercentage | int | `80` | Average memory utilization percentage for the server [HPA]. |
-| server.config.pageInfo.navLinks[0].path | string | `"https://github.com/this-is-tobi"` |  |
-| server.config.pageInfo.navLinks[0].title | string | `"GitHub"` |  |
-| server.config.pageInfo.title | string | `"Home"` |  |
+| server.config | object | `{"pageInfo":{"navLinks":[{"path":"https://github.com/this-is-tobi","title":"GitHub"}],"title":"Home"}}` | Application custom configuration that will be mount inside the container. |
+| server.configMountPath | string | `"/app/user-data"` | Mount path for the config file inside the container. |
 | server.container.args | list | `[]` | server container command args. |
 | server.container.command | list | `[]` | server container command. |
 | server.container.port | int | `8080` | server container port. |
