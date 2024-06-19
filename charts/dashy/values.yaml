@@ -216,6 +216,9 @@ server:
     annotations: {}
     # -- Service account name.
     name: "server-sa"
+  # -- Mount path for the config file inside the container.
+  configMountPath: /app/user-data
+  # -- Application custom configuration that will be mount inside the container.
   config:
     pageInfo:
       title: Home
