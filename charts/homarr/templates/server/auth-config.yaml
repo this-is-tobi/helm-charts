@@ -1,0 +1,32 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ printf "%s-%s" (include "template.fullname" .) "server-auth" }}
+  labels: {{- include "template.server.labels" . | nindent 4 }}
+data:
+  AUTH_PROVIDER: {{ .Values.server.auth.provider | quote }}
+  AUTH_LOGOUT_REDIRECT_URL: {{ .Values.server.auth.logoutRedirectUri | quote }}
+  AUTH_SESSION_EXPIRY_TIME: {{ .Values.server.auth.sessionExpiryTime | quote }}
+  {{- if contains "oidc" .Values.server.auth.provider | quote }}
+  AUTH_OIDC_URI: {{ .Values.server.auth.oidc.URI | quote }}
+  AUTH_OIDC_CLIENT_NAME: {{ .Values.server.auth.oidc.CLIENT_NAME | quote }}
+  AUTH_OIDC_ADMIN_GROUP: {{ .Values.server.auth.oidc.ADMIN_GROUP | quote }}
+  AUTH_OIDC_OWNER_GROUP: {{ .Values.server.auth.oidc.OWNER_GROUP | quote }}
+  AUTH_OIDC_TIMEOUT: {{ .Values.server.auth.oidc.TIMEOUT | quote }}
+  AUTH_OIDC_AUTO_LOGIN: {{ .Values.server.auth.oidc.AUTO_LOGIN | quote }}
+  {{- end -}}
+  {{- if contains "ldap" .Values.server.auth.provider | quote }}
+  AUTH_LDAP_URI: {{ .Values.server.auth.ldap.URI | quote }}
+  AUTH_LDAP_BASE: {{ .Values.server.auth.ldap.BASE | quote }}
+  AUTH_LDAP_BIND_DN: {{ .Values.server.auth.ldap.BIND_DN | quote }}
+  AUTH_LDAP_USERNAME_ATTRIBUTE: {{ .Values.server.auth.ldap.USERNAME_ATTRIBUTE | quote }}
+  AUTH_LDAP_USER_MAIL_ATTRIBUTE: {{ .Values.server.auth.ldap.USER_MAIL_ATTRIBUTE | quote }}
+  AUTH_LDAP_GROUP_CLASS: {{ .Values.server.auth.ldap.GROUP_CLASS | quote }}
+  AUTH_LDAP_GROUP_MEMBER_ATTRIBUTE: {{ .Values.server.auth.ldap.GROUP_MEMBER_ATTRIBUTE | quote }}
+  AUTH_LDAP_GROUP_MEMBER_USER_ATTRIBUTE: {{ .Values.server.auth.ldap.GROUP_MEMBER_USER_ATTRIBUTE | quote }}
+  AUTH_LDAP_ADMIN_GROUP: {{ .Values.server.auth.ldap.ADMIN_GROUP | quote }}
+  AUTH_LDAP_OWNER_GROUP: {{ .Values.server.auth.ldap.OWNER_GROUP | quote }}
+  AUTH_LDAP_SEARCH_SCOPE: {{ .Values.server.auth.ldap.SEARCH_SCOPE | quote }}
+  AUTH_LDAP_USERNAME_FILTER_EXTRA_ARG: {{ .Values.server.auth.ldap.USERNAME_FILTER_EXTRA_ARG | quote }}
+  AUTH_LDAP_GROUP_FILTER_EXTRA_ARG: {{ .Values.server.auth.ldap.GROUP_FILTER_EXTRA_ARG | quote }}
+  {{- end -}}

@@ -1,0 +1,346 @@
+# -- Provide a name in place of the default application name.
+nameOverride: ""
+# -- String to fully override the default application name.
+fullnameOverride: ""
+
+# Image credentials configuration.
+imageCredentials:
+  # -- Registry to pull images from.
+  registry: ""
+  # -- Username to pull images.
+  username: ""
+  # -- Password to pull images.
+  password: ""
+  # -- Email to pull images.
+  email: ""
+
+# Global configuration.
+global:
+  # -- Map of environment variables to inject into backend and frontend containers.
+  env: {}
+  # -- Map of environment variables to inject into backend and frontend containers.
+  secrets: {}
+
+# Ingress configuration
+ingress:
+  # -- Whether or not ingress should be enabled.
+  enabled: true
+  # -- Defines which ingress controller will implement the resource.
+  className: ""
+  # -- Additional ingress annotations.
+  annotations: {}
+  # -- Additional ingress labels.
+  labels: {}
+  # -- The list of hosts to be covered by ingress record.
+  hosts:
+  - "domain.local"
+  # -- Enable TLS configuration.
+  tls: []
+  # - secretName: domain.local-tls
+  #   hosts:
+  #   - domain.local
+
+# Server configuration.
+server:
+  # -- The number of application controller pods to run.
+  replicaCount: 1
+  ## Server image.
+  image:
+    # -- Repository to use for the server.
+    repository: "ghcr.io/ajnart/homarr"
+    # -- Image pull policy for the server.
+    pullPolicy: "Always"
+    # -- Tag to use for the server.
+    ## Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  # -- Annotations for the server deployed pods.
+  podAnnotations: {}
+  # -- Labels for the server deployed pods.
+  podLabels: {}
+  # -- Toggle and define pod-level security context.
+  podSecurityContext: {}
+    # fsGroup: 2000
+  # -- Init containers to add to the server pod.
+  initContainers: []
+  # - name: wait-for-keycloak
+  #   image: docker.io/curlimages/curl:latest
+  #   command:
+  #   - "/bin/sh"
+  #   - "-c"
+  #   args:
+  #   - "while [ $(curl -sw '%{http_code}' http://webserver.svc.cluster.local -o /dev/null) -ne 200 ]; do sleep 5; echo 'Waiting for the webserver...'; done"
+  #   volumeMounts:
+  #   - mountPath: /custom-volume
+  #     name: custom-volume
+  container:
+    # -- server container port.
+    port: 7575
+    # -- server container command.
+    command: []
+    # -- server container command args.
+    args: []
+    # -- Toggle and define container-level security context.
+    securityContext: {}
+      # capabilities:
+      #   drop:
+      #   - ALL
+      # readOnlyRootFilesystem: true
+      # runAsNonRoot: true
+      # runAsUser: 1000
+  # -- Extra containers to add to the server pod as sidecars.
+  extraContainers: []
+  # - name: fluentd
+  #   image: "fluentd"
+  #   volumeMounts:
+  #     - mountPath: /my-volume/config
+  #       name: config
+  # -- server container env variables loaded from configmap or secret reference.
+  envFrom: []
+  # - configMapRef:
+  #     name: my-config
+  # - secretRef:
+  #     name: my-secret
+  # -- server container env variables, it will be injected into a configmap and loaded into the container.
+  env: {}
+  # -- server container env secrets, it will be injected into a secret and loaded into the container.
+  secrets: {}
+  # -- server container healthcheck endpoint.
+  healthcheckPath: "/"
+  ## Deployment strategy for CPN server deployment.
+  strategy:
+    # -- Strategy type used to replace old Pods by new ones, can be "Recreate" or "RollingUpdate".
+    type: "RollingUpdate"
+  ## Startup probe for server.
+  startupProbe:
+    # -- Whether or not enable the probe.
+    enabled: true
+    # -- Number of seconds after the container has started before probe is initiated.
+    initialDelaySeconds: 0
+    # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    successThreshold: 1
+    # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
+    failureThreshold: 10
+    # -- How often (in seconds) to perform the probe.
+    periodSeconds: 10
+    # -- Number of seconds after which the probe times out.
+    timeoutSeconds: 5
+  ## Readiness probe for server.
+  readinessProbe:
+    # -- Whether or not enable the probe.
+    enabled: true
+    # -- Number of seconds after the container has started before probe is initiated.
+    initialDelaySeconds: 15
+    # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    successThreshold: 2
+    # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
+    failureThreshold: 2
+    # -- How often (in seconds) to perform the probe.
+    periodSeconds: 10
+    # -- Number of seconds after which the probe times out.
+    timeoutSeconds: 5
+  ## Liveness probe for server.
+  livenessProbe:
+    # -- Whether or not enable the probe.
+    enabled: true
+    # -- Whether or not enable the probe.
+    initialDelaySeconds: 30
+    # -- Number of seconds after the container has started before probe is initiated.
+    successThreshold: 1
+    # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    failureThreshold: 3
+    # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
+    periodSeconds: 30
+    # -- How often (in seconds) to perform the probe.
+    timeoutSeconds: 5
+  # -- Host aliases that will be injected at pod-level into /etc/hosts.
+  hostAliases: []
+  # - ip: "127.0.0.1"
+  #   hostnames:
+  #   - "foo.local"
+  #   - "bar.local"
+  # - ip: "10.1.2.3"
+  #   hostnames:
+  #   - "foo.remote"
+  #   - "bar.remote"
+  # -- List of extra volumes to add.
+  extraVolumes: []
+  # - name: extra-vol
+  #   path: /host/path
+  #   type: hostPath
+  # - name: extra-vol-cm
+  #   type: configMap
+  # -- List of extra mounts to add (normally used with extraVolumes)
+  extraVolumeMounts: []
+  # - name: extra-vol
+  #   mountPath: /volume/path
+  # - name: extra-vol-cm
+  #   mountPath: /volume/cm/path
+  service:
+    # -- server service type.
+    type: "ClusterIP"
+    # -- server service port.
+    port: 80
+  resources:
+    requests:
+      # -- Memory request for the server.
+      memory: "256Mi"
+      # -- CPU request for the server.
+      cpu: "100m"
+    limits:
+      # -- Memory limit for the server.
+      memory: "2Gi"
+      # -- CPU limit for the server.
+      cpu: "500m"
+  autoscaling:
+    # -- Enable Horizontal Pod Autoscaler ([HPA]) for the server.
+    enabled: false
+    # -- Minimum number of replicas for the server [HPA].
+    minReplicas: 1
+    # -- Maximum number of replicas for the server [HPA].
+    maxReplicas: 3
+    # -- Average CPU utilization percentage for the server [HPA].
+    targetCPUUtilizationPercentage: 80
+    # -- Average memory utilization percentage for the server [HPA].
+    targetMemoryUtilizationPercentage: 80
+  # -- Default node selector for server.
+  nodeSelector: {}
+  # -- Default tolerations for server.
+  tolerations: []
+  # -- Default affinity for server.
+  affinity: {}
+    # Server configuration.
+  serviceAccount:
+    # -- Create a service account for the API.
+    create: false
+    # -- Annotations applied to created service account.
+    annotations: {}
+    # -- Service account name.
+    name: "server-sa"
+  persistence:
+    configs:
+      # -- Name for the homarr-configs PersistentVolumeClaim.
+      name: homarr-configs
+      # -- Enable homarr-configs persistent storage.
+      enabled: false
+      # -- Storage class name for homarr-configs.
+      storageClassName: ""
+      # -- Access mode for homarr-configs.
+      accessMode: "ReadWriteOnce"
+      # -- Storage size for homarr-configs.
+      size: "100Mi"
+      # -- Mount path inside the pod for homarr-configs.
+      mountPath: "/app/data/configs"
+    icons:
+      # -- Name for the homarr-icons PersistentVolumeClaim.
+      name: homarr-icons
+      # -- Enable homarr-icons persistent storage
+      enabled: false
+      # -- Storage class name for homarr-icons.
+      storageClassName: ""
+      # -- Access mode for homarr-icons.
+      accessMode: "ReadWriteOnce"
+      # -- Storage size for homarr-icons.
+      size: "100Mi"
+      # -- Mount path inside the pod for homarr-icons.
+      mountPath: "/app/public/icons"
+    data:
+      # -- Name for the homarr-data PersistentVolumeClaim.
+      name: homarr-data
+      # -- Enable homarr-database persistent storage
+      enabled: false
+      # -- Storage class name for homarr-data.
+      storageClassName: ""
+      # -- Access mode for homarr-data.
+      accessMode: "ReadWriteOnce"
+      # -- Storage size for homarr-data.
+      size: "100Mi"
+      # -- Mount path inside the pod for homarr-data.
+      mountPath: "/data"
+  auth:
+    # -- Select Which provider to use between credentials, ldap and oidc.
+    # Multiple providers can be enabled with a comma separated list (ex: 'credentials,oidc'), it is highly recommended to just enable one provider.
+    provider: "credentials"
+    # -- URL to redirect to after clicking logging out.
+    logoutRedirectUri: "domain.local"
+    # -- Time for the session to time out. Can be set as pure number, which will automatically be used in seconds, or followed by s, m, h or d for seconds, minutes, hours or days. (ex: "30m").
+    sessionExpiryTime: "30d"
+    oidc:
+      # -- URI of OIDC provider.
+      URI: ""
+      # -- ID of OIDC client (application).
+      CLIENT_ID: ""
+      # -- Secret of OIDC client (application).
+      CLIENT_SECRET: ""
+      # -- Display name of provider (in login screen).
+      CLIENT_NAME: "OIDC"
+      # -- Admin group.
+      ADMIN_GROUP: "admin"
+      # -- Owner group.
+      OWNER_GROUP: "admin"
+      # -- Timeout in milliseconds.
+      TIMEOUT: 3500
+      # -- Automatically redirect to OIDC login.
+      AUTO_LOGIN: false
+    ldap:
+      # -- URI of your LDAP server.
+      URI: ""
+      # -- Base dn of your LDAP server.
+      BASE: ""
+      # -- User used for finding users and groups.
+      BIND_DN: ""
+      # -- Password for bind user.
+      BIND_PASSWORD: ""
+      # -- Attribute used for username.
+      USERNAME_ATTRIBUTE: "uid"
+      # -- Attribute used for mail field.
+      USER_MAIL_ATTRIBUTE: "mail"
+      # -- Class used for querying groups.
+      GROUP_CLASS: "groupOfUniqueNames"
+      # -- Attribute used for querying group member.
+      GROUP_MEMBER_ATTRIBUTE: "member"
+      # -- User attribute used for comparing with group member.
+      GROUP_MEMBER_USER_ATTRIBUTE: "dn"
+      # -- Admin group.
+      ADMIN_GROUP: "admin"
+      # -- Owner group.
+      OWNER_GROUP: "admin"
+      # -- Search scopes between base, one and sub.
+      SEARCH_SCOPE: "base"
+      # -- Extra arguments for user search filter (& based).
+      USERNAME_FILTER_EXTRA_ARG: ""
+      # -- Extra arguments for user's groups search filter (& based).
+      GROUP_FILTER_EXTRA_ARG: ""
+  # -- Any TZ identifier from the wikipedia page (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Default to your local timezone.
+  timezone: ""
+
+
+# Keycloak configuration.
+## Ref: https://artifacthub.io/packages/helm/bitnami/keycloak
+keycloak:
+  enabled: false
+  nameOverride: "keycloak"
+  auth:
+    adminUser: ""
+    adminPassword: ""
+  ingress:
+    enabled: true
+    ingressClassName: ""
+    annotations: {}
+    hostname: "keycloak.domain.local"
+    path: "/"
+    tls: false
+    secrets: []
+  production: true
+  proxy: "edge"
+  tls:
+    enabled: false
+    autoGenerated: false
+  postgresql:
+    nameOverride: "keycloak-db"
+    enabled: true
+    auth:
+      postgresPassword: ""
+      username: ""
+      password: ""
+      database: "keycloak"
+      architecture: "standalone"
