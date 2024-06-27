@@ -71,4 +71,29 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/dashy-0.1.1/dashy-0.1.1.tgz
     version: 0.1.1
-generated: "2024-06-19T00:36:28.988808869Z"
+  homarr:
+  - apiVersion: v2
+    appVersion: 0.15.3
+    created: "2024-06-27T21:21:10.122208856Z"
+    dependencies:
+    - condition: keycloak.enabled
+      name: keycloak
+      repository: https://charts.bitnami.com/bitnami
+      version: 21.4.1
+    description: Customizable browser's home page to interact with your homeserver's
+      Docker containers (e.g. Sonarr/Radarr)
+    digest: ac65586a2f8e06a6d2eb97d01d5ccfd1650444cc882c67bd7f043d8216d82791
+    home: https://homarr.dev
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: Tobi
+      url: https://this-is-tobi.com
+    name: homarr
+    sources:
+    - https://github.com/thi-is-tobi/helm-charts
+    - https://github.com/ajnart/homarr
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.0/homarr-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-06-27T21:21:10.122224866Z"
