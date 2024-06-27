@@ -1,0 +1,53 @@
+{{- with .Values.server.persistence.configs -}}
+{{- if .enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-%s-%s" (include "template.fullname" .) "server" .name }}
+  labels: {{- include "template.server.labels" . | nindent 4 }}
+spec:
+  accessModes:
+  - {{ .accessMode }}
+  storageClassName: "{{ .storageClassName }}"
+  resources:
+  requests:
+    storage: {{ .size }}
+{{- end }}
+{{- end }}
+
+{{- with .Values.server.persistence.icons -}}
+{{- if .enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-%s-%s" (include "template.fullname" .) "server" .name }}
+  labels: {{- include "template.server.labels" . | nindent 4 }}
+spec:
+  accessModes:
+  - {{ .accessMode }}
+  storageClassName: "{{ .storageClassName }}"
+  resources:
+  requests:
+    storage: {{ .size }}
+{{- end }}
+{{- end }}
+
+
+{{- with .Values.server.persistence.data -}}
+{{- if .enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-%s-%s" (include "template.fullname" .) "server" .name }}
+  labels: {{- include "template.server.labels" . | nindent 4 }}
+spec:
+  accessModes:
+  - {{ .accessMode }}
+  storageClassName: "{{ .storageClassName }}"
+  resources:
+  requests:
+    storage: {{ .size }}
+{{- end }}
+{{- end }}

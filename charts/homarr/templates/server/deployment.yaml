@@ -1,0 +1,193 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-%s" (include "template.fullname" .) "server" }}
+  labels:
+    {{- include "template.server.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.server.autoscaling.enabled }}
+  replicas: {{ .Values.server.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "template.server.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: {{ .Values.server.strategy.type }}
+  template:
+    metadata:
+      annotations:
+        {{- include "checksum" (list $ "/server/configmap.yaml") | nindent 8 }}
+        {{- include "checksum" (list $ "/server/secret.yaml") | nindent 8 }}
+        {{- with .Values.server.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "template.server.selectorLabels" . | nindent 8 }}
+        {{- with .Values.server.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- if and .Values.imageCredentials.username .Values.imageCredentials.password }}
+      imagePullSecrets:
+      - name: {{ include "template.name" . }}-pullsecret
+      {{- end }}
+      serviceAccountName: {{ include "template.server.serviceAccountName" . }}
+      {{- if .Values.server.podSecurityContext }}
+      securityContext:
+        {{- toYaml .Values.server.podSecurityContext | nindent 8 }}
+      {{- end }}
+      {{- if .Values.server.initContainers }}
+      initContainers:
+        {{- tpl (toYaml .Values.server.initContainers) . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: server
+        {{- if .Values.server.container.securityContext }}
+        securityContext:
+          {{- toYaml .Values.server.container.securityContext | nindent 12 }}
+        {{- end }}
+        image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.server.image.pullPolicy }}
+        {{- if .Values.server.container.command }}
+        command:
+        {{- range .Values.server.container.command }}
+        - {{ . | quote }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.server.container.args }}
+        args:
+        {{- range .Values.server.container.args }}
+        - {{ . | quote }}
+        {{- end }}
+        {{- end }}
+        ports:
+          - containerPort: {{ .Values.server.container.port }}
+            protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: {{ printf "%s-%s" (include "template.fullname" .) "server-auth" }}
+        {{- if or (contains "oidc" .Values.server.auth.provider) (contains "ldap" .Values.server.auth.provider) }}
+        - secretRef:
+            name: {{ printf "%s-%s" (include "template.fullname" .) "server-auth" }}
+        {{- end }}
+        {{- if or .Values.server.env .Values.global.env }}
+        - configMapRef:
+            name: {{ printf "%s-%s" (include "template.fullname" .) "server" }}
+        {{- end }}
+        {{- if or .Values.server.secrets .Values.global.secrets -}}
+        - secretRef:
+            name: {{ printf "%s-%s" (include "template.fullname" .) "server" }}
+        {{- end }}
+        {{- if .Values.server.envFrom }}
+          {{- toYaml .Values.server.envFrom | nindent 8 }}
+        {{- end }}
+        {{- if .Values.server.startupProbe.enabled }}
+        startupProbe:
+          httpGet:
+            path: {{ .Values.server.healthcheckPath }}
+            port: {{ .Values.server.container.port }}
+          initialDelaySeconds: {{ .Values.server.startupProbe.initialDelaySeconds }}
+          successThreshold: {{ .Values.server.startupProbe.successThreshold }}
+          failureThreshold: {{ .Values.server.startupProbe.failureThreshold }}
+          periodSeconds: {{ .Values.server.startupProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.server.startupProbe.timeoutSeconds }}
+        {{- end }}
+        {{- if .Values.server.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.server.healthcheckPath }}
+            port: {{ .Values.server.container.port }}
+          initialDelaySeconds: {{ .Values.server.readinessProbe.initialDelaySeconds }}
+          successThreshold: {{ .Values.server.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.server.readinessProbe.failureThreshold }}
+          periodSeconds: {{ .Values.server.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.server.readinessProbe.timeoutSeconds }}
+        {{- end }}
+        {{- if .Values.server.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.server.healthcheckPath }}
+            port: {{ .Values.server.container.port }}
+          initialDelaySeconds: {{ .Values.server.livenessProbe.initialDelaySeconds }}
+          successThreshold: {{ .Values.server.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.server.livenessProbe.failureThreshold }}
+          periodSeconds: {{ .Values.server.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.server.livenessProbe.timeoutSeconds }}
+        {{- end }}
+        {{- if .Values.server.hostAliases }}
+        hostAliases:
+          {{- toYaml .Values.server.hostAliases | nindent 8 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.server.resources | nindent 10 }}
+        volumeMounts:
+        {{- with .Values.server.persistence.configs }}
+        {{- if .enabled }}
+        - name: {{ printf "%s-%s-%s" (include "template.fullname" .) "server" .name }}
+          mountPath: {{ .mountPath }}
+        {{- end }}
+        {{- end }}
+        {{- with .Values.server.persistence.icons }}
+        {{- if .enabled }}
+        - name: {{ printf "%s-%s-%s" (include "template.fullname" .) "server" .name }}
+          mountPath: {{ .mountPath }}
+        {{- end }}
+        {{- end }}
+        {{- with .Values.server.persistence.data }}
+        {{- if .enabled }}
+        - name: {{ printf "%s-%s-%s" (include "template.fullname" .) "server" .name }}
+          mountPath: {{ .mountPath }}
+        {{- end }}
+        {{- end }}
+        {{- range $volumeMount := .Values.server.extraVolumeMounts }}
+        - name: {{ $volumeMount.name }}
+          mountPath: {{ $volumeMount.mountPath }}
+        {{- end }}
+      {{- if .Values.server.extraContainers }}
+        {{- tpl (toYaml .Values.server.extraContainers) . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      {{- with .Values.server.persistence.configs -}}
+      {{- if .enabled }}
+      - name: {{ printf "%s-%s-%s" (include "template.fullname" .) "server" .name }}
+        persistentVolumeClaim:
+          claimName: {{ printf "%s-%s-%s" (include "template.fullname" .) "server" .name }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.server.persistence.icons -}}
+      {{- if .enabled }}
+      - name: {{ printf "%s-%s-%s" (include "template.fullname" .) "server" .name }}
+        persistentVolumeClaim:
+          claimName: {{ printf "%s-%s-%s" (include "template.fullname" .) "server" .name }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.server.persistence.data -}}
+      {{- if .enabled }}
+      - name: {{ printf "%s-%s-%s" (include "template.fullname" .) "server" .name }}
+        persistentVolumeClaim:
+          claimName: {{ printf "%s-%s-%s" (include "template.fullname" .) "server" .name }}
+      {{- end }}
+      {{- end }}
+      {{- range $volume := .Values.server.extraVolumes }}
+      - name: {{ $volume.name }}
+        {{- if eq $volume.type "hostPath" }}
+        hostPath:
+          path: {{ $volume.path }}
+        {{- end }}
+        {{- if eq $volume.type "configMap" }}
+        configMap:
+          name: {{ $volume.name }}
+        {{- end }}
+      {{- end }}

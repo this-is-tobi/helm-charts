@@ -1,0 +1,21 @@
+apiVersion: v2
+name: homarr
+type: application
+version: 0.1.0
+appVersion: "0.15.3"
+description: Customizable browser's home page to interact with your homeserver's Docker containers (e.g. Sonarr/Radarr)
+home: https://homarr.dev
+deprecated: false
+annotations: {}
+dependencies:
+- name: keycloak
+  version: 21.4.1
+  repository: https://charts.bitnami.com/bitnami
+  condition: keycloak.enabled
+sources:
+- https://github.com/thi-is-tobi/helm-charts
+- https://github.com/ajnart/homarr
+maintainers:
+- name: Tobi
+  email: this-is-tobi@proton.me
+  url: https://this-is-tobi.com
