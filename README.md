@@ -10,8 +10,8 @@ This repository hosts a set of personal Helm Charts and exposes a Helm Repositor
 | Chart                                        | Application                                | Description                         |
 | -------------------------------------------- | ------------------------------------------ | ----------------------------------- |
 | [charts/cnpg-cluster](./charts/cnpg-cluster) | [CNPG](https://cloudnative-pg.io)          | Easy CNPG cluster deployment.       |
-| [charts/dashy](./charts/dashy)               | [dashy](https://github.com/lissy93/dashy)  | A self-hostable personal dashboard. |
-| [charts/homarr](./charts/homarr)             | [homarr](https://github.com/ajnart/homarr) | A self-hostable personal dashboard. |
+| [charts/dashy](./charts/dashy)               | [Dashy](https://github.com/lissy93/dashy)  | A self-hostable personal dashboard. |
+| [charts/homarr](./charts/homarr)             | [Homarr](https://github.com/ajnart/homarr) | A self-hostable personal dashboard. |
 
 ## Usage
 
