@@ -1,0 +1,13 @@
+{{- if .Values.backup.enabled }}
+apiVersion: postgresql.io/v1
+kind: ScheduledBackup
+metadata:
+  name: {{ .Values.nameOverride | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+  labels:
+    {{- include "template.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.cron }}
+  backupOwnerReference: self
+  cluster:
+    name: {{ .Values.nameOverride | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+{{- end }}

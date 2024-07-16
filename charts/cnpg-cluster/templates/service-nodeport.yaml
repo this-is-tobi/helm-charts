@@ -1,0 +1,22 @@
+{{- if .Values.exposed }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ (printf "%s-%s" .Values.nameOverride "rw-nodeport") | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+  labels:
+    {{- include "template.labels" . | nindent 4 }}
+  annotations:
+    {{- with .Values.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ports:
+  - name: postgres
+    port: 5432
+    protocol: TCP
+    nodePort: {{ .Values.nodePort }}
+  selector:
+    cnpg.io/cluster: {{ .Values.nameOverride | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+    role: primary
+  type: NodePort
+{{- end }}

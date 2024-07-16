@@ -1,0 +1,71 @@
+# -- Provide a name in place of the default application name.
+nameOverride: &cnpgNameOverride ""
+# -- String to fully override the default application name.
+fullnameOverride: ""
+
+# CNPG configuration
+
+# -- Number of instances to spawn in the cluster.
+instances: 3
+# -- Name of the image used for database. 
+# By default (empty string), the operator will install the latest available minor version of the latest major version of PostgreSQL when the operator was released
+imageName: ""
+# -- Username of the database user.
+username: "username"
+# -- Name of the database.
+dbName: "dbname"
+# -- Enable superuser access.
+enableSuperuserAccess: true
+# -- Rolling update strategy used :
+# unsupervised: automated update of the primary once all replicas have been upgraded (default)
+# supervised: requires manual supervision to perform the switchover of the primary
+primaryUpdateStrategy: "unsupervised"
+# -- Size of the PVC used by each cnpg instance.
+pvcSize: "10Gi"
+# -- Additional cnpg cluster annotations.
+annotations: {}
+# -- Whether or not a NodePort service should be created to exposed the database.
+exposed: false
+# -- Port used for NodePort service. Needs `exposed` tu be true.
+nodePort:
+# -- Mode used to deploy the cnpg cluster, it should be `primary`, `replica` or `restore`.
+mode: "primary"
+replica:
+  # -- Primary cnpg cluster host used for replica mode.
+  host: ""
+  # -- Primary cnpg cluster port used for replica mode.
+  port: 5432
+backup:
+  # -- Whether or not cnpg cluster deployment should be enabled.
+  enabled: false
+  # -- S3 destination path for cnpg backups (it should be set like `s3://<bucket_name>/<path>`).
+  destinationPath: ""
+  # -- S3 endpoint for cnpg backups.
+  endpointURL: ""
+  endpointCA:
+    # -- The secret name containing S3 CA for cnpg backups.
+    name: ""
+    # -- The secret key containing S3 CA for cnpg backups.
+    key: ""
+  s3Credentials:
+    # -- Whether or not to create kuebernetes secret used for cnpg backups.
+    # It will use `name`, `accessKeyId.key`, `accessKeyId.value`, `secretAccessKey.key` and `secretAccessKey.value` to create the secret.
+    create: false
+    # -- S3 kuebernetes secret name used for cnpg backups.
+    secretName: *cnpgNameOverride
+    accessKeyId:
+      # -- S3 accessKeyId kubernetes secret key used for cnpg backups.
+      key: "accessKeyId"
+      # -- S3 accessKeyId value used for cnpg backups.
+      # Only needed if `backup.s3Credentials.create` is set to `true`.
+      value: ""
+    secretAccessKey:
+      # -- S3 secretAccessKey kubernetes secret key used for cnpg backups.
+      key: "secretAccessKey"
+      # -- S3 secretAccessKey value used for cnpg backups.
+      # Only needed if `backup.s3Credentials.create` is set to `true`.
+      value: ""
+  # -- The cron rule used for cnpg backups. By default it runs every 6 hours.
+  cron: "0 0 */6 * * *"
+  # -- Retention policy for cnpg backups recurrences.
+  retentionPolicy: "14d"

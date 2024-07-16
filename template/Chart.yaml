@@ -7,6 +7,7 @@ description: A Helm chart to deploy ...
 # home: https://this-is-tobi.com
 deprecated: false
 annotations: {}
+keywords: []
 dependencies: []
 # - name: keycloak
 #   version: 21.4.1
@@ -15,6 +16,6 @@ dependencies: []
 sources: []
 # - https://github.com/thi-is-tobi/helm-charts
 maintainers: []
-# - name: Tobi
+# - name: this-is-tobi
 #   email: this-is-tobi@proton.me
 #   url: https://this-is-tobi.com
