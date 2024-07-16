@@ -1,0 +1,92 @@
+apiVersion: postgresql.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Values.nameOverride | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+  labels:
+    {{- include "template.labels" . | nindent 4 }}
+  annotations:
+    {{- with .Values.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  instances: {{ .Values.instances }}
+  {{- if .Values.imageName }}
+  imageName: {{ .Values.imageName }}
+  {{- end }}
+  postgresql:
+    {{- end }}
+    parameters:
+      max_worker_processes: "60"
+    pg_hba:
+      - {{ printf "%s %s %s %s %s" "host" .Values.dbName .Values.username "all" "md5" }}
+      - {{ printf "%s %s %s %s %s" "host" .Values.dbName "streaming_replica" "all" "md5" }}
+  bootstrap:
+  {{- if eq .Values.mode "primary" }}
+    initdb:
+      database: {{ .Values.dbName }}
+      owner: {{ .Values.username }}
+  {{- else if or (eq .Values.mode "replica") (eq .Values.mode "restore") }}
+    recovery:
+      source: {{ .Values.nameOverride | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+  externalClusters:
+  - name: {{ .Values.nameOverride | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+    {{- if or (.Values.backup.enabled) (eq .Values.mode "restore") }}
+    barmanObjectStore:
+      destinationPath: {{ .Values.backup.destinationPath }}
+      endpointURL: {{ .Values.backup.endpointURL }}
+      {{- if .Values.backup.endpointCA.name }}
+      endpointCA:
+        name: {{ .Values.backup.endpointCA.name }}
+        key: {{ .Values.backup.endpointCA.key }}
+      {{- end }}
+      s3Credentials:
+        accessKeyId:
+          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+          key: {{ .Values.backup.s3Credentials.accessKeyId.key }}
+        secretAccessKey:
+          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+          key: {{ .Values.backup.s3Credentials.secretAccessKey.key }}
+    {{- end }}
+    {{- if eq .Values.mode "replica" }}
+    connectionParameters:
+      host: {{ .Values.replica.host }}
+      port: {{ .Values.replica.port }}
+      dbname: {{ .Values.dbName }}
+      sslmode: prefer
+    sslKey:
+      name: {{ (printf "%s-%s" .Values.nameOverride "replication") | default (printf "%s-%s-%s" (include "template.fullname" .) "pg-cluster" "replication") }}
+      key: tls.key
+    sslCert:
+      name: {{ (printf "%s-%s" .Values.nameOverride "replication") | default (printf "%s-%s-%s" (include "template.fullname" .) "pg-cluster" "replication") }}
+      key: tls.crt
+    sslRootCert:
+      name: {{ (printf "%s-%s" .Values.nameOverride "ca") | default (printf "%s-%s-%s" (include "template.fullname" .) "pg-cluster" "ca") }}
+      key: ca.crt
+    {{- end }}
+  {{- end }}
+  {{- if eq .Values.mode "replica" }}
+  replica:
+    enabled: true
+    source: {{ .Values.nameOverride | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+  {{- end }}
+  enableSuperuserAccess: {{ .Values.enableSuperuserAccess }}
+  primaryUpdateStrategy: {{ .Values.primaryUpdateStrategy }}
+  storage:
+    size: {{ .Values.pvcSize }}
+  {{- if .Values.backup.enabled }}
+  backup:
+    barmanObjectStore:
+      destinationPath: {{ .Values.backup.destinationPath }}
+      endpointURL: {{ .Values.backup.endpointURL }}
+      endpointCA:
+        name: {{ .Values.backup.endpointCA.name }}
+        key: {{ .Values.backup.endpointCA.key }}
+      s3Credentials:
+        accessKeyId:
+          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+          key: {{ .Values.backup.s3Credentials.accessKeyId.key }}
+        secretAccessKey:
+          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+          key: {{ .Values.backup.s3Credentials.secretAccessKey.key }}
+    retentionPolicy: {{ .Values.backup.retentionPolicy }}
+  {{- end }}

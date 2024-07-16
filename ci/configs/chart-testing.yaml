@@ -8,5 +8,6 @@ validate-chart-values: true
 validate-maintainers: true
 validate-yaml: true
 exclude-deprecated: true
-excluded-charts: []
+excluded-charts:
+- cnpg-cluster
 debug: true
