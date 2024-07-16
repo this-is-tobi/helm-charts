@@ -1,6 +1,48 @@
 apiVersion: v1
 entries:
+  cnpg-cluster:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2024-07-16T00:26:36.937958595Z"
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: 28542ccbe5a18e4e8307628230e120b565b15e06531229d1984d18972b61dd86
+    home: https://cloudnative-pg.io
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/thi-is-tobi/helm-charts
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-0.1.0/cnpg-cluster-0.1.0.tgz
+    version: 0.1.0
   dashy:
+  - apiVersion: v2
+    appVersion: 3.1.0
+    created: "2024-07-16T00:26:37.07839299Z"
+    dependencies:
+    - condition: keycloak.enabled
+      name: keycloak
+      repository: https://charts.bitnami.com/bitnami
+      version: 21.4.1
+    description: A Helm chart to deploy Dashy, a self-hostable personal dashboard
+      that includes status-checking, widgets, themes, icon packs, a UI editor etc...
+    digest: 52c0460724a76aeef0b2f06bc8bdb0c507e84ddbdcae0bf9e75101b3982bb6f3
+    home: https://dashy.to
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: dashy
+    sources:
+    - https://github.com/thi-is-tobi/helm-charts
+    - https://github.com/Lissy93/dashy
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/dashy-0.1.4/dashy-0.1.4.tgz
+    version: 0.1.4
   - apiVersion: v2
     appVersion: 3.1.0
     created: "2024-06-19T00:36:28.988790816Z"
@@ -74,6 +116,30 @@ entries:
   homarr:
   - apiVersion: v2
     appVersion: 0.15.3
+    created: "2024-07-16T00:26:37.187859453Z"
+    dependencies:
+    - condition: keycloak.enabled
+      name: keycloak
+      repository: https://charts.bitnami.com/bitnami
+      version: 21.4.1
+    description: Customizable browser's home page to interact with your homeserver's
+      Docker containers (e.g. Sonarr/Radarr)
+    digest: 4f86246d478bdb28e9b201b4a15b31ae593f25dbd2a9afb2c9bb697f3d559e7b
+    home: https://homarr.dev
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: homarr
+    sources:
+    - https://github.com/thi-is-tobi/helm-charts
+    - https://github.com/ajnart/homarr
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.1/homarr-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: 0.15.3
     created: "2024-06-27T21:21:10.122208856Z"
     dependencies:
     - condition: keycloak.enabled
@@ -96,4 +162,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.0/homarr-0.1.0.tgz
     version: 0.1.0
-generated: "2024-06-27T21:21:10.122224866Z"
+generated: "2024-07-16T00:26:37.187882185Z"
