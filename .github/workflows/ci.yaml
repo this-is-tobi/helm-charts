@@ -29,10 +29,11 @@ jobs:
         uses: helm/chart-testing-action@main
         with:
           version: v3.10.0
-
+            
       - name: Add Helm repos
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add cnpg https://cloudnative-pg.github.io/charts
 
       - name: Run chart-testing (lint)
         run: ct lint --config ./ci/configs/chart-testing.yaml
