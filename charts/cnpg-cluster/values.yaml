@@ -69,3 +69,9 @@ backup:
   cron: "0 0 */6 * * *"
   # -- Retention policy for cnpg backups recurrences.
   retentionPolicy: "14d"
+
+
+# CNPG operator configuration
+cnpg-operator:
+  # -- Whether or not cnpg operator should be deployed.
+  enabled: false
