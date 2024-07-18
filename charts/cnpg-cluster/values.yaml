@@ -24,6 +24,8 @@ primaryUpdateStrategy: "unsupervised"
 pvcSize: "10Gi"
 # -- Additional cnpg cluster annotations.
 annotations: {}
+# -- Additional cnpg cluster labels.
+labels: {}
 # -- Whether or not a NodePort service should be created to exposed the database.
 exposed: false
 # -- Port used for NodePort service. Needs `exposed` tu be true.

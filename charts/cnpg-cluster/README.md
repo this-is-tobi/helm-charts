@@ -47,6 +47,7 @@ A Helm Chart to deploy easily a CNPG cluster
 | fullnameOverride | string | `""` | String to fully override the default application name. |
 | imageName | string | `""` | Name of the image used for database.  By default (empty string), the operator will install the latest available minor version of the latest major version of PostgreSQL when the operator was released |
 | instances | int | `3` | Number of instances to spawn in the cluster. |
+| labels | object | `{}` | Additional cnpg cluster labels. |
 | mode | string | `"primary"` | Mode used to deploy the cnpg cluster, it should be `primary`, `replica` or `restore`. |
 | nameOverride | string | `""` | Provide a name in place of the default application name. |
 | nodePort | string | `nil` | Port used for NodePort service. Needs `exposed` tu be true. |
