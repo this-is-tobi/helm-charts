@@ -24,6 +24,8 @@ primaryUpdateStrategy: "unsupervised"
 pvcSize: "10Gi"
 # -- Additional cnpg cluster annotations.
 annotations: {}
+# -- Additional cnpg cluster labels.
+labels: {}
 # -- Whether or not a NodePort service should be created to exposed the database.
 exposed: false
 # -- Port used for NodePort service. Needs `exposed` tu be true.
@@ -69,3 +71,9 @@ backup:
   cron: "0 0 */6 * * *"
   # -- Retention policy for cnpg backups recurrences.
   retentionPolicy: "14d"
+
+
+# CNPG operator configuration
+cnpg-operator:
+  # -- Whether or not cnpg operator should be deployed.
+  enabled: false
