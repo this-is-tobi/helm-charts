@@ -14,7 +14,7 @@ dependencies: []
 #   repository: https://charts.bitnami.com/bitnami
 #   condition: keycloak.enabled
 sources: []
-# - https://github.com/thi-is-tobi/helm-charts
+# - https://github.com/this-is-tobi/helm-charts
 maintainers: []
 # - name: this-is-tobi
 #   email: this-is-tobi@proton.me

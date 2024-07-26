@@ -16,7 +16,6 @@ spec:
   template:
     metadata:
       annotations:
-        {{- include "checksum" (list $ "/server/config.yaml") | nindent 8 }}
         {{- include "checksum" (list $ "/server/configmap.yaml") | nindent 8 }}
         {{- include "checksum" (list $ "/server/secret.yaml") | nindent 8 }}
         {{- with .Values.server.podAnnotations }}
