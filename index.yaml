@@ -3,6 +3,29 @@ entries:
   cnpg-cluster:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2024-07-27T01:01:29.604590343Z"
+    dependencies:
+    - alias: cnpg-operator
+      condition: cnpg-operator.enabled
+      name: cloudnative-pg
+      repository: https://cloudnative-pg.github.io/charts
+      version: 0.21.5
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: 432f420bdce13a21ceb17ebf179e0d1f6faea8b1aaef358c79ce6cb379497e19
+    home: https://cloudnative-pg.io
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-0.2.1/cnpg-cluster-0.2.1.tgz
+    version: 0.2.1
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2024-07-19T03:07:30.918128214Z"
     dependencies:
     - alias: cnpg-operator
@@ -42,6 +65,30 @@ entries:
     - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-0.1.0/cnpg-cluster-0.1.0.tgz
     version: 0.1.0
   dashy:
+  - apiVersion: v2
+    appVersion: 3.1.0
+    created: "2024-07-27T01:01:29.722200737Z"
+    dependencies:
+    - condition: keycloak.enabled
+      name: keycloak
+      repository: https://charts.bitnami.com/bitnami
+      version: 21.4.1
+    description: A Helm chart to deploy Dashy, a self-hostable personal dashboard
+      that includes status-checking, widgets, themes, icon packs, a UI editor etc...
+    digest: 54171ff28775f5d50c209acd9991bf9d7a070b3ed2706d5638ef82579c12028b
+    home: https://dashy.to
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: dashy
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/Lissy93/dashy
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/dashy-0.1.5/dashy-0.1.5.tgz
+    version: 0.1.5
   - apiVersion: v2
     appVersion: 3.1.0
     created: "2024-07-16T00:26:37.07839299Z"
@@ -139,6 +186,30 @@ entries:
   homarr:
   - apiVersion: v2
     appVersion: 0.15.3
+    created: "2024-07-27T01:01:29.853633357Z"
+    dependencies:
+    - condition: keycloak.enabled
+      name: keycloak
+      repository: https://charts.bitnami.com/bitnami
+      version: 21.4.1
+    description: Customizable browser's home page to interact with your homeserver's
+      Docker containers (e.g. Sonarr/Radarr)
+    digest: f1d661826f68071ef9246e2de42776f93453c6b273e9bf1489ca1ed5f072238c
+    home: https://homarr.dev
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: homarr
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/ajnart/homarr
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.2/homarr-0.1.2.tgz
+    version: 0.1.2
+  - apiVersion: v2
+    appVersion: 0.15.3
     created: "2024-07-16T00:26:37.187859453Z"
     dependencies:
     - condition: keycloak.enabled
@@ -185,4 +256,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.0/homarr-0.1.0.tgz
     version: 0.1.0
-generated: "2024-07-19T03:07:30.918143853Z"
+generated: "2024-07-27T01:01:29.85367789Z"
