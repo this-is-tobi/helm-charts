@@ -1,0 +1,16 @@
+apiVersion: v2
+name: backup-utils
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+description: A Helm chart for effortless deployment of backup utilities.
+deprecated: false
+annotations: {}
+keywords: []
+dependencies: []
+sources:
+- https://github.com/this-is-tobi/helm-charts
+maintainers:
+- name: this-is-tobi
+  email: this-is-tobi@proton.me
+  url: https://this-is-tobi.com
