@@ -1,0 +1,87 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ printf "%s-%s" (include "template.fullname" .) "postgresql" }}
+  labels:
+    {{- include "template.postgresql.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.postgresql.job.schedule }}
+  successfulJobsHistoryLimit: {{ .Values.postgresql.job.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.postgresql.job.failedJobsHistoryLimit }}
+  concurrencyPolicy: {{ .Values.postgresql.job.concurrencyPolicy }}
+  timeZone: {{ .Values.postgresql.job.timezone }}
+  jobTemplate:
+    metadata:
+      {{- if .Values.postgresql.jobAnnotations }}
+      annotations:
+        {{- with .Values.postgresql.jobAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      labels:
+        {{- include "template.postgresql.selectorLabels" . | nindent 8 }}
+        {{- with .Values.postgresql.jobLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      backoffLimit: {{ .Values.postgresql.job.backoffLimit }}
+      template:
+        metadata:
+          {{- if .Values.postgresql.podAnnotations }}
+          annotations:
+            {{- with .Values.postgresql.podAnnotations }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          labels:
+            {{- include "template.postgresql.selectorLabels" . | nindent 12 }}
+            {{- with .Values.postgresql.podLabels }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        spec:
+          {{- if and .Values.imageCredentials.username .Values.imageCredentials.password }}
+          imagePullSecrets:
+          - name: {{ include "template.name" . }}-pullsecret
+          {{- end }}
+          restartPolicy: {{ .Values.postgresql.restartPolicy }}
+          {{- if .Values.postgresql.podSecurityContext }}
+          securityContext:
+            {{- toYaml .Values.postgresql.podSecurityContext | nindent 12 }}
+          {{- end }}
+          containers:
+          - name: postgresql
+            {{- if .Values.postgresql.container.securityContext }}
+            securityContext:
+              {{- toYaml .Values.postgresql.container.securityContext | nindent 14 }}
+            {{- end }}
+            image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag | default .Chart.AppVersion }}"
+            imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
+            {{- if .Values.postgresql.container.command }}
+            command:
+            {{- range .Values.postgresql.container.command }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.postgresql.container.args }}
+            args:
+            {{- range .Values.postgresql.container.args }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            ports:
+            - containerPort: {{ .Values.postgresql.container.port }}
+              protocol: TCP
+            envFrom:
+            {{- if or .Values.postgresql.env .Values.global.env }}
+            - configMapRef:
+                name: {{ printf "%s-%s" (include "template.fullname" .) "postgresql" }}
+            {{- end }}
+            {{- if or .Values.postgresql.secrets .Values.global.secrets }}
+            - secretRef:
+                name: {{ printf "%s-%s" (include "template.fullname" .) "postgresql" }}
+            {{- end }}
+            {{- if .Values.postgresql.envFrom }}
+              {{- toYaml .Values.postgresql.envFrom | nindent 12 }}
+            {{- end }}
+            resources:
+              {{- toYaml .Values.postgresql.resources | nindent 14 }}
