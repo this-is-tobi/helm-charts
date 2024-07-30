@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 A Helm chart for effortless deployment of backup utilities.
 
@@ -30,6 +30,7 @@ A Helm chart for effortless deployment of backup utilities.
 | postgresql.container.command | list | `[]` | Postgresql backup container command. |
 | postgresql.container.port | int | `8080` | Postgresql backup container port. |
 | postgresql.container.securityContext | object | `{}` | Toggle and define container-level security context. |
+| postgresql.enabled | bool | `false` | Whether or not postgresql backup should be enabled. |
 | postgresql.env.RETENTION_DAYS | string | `"7"` | Backup rentention days to apply on the bucket. |
 | postgresql.envFrom | list | `[]` | Postgresql backup container env variables loaded from configmap or secret reference. |
 | postgresql.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the postgresql backup. |
@@ -65,6 +66,7 @@ A Helm chart for effortless deployment of backup utilities.
 | vault.container.command | list | `[]` | Vault backup container command. |
 | vault.container.port | int | `8080` | Vault backup container port. |
 | vault.container.securityContext | object | `{}` | Toggle and define container-level security context. |
+| vault.enabled | bool | `false` | Whether or not vault backup should be enabled. |
 | vault.env.RETENTION_DAYS | string | `"7"` | Backup rentention days to apply on the bucket. |
 | vault.envFrom | list | `[]` | Vault backup container env variables loaded from configmap or secret reference. |
 | vault.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the vault backup. |
