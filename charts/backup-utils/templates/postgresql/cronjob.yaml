@@ -10,7 +10,7 @@ spec:
   successfulJobsHistoryLimit: {{ .Values.postgresql.job.successfulJobsHistoryLimit }}
   failedJobsHistoryLimit: {{ .Values.postgresql.job.failedJobsHistoryLimit }}
   concurrencyPolicy: {{ .Values.postgresql.job.concurrencyPolicy }}
-  timeZone: {{ .Values.postgresql.job.timezone }}
+  timeZone: {{ .Values.postgresql.job.timeZone }}
   jobTemplate:
     metadata:
       {{- if .Values.postgresql.jobAnnotations }}

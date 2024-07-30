@@ -10,7 +10,7 @@ spec:
   successfulJobsHistoryLimit: {{ .Values.vault.job.successfulJobsHistoryLimit }}
   failedJobsHistoryLimit: {{ .Values.vault.job.failedJobsHistoryLimit }}
   concurrencyPolicy: {{ .Values.vault.job.concurrencyPolicy }}
-  timeZone: {{ .Values.vault.job.timezone }}
+  timeZone: {{ .Values.vault.job.timeZone }}
   jobTemplate:
     metadata:
       {{- if .Values.vault.jobAnnotations }}
