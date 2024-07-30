@@ -1,4 +1,4 @@
-{{- if or .Values.vault.env .Values.global.env -}}
+{{- if and .Values.vault.enabled (or .Values.vault.env .Values.global.env) -}}
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -11,4 +11,4 @@ data:
   {{- if .Values.vault.env -}}
   {{- include "template.env" .Values.vault | indent 2 }}
   {{- end -}}
-{{- end -}}
+{{- end }}

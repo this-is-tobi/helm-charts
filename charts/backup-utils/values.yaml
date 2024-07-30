@@ -23,6 +23,8 @@ global:
 
 # Postgresql backup configuration.
 postgresql:
+  # -- Whether or not postgresql backup should be enabled.
+  enabled: false
   ## Postgresql backup image.
   image:
     # -- Repository to use for the postgresql backup.
@@ -117,6 +119,8 @@ postgresql:
 
 # Vault backup configuration.
 vault:
+  # -- Whether or not vault backup should be enabled.
+  enabled: false
   ## Vault backup image.
   image:
     # -- Repository to use for the vault backup.
