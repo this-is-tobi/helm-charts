@@ -182,7 +182,7 @@ vault:
     RETENTION_DAYS: "7"
   secrets:
     # -- Host of the vault server to backup.
-    VAULT_ADDRESS: ""
+    VAULT_ADDR: ""
     # -- Token of the vault server used for backup.
     VAULT_TOKEN: ""
     # -- Vault extra cli args used for backup.

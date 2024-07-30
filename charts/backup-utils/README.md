@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 A Helm chart for effortless deployment of backup utilities.
 
@@ -93,7 +93,7 @@ A Helm chart for effortless deployment of backup utilities.
 | vault.secrets.S3_BUCKET_PREFIX | string | `""` | S3 bucket prefix used as target destination (the folder prefix used in the bucket). |
 | vault.secrets.S3_ENDPOINT | string | `""` | S3 endpoint used as target destination. |
 | vault.secrets.S3_SECRET_KEY | string | `""` | S3 secret key. |
-| vault.secrets.VAULT_ADDRESS | string | `""` | Host of the vault server to backup. |
+| vault.secrets.VAULT_ADDR | string | `""` | Host of the vault server to backup. |
 | vault.secrets.VAULT_EXTRA_ARGS | string | `""` | Vault extra cli args used for backup. |
 | vault.secrets.VAULT_TOKEN | string | `""` | Token of the vault server used for backup. |
 
