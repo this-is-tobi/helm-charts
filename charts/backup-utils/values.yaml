@@ -33,7 +33,7 @@ postgresql:
     pullPolicy: "IfNotPresent"
     # -- Tag to use for the postgresql backup.
     ## Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
+    tag: "1.3.1"
   job:
     # -- The cron rule used for backups. By default it runs everyday at 00:00.
     schedule: "0 0 * * *"
@@ -44,7 +44,7 @@ postgresql:
     # -- Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace".
     concurrencyPolicy: "Forbid"
     # -- The time zone name for the given schedule, see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
-    timeZone: "Europe/Paris"
+    timeZone: ""
     # -- Specifies the number of retries before marking this job failed.
     backoffLimit: 3
   # -- Annotations for the postgresql backup deployed jobs.
@@ -129,7 +129,7 @@ vault:
     pullPolicy: "IfNotPresent"
     # -- Tag to use for the vault backup.
     ## Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
+    tag: "1.0.10"
   job:
     # -- The cron rule used for backups. By default it runs everyday at 00:00.
     schedule: "0 0 * * *"
@@ -140,7 +140,7 @@ vault:
     # -- Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace".
     concurrencyPolicy: "Forbid"
     # -- The time zone name for the given schedule, see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
-    timeZone: "Europe/Paris"
+    timeZone: ""
     # -- Specifies the number of retries before marking this job failed.
     backoffLimit: 3
   # -- Annotations for the vault backup deployed jobs.

@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 A Helm chart for effortless deployment of backup utilities.
 
@@ -13,6 +13,7 @@ A Helm chart for effortless deployment of backup utilities.
 ## Source Code
 
 * <https://github.com/this-is-tobi/helm-charts>
+* <https://github.com/this-is-tobi/tools>
 
 ## Values
 
@@ -35,13 +36,13 @@ A Helm chart for effortless deployment of backup utilities.
 | postgresql.envFrom | list | `[]` | Postgresql backup container env variables loaded from configmap or secret reference. |
 | postgresql.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the postgresql backup. |
 | postgresql.image.repository | string | `"ghcr.io/this-is-tobi/tools/pg-backup"` | Repository to use for the postgresql backup. |
-| postgresql.image.tag | string | `"latest"` | Tag to use for the postgresql backup. # Overrides the image tag whose default is the chart appVersion. |
+| postgresql.image.tag | string | `"1.3.1"` | Tag to use for the postgresql backup. # Overrides the image tag whose default is the chart appVersion. |
 | postgresql.job.backoffLimit | int | `3` | Specifies the number of retries before marking this job failed. |
 | postgresql.job.concurrencyPolicy | string | `"Forbid"` | Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace". |
 | postgresql.job.failedJobsHistoryLimit | int | `3` | The number of failed finished jobs to retain. Value must be non-negative integer. |
 | postgresql.job.schedule | string | `"0 0 * * *"` | The cron rule used for backups. By default it runs everyday at 00:00. |
 | postgresql.job.successfulJobsHistoryLimit | int | `3` | The number of successful finished jobs to retain. Value must be non-negative integer. |
-| postgresql.job.timeZone | string | `"Europe/Paris"` | The time zone name for the given schedule, see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones. |
+| postgresql.job.timeZone | string | `""` | The time zone name for the given schedule, see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones. |
 | postgresql.jobAnnotations | object | `{}` | Annotations for the postgresql backup deployed jobs. |
 | postgresql.jobLabels | object | `{}` | Labels for the postgresql backup deployed jobs. |
 | postgresql.podAnnotations | object | `{}` | Annotations for the postgresql backup deployed pods. |
@@ -71,13 +72,13 @@ A Helm chart for effortless deployment of backup utilities.
 | vault.envFrom | list | `[]` | Vault backup container env variables loaded from configmap or secret reference. |
 | vault.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the vault backup. |
 | vault.image.repository | string | `"ghcr.io/this-is-tobi/tools/vault-backup"` | Repository to use for the vault backup. |
-| vault.image.tag | string | `"latest"` | Tag to use for the vault backup. # Overrides the image tag whose default is the chart appVersion. |
+| vault.image.tag | string | `"1.0.10"` | Tag to use for the vault backup. # Overrides the image tag whose default is the chart appVersion. |
 | vault.job.backoffLimit | int | `3` | Specifies the number of retries before marking this job failed. |
 | vault.job.concurrencyPolicy | string | `"Forbid"` | Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace". |
 | vault.job.failedJobsHistoryLimit | int | `3` | The number of failed finished jobs to retain. Value must be non-negative integer. |
 | vault.job.schedule | string | `"0 0 * * *"` | The cron rule used for backups. By default it runs everyday at 00:00. |
 | vault.job.successfulJobsHistoryLimit | int | `3` | The number of successful finished jobs to retain. Value must be non-negative integer. |
-| vault.job.timeZone | string | `"Europe/Paris"` | The time zone name for the given schedule, see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones. |
+| vault.job.timeZone | string | `""` | The time zone name for the given schedule, see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones. |
 | vault.jobAnnotations | object | `{}` | Annotations for the vault backup deployed jobs. |
 | vault.jobLabels | object | `{}` | Labels for the vault backup deployed jobs. |
 | vault.podAnnotations | object | `{}` | Annotations for the vault backup deployed pods. |
