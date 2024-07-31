@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 A Helm chart for effortless deployment of backup utilities.
 
@@ -32,11 +32,12 @@ A Helm chart for effortless deployment of backup utilities.
 | postgresql.container.port | int | `8080` | Postgresql backup container port. |
 | postgresql.container.securityContext | object | `{}` | Toggle and define container-level security context. |
 | postgresql.enabled | bool | `false` | Whether or not postgresql backup should be enabled. |
-| postgresql.env.RETENTION_DAYS | string | `"7"` | Backup rentention days to apply on the bucket. |
+| postgresql.env.MC_EXTRA_ARGS | string | `""` | Minio extra cli args used for backup. |
+| postgresql.env.RETENTION | string | `"7d"` | Backup rentention to apply on the bucket, it should follow the pattern `#d#hh#mm#ss` (https://min.io/docs/minio/linux/reference/minio-mc/mc-rm.html#mc.rm.-older-than). |
 | postgresql.envFrom | list | `[]` | Postgresql backup container env variables loaded from configmap or secret reference. |
 | postgresql.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the postgresql backup. |
 | postgresql.image.repository | string | `"ghcr.io/this-is-tobi/tools/pg-backup"` | Repository to use for the postgresql backup. |
-| postgresql.image.tag | string | `"1.3.1"` | Tag to use for the postgresql backup. # Overrides the image tag whose default is the chart appVersion. |
+| postgresql.image.tag | string | `"1.4.0"` | Tag to use for the postgresql backup. # Overrides the image tag whose default is the chart appVersion. |
 | postgresql.job.backoffLimit | int | `3` | Specifies the number of retries before marking this job failed. |
 | postgresql.job.concurrencyPolicy | string | `"Forbid"` | Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace". |
 | postgresql.job.failedJobsHistoryLimit | int | `3` | The number of failed finished jobs to retain. Value must be non-negative integer. |
@@ -68,11 +69,12 @@ A Helm chart for effortless deployment of backup utilities.
 | vault.container.port | int | `8080` | Vault backup container port. |
 | vault.container.securityContext | object | `{}` | Toggle and define container-level security context. |
 | vault.enabled | bool | `false` | Whether or not vault backup should be enabled. |
-| vault.env.RETENTION_DAYS | string | `"7"` | Backup rentention days to apply on the bucket. |
+| vault.env.MC_EXTRA_ARGS | string | `""` | Minio extra cli args used for backup. |
+| vault.env.RETENTION | string | `"7d"` | Backup rentention to apply on the bucket, it should follow the pattern `#d#hh#mm#ss` (https://min.io/docs/minio/linux/reference/minio-mc/mc-rm.html#mc.rm.-older-than). |
 | vault.envFrom | list | `[]` | Vault backup container env variables loaded from configmap or secret reference. |
 | vault.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the vault backup. |
 | vault.image.repository | string | `"ghcr.io/this-is-tobi/tools/vault-backup"` | Repository to use for the vault backup. |
-| vault.image.tag | string | `"1.0.10"` | Tag to use for the vault backup. # Overrides the image tag whose default is the chart appVersion. |
+| vault.image.tag | string | `"1.1.0"` | Tag to use for the vault backup. # Overrides the image tag whose default is the chart appVersion. |
 | vault.job.backoffLimit | int | `3` | Specifies the number of retries before marking this job failed. |
 | vault.job.concurrencyPolicy | string | `"Forbid"` | Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace". |
 | vault.job.failedJobsHistoryLimit | int | `3` | The number of failed finished jobs to retain. Value must be non-negative integer. |
