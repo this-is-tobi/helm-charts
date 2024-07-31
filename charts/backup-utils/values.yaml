@@ -33,7 +33,7 @@ postgresql:
     pullPolicy: "IfNotPresent"
     # -- Tag to use for the postgresql backup.
     ## Overrides the image tag whose default is the chart appVersion.
-    tag: "1.3.1"
+    tag: "1.4.0"
   job:
     # -- The cron rule used for backups. By default it runs everyday at 00:00.
     schedule: "0 0 * * *"
@@ -82,8 +82,10 @@ postgresql:
   # - secretRef:
   #     name: my-secret
   env:
-    # -- Backup rentention days to apply on the bucket.
-    RETENTION_DAYS: "7"
+    # -- Backup rentention to apply on the bucket, it should follow the pattern `#d#hh#mm#ss` (https://min.io/docs/minio/linux/reference/minio-mc/mc-rm.html#mc.rm.-older-than).
+    RETENTION: "7d"
+    # -- Minio extra cli args used for backup.
+    MC_EXTRA_ARGS: ""
   secrets:
     # -- Host of the postgresql database to backup.
     DB_HOST: ""
@@ -129,7 +131,7 @@ vault:
     pullPolicy: "IfNotPresent"
     # -- Tag to use for the vault backup.
     ## Overrides the image tag whose default is the chart appVersion.
-    tag: "1.0.10"
+    tag: "1.1.0"
   job:
     # -- The cron rule used for backups. By default it runs everyday at 00:00.
     schedule: "0 0 * * *"
@@ -178,8 +180,10 @@ vault:
   # - secretRef:
   #     name: my-secret
   env:
-    # -- Backup rentention days to apply on the bucket.
-    RETENTION_DAYS: "7"
+    # -- Backup rentention to apply on the bucket, it should follow the pattern `#d#hh#mm#ss` (https://min.io/docs/minio/linux/reference/minio-mc/mc-rm.html#mc.rm.-older-than).
+    RETENTION: "7d"
+    # -- Minio extra cli args used for backup.
+    MC_EXTRA_ARGS: ""
   secrets:
     # -- Host of the vault server to backup.
     VAULT_ADDR: ""
