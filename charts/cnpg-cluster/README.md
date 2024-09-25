@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -27,6 +27,7 @@ A Helm Chart to deploy easily a CNPG cluster
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | annotations | object | `{}` | Additional cnpg cluster annotations. |
+| backup.compression | string | `""` | Which compression algorithm should be used for cnpg backups (should be one of "gzip", "bzip2" or "snappy"). |
 | backup.cron | string | `"0 0 */6 * * *"` | The cron rule used for cnpg backups. By default it runs every 6 hours. |
 | backup.destinationPath | string | `""` | S3 destination path for cnpg backups (it should be set like `s3://<bucket_name>/<path>`). |
 | backup.enabled | bool | `false` | Whether or not cnpg cluster deployment should be enabled. |
