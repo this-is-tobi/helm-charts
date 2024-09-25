@@ -91,5 +91,11 @@ spec:
         secretAccessKey:
           name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
           key: {{ .Values.backup.s3Credentials.secretAccessKey.key }}
+      {{- if .Values.backup.compression }}
+      data:
+        compression: {{ .Values.backup.compression }}
+      wal:
+        compression: {{ .Values.backup.compression }}
+      {{- end }}
     retentionPolicy: {{ .Values.backup.retentionPolicy }}
   {{- end }}

@@ -67,6 +67,8 @@ backup:
       # -- S3 secretAccessKey value used for cnpg backups.
       # Only needed if `backup.s3Credentials.create` is set to `true`.
       value: ""
+  # -- Which compression algorithm should be used for cnpg backups (should be one of "gzip", "bzip2" or "snappy").
+  compression: ""
   # -- The cron rule used for cnpg backups. By default it runs every 6 hours.
   cron: "0 0 */6 * * *"
   # -- Retention policy for cnpg backups recurrences.
