@@ -75,7 +75,11 @@ spec:
   enableSuperuserAccess: {{ .Values.enableSuperuserAccess }}
   primaryUpdateStrategy: {{ .Values.primaryUpdateStrategy }}
   storage:
-    size: {{ .Values.pvcSize }}
+    size: {{ .Values.pvcSize.data }}
+  {{- if .Values.cnpg.pvcSize.wal }}
+  walStorage:
+    size: {{ .Values.cnpg.pvcSize.wal }}
+  {{- end }}
   {{- if .Values.backup.enabled }}
   backup:
     barmanObjectStore:
