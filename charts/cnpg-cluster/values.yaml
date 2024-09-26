@@ -20,8 +20,11 @@ enableSuperuserAccess: true
 # unsupervised: automated update of the primary once all replicas have been upgraded (default)
 # supervised: requires manual supervision to perform the switchover of the primary
 primaryUpdateStrategy: "unsupervised"
-# -- Size of the PVC used by each cnpg instance.
-pvcSize: "10Gi"
+pvcSize: 
+  # -- Size of the data PVC used by each cnpg instance.
+  data: "10Gi"
+  # -- Size of the WAL PVC used by each cnpg instance (if value is `null` then WAL files are stored within the data PVC).
+  wal: "10Gi"
 # -- Additional cnpg cluster annotations.
 annotations: {}
 # -- Additional cnpg cluster labels.

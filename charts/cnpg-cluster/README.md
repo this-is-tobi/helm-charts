@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -53,7 +53,8 @@ A Helm Chart to deploy easily a CNPG cluster
 | nameOverride | string | `""` | Provide a name in place of the default application name. |
 | nodePort | string | `nil` | Port used for NodePort service. Needs `exposed` tu be true. |
 | primaryUpdateStrategy | string | `"unsupervised"` | Rolling update strategy used : unsupervised: automated update of the primary once all replicas have been upgraded (default) supervised: requires manual supervision to perform the switchover of the primary |
-| pvcSize | string | `"10Gi"` | Size of the PVC used by each cnpg instance. |
+| pvcSize.data | string | `"10Gi"` | Size of the data PVC used by each cnpg instance. |
+| pvcSize.wal | string | `"10Gi"` | Size of the WAL PVC used by each cnpg instance (if value is `null` then WAL files are stored within the data PVC). |
 | replica.host | string | `""` | Primary cnpg cluster host used for replica mode. |
 | replica.port | int | `5432` | Primary cnpg cluster port used for replica mode. |
 | username | string | `"username"` | Username of the database user. |
