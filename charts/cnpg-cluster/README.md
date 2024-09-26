@@ -20,7 +20,7 @@ A Helm Chart to deploy easily a CNPG cluster
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://cloudnative-pg.github.io/charts | cnpg-operator(cloudnative-pg) | 0.21.5 |
+| https://cloudnative-pg.github.io/charts | cnpg-operator(cloudnative-pg) | 0.22.0 |
 
 ## Values
 
