@@ -115,7 +115,7 @@ postgresql:
       cpu: "100m"
     limits:
       # -- Memory limit for the postgresql backup.
-      memory: "512Gi"
+      memory: "512Mi"
       # -- CPU limit for the postgresql backup.
       cpu: "250m"
 
@@ -209,6 +209,6 @@ vault:
       cpu: "100m"
     limits:
       # -- Memory limit for the vault backup.
-      memory: "512Gi"
+      memory: "512Mi"
       # -- CPU limit for the vault backup.
       cpu: "250m"

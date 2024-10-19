@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 1.0.3](https://img.shields.io/badge/Version-1.0.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 1.0.4](https://img.shields.io/badge/Version-1.0.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 A Helm chart for effortless deployment of backup utilities.
 
@@ -50,7 +50,7 @@ A Helm chart for effortless deployment of backup utilities.
 | postgresql.podLabels | object | `{}` | Labels for the postgresql backup deployed pods. |
 | postgresql.podSecurityContext | object | `{}` | Toggle and define pod-level security context. |
 | postgresql.resources.limits.cpu | string | `"250m"` | CPU limit for the postgresql backup. |
-| postgresql.resources.limits.memory | string | `"512Gi"` | Memory limit for the postgresql backup. |
+| postgresql.resources.limits.memory | string | `"512Mi"` | Memory limit for the postgresql backup. |
 | postgresql.resources.requests.cpu | string | `"100m"` | CPU request for the postgresql backup. |
 | postgresql.resources.requests.memory | string | `"128Mi"` | Memory request for the postgresql backup. |
 | postgresql.restartPolicy | string | `"Never"` | Restart policy for all containers within the pod. |
@@ -87,7 +87,7 @@ A Helm chart for effortless deployment of backup utilities.
 | vault.podLabels | object | `{}` | Labels for the vault backup deployed pods. |
 | vault.podSecurityContext | object | `{}` | Toggle and define pod-level security context. |
 | vault.resources.limits.cpu | string | `"250m"` | CPU limit for the vault backup. |
-| vault.resources.limits.memory | string | `"512Gi"` | Memory limit for the vault backup. |
+| vault.resources.limits.memory | string | `"512Mi"` | Memory limit for the vault backup. |
 | vault.resources.requests.cpu | string | `"100m"` | CPU request for the vault backup. |
 | vault.resources.requests.memory | string | `"128Mi"` | Memory request for the vault backup. |
 | vault.restartPolicy | string | `"Never"` | Restart policy for all containers within the pod. |
