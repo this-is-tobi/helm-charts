@@ -37,7 +37,7 @@ A Helm chart for effortless deployment of backup utilities.
 | postgresql.envFrom | list | `[]` | Postgresql backup container env variables loaded from configmap or secret reference. |
 | postgresql.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the postgresql backup. |
 | postgresql.image.repository | string | `"ghcr.io/this-is-tobi/tools/pg-backup"` | Repository to use for the postgresql backup. |
-| postgresql.image.tag | string | `"1.4.3"` | Tag to use for the postgresql backup. # Overrides the image tag whose default is the chart appVersion. |
+| postgresql.image.tag | string | `"3.0.0"` | Tag to use for the postgresql backup. # Overrides the image tag whose default is the chart appVersion. |
 | postgresql.job.backoffLimit | int | `3` | Specifies the number of retries before marking this job failed. |
 | postgresql.job.concurrencyPolicy | string | `"Forbid"` | Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace". |
 | postgresql.job.failedJobsHistoryLimit | int | `3` | The number of failed finished jobs to retain. Value must be non-negative integer. |
@@ -110,7 +110,7 @@ A Helm chart for effortless deployment of backup utilities.
 | vault.envFrom | list | `[]` | Vault backup container env variables loaded from configmap or secret reference. |
 | vault.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the vault backup. |
 | vault.image.repository | string | `"ghcr.io/this-is-tobi/tools/vault-backup"` | Repository to use for the vault backup. |
-| vault.image.tag | string | `"1.1.3"` | Tag to use for the vault backup. # Overrides the image tag whose default is the chart appVersion. |
+| vault.image.tag | string | `"1.2.0"` | Tag to use for the vault backup. # Overrides the image tag whose default is the chart appVersion. |
 | vault.job.backoffLimit | int | `3` | Specifies the number of retries before marking this job failed. |
 | vault.job.concurrencyPolicy | string | `"Forbid"` | Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace". |
 | vault.job.failedJobsHistoryLimit | int | `3` | The number of failed finished jobs to retain. Value must be non-negative integer. |
