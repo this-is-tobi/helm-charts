@@ -119,6 +119,102 @@ postgresql:
       # -- CPU limit for the postgresql backup.
       cpu: "250m"
 
+# S3 backup configuration.
+s3:
+  # -- Whether or not s3 backup should be enabled.
+  enabled: false
+  ## S3 backup image.
+  image:
+    # -- Repository to use for the s3 backup.
+    repository: "ghcr.io/this-is-tobi/tools/s3-backup"
+    # -- Image pull policy for the s3 backup.
+    pullPolicy: "IfNotPresent"
+    # -- Tag to use for the s3 backup.
+    ## Overrides the image tag whose default is the chart appVersion.
+    tag: "1.1.3"
+  job:
+    # -- The cron rule used for backups. By default it runs everyday at 00:00.
+    schedule: "0 0 * * *"
+    # -- The number of successful finished jobs to retain. Value must be non-negative integer.
+    successfulJobsHistoryLimit: 3
+    # -- The number of failed finished jobs to retain. Value must be non-negative integer.
+    failedJobsHistoryLimit: 3
+    # -- Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace".
+    concurrencyPolicy: "Forbid"
+    # -- The time zone name for the given schedule, see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
+    timeZone: ""
+    # -- Specifies the number of retries before marking this job failed.
+    backoffLimit: 3
+  # -- Annotations for the s3 backup deployed jobs.
+  jobAnnotations: {}
+  # -- Labels for the s3 backup deployed jobs.
+  jobLabels: {}
+  # -- Annotations for the s3 backup deployed pods.
+  podAnnotations: {}
+  # -- Labels for the s3 backup deployed pods.
+  podLabels: {}
+  # -- Restart policy for all containers within the pod.
+  restartPolicy: Never
+  # -- Toggle and define pod-level security context.
+  podSecurityContext: {}
+    # fsGroup: 2000
+  container:
+    # -- S3 backup container port.
+    port: 8080
+    # -- S3 backup container command.
+    command: []
+    # -- S3 backup container command args.
+    args: []
+    # -- Toggle and define container-level security context.
+    securityContext: {}
+      # capabilities:
+      #   drop:
+      #   - ALL
+      # readOnlyRootFilesystem: true
+      # runAsNonRoot: true
+      # runAsUser: 1000
+  # -- S3 backup container env variables loaded from configmap or secret reference.
+  envFrom: []
+  # - configMapRef:
+  #     name: my-config
+  # - secretRef:
+  #     name: my-secret
+  env:
+    # -- Minio extra cli args used for backup.
+    MC_EXTRA_ARGS: ""
+  secrets:
+    # -- S3 source endpoint used as target destination.
+    SOURCE_S3_ENDPOINT: ""
+    # -- S3 source access key.
+    SOURCE_S3_ACCESS_KEY: ""
+    # -- S3 source secret key.
+    SOURCE_S3_SECRET_KEY: ""
+    # -- S3 source bucket name used as target destination.
+    SOURCE_S3_BUCKET_NAME: ""
+    # -- S3 source bucket prefix used as target destination (the folder prefix used in the bucket).
+    SOURCE_S3_BUCKET_PREFIX: ""
+    # -- S3 target endpoint used as target destination.
+    TARGET_S3_ENDPOINT: ""
+    # -- S3 target access key.
+    TARGET_S3_ACCESS_KEY: ""
+    # -- S3 target secret key.
+    TARGET_S3_SECRET_KEY: ""
+    # -- S3 target bucket name used as target destination.
+    TARGET_S3_BUCKET_NAME: ""
+    # -- S3 target bucket prefix used as target destination (the folder prefix used in the bucket).
+    TARGET_S3_BUCKET_PREFIX: ""
+  resources:
+    requests:
+      # -- Memory request for the s3 backup.
+      memory: "128Mi"
+      # -- CPU request for the s3 backup.
+      cpu: "100m"
+    limits:
+      # -- Memory limit for the s3 backup.
+      memory: "512Mi"
+      # -- CPU limit for the s3 backup.
+      cpu: "250m"
+
 # Vault backup configuration.
 vault:
   # -- Whether or not vault backup should be enabled.

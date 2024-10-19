@@ -55,7 +55,7 @@ spec:
             securityContext:
               {{- toYaml .Values.postgresql.container.securityContext | nindent 14 }}
             {{- end }}
-            image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag | default .Chart.AppVersion }}"
+            image: {{ printf "%s:%s" .Values.postgresql.image.repository (.Values.postgresql.image.tag | default printf "%s" "latest") }}
             imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
             {{- if .Values.postgresql.container.command }}
             command:
