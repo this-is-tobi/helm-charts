@@ -96,6 +96,11 @@ app.kubernetes.io/name: {{ printf "%s-%s" (include "template.name" .) "postgresq
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+{{- define "template.s3.selectorLabels" -}}
+app.kubernetes.io/name: {{ printf "%s-%s" (include "template.name" .) "s3" }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
 {{- define "template.vault.selectorLabels" -}}
 app.kubernetes.io/name: {{ printf "%s-%s" (include "template.name" .) "vault" }}
 app.kubernetes.io/instance: {{ .Release.Name }}
@@ -108,6 +113,11 @@ App labels
 {{- define "template.postgresql.labels" -}}
 {{ include "template.common.labels" . }}
 {{ include "template.postgresql.selectorLabels" . }}
+{{- end }}
+
+{{- define "template.s3.labels" -}}
+{{ include "template.common.labels" . }}
+{{ include "template.s3.selectorLabels" . }}
 {{- end }}
 
 {{- define "template.vault.labels" -}}

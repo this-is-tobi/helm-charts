@@ -1,0 +1,89 @@
+{{- if .Values.s3.enabled -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ printf "%s-%s" (include "template.fullname" .) "s3" }}
+  labels:
+    {{- include "template.s3.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.s3.job.schedule }}
+  successfulJobsHistoryLimit: {{ .Values.s3.job.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.s3.job.failedJobsHistoryLimit }}
+  concurrencyPolicy: {{ .Values.s3.job.concurrencyPolicy }}
+  timeZone: {{ .Values.s3.job.timeZone }}
+  jobTemplate:
+    metadata:
+      {{- if .Values.s3.jobAnnotations }}
+      annotations:
+        {{- with .Values.s3.jobAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      labels:
+        {{- include "template.s3.selectorLabels" . | nindent 8 }}
+        {{- with .Values.s3.jobLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      backoffLimit: {{ .Values.s3.job.backoffLimit }}
+      template:
+        metadata:
+          {{- if .Values.s3.podAnnotations }}
+          annotations:
+            {{- with .Values.s3.podAnnotations }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          labels:
+            {{- include "template.s3.selectorLabels" . | nindent 12 }}
+            {{- with .Values.s3.podLabels }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        spec:
+          {{- if and .Values.imageCredentials.username .Values.imageCredentials.password }}
+          imagePullSecrets:
+          - name: {{ include "template.name" . }}-pullsecret
+          {{- end }}
+          restartPolicy: {{ .Values.s3.restartPolicy }}
+          {{- if .Values.s3.podSecurityContext }}
+          securityContext:
+            {{- toYaml .Values.s3.podSecurityContext | nindent 12 }}
+          {{- end }}
+          containers:
+          - name: s3
+            {{- if .Values.s3.container.securityContext }}
+            securityContext:
+              {{- toYaml .Values.s3.container.securityContext | nindent 14 }}
+            {{- end }}
+            image: {{ printf "%s:%s" .Values.s3.image.repository (.Values.s3.image.tag | default printf "%s" "latest") }}
+            imagePullPolicy: {{ .Values.s3.image.pullPolicy }}
+            {{- if .Values.s3.container.command }}
+            command:
+            {{- range .Values.s3.container.command }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.s3.container.args }}
+            args:
+            {{- range .Values.s3.container.args }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            ports:
+            - containerPort: {{ .Values.s3.container.port }}
+              protocol: TCP
+            envFrom:
+            {{- if or .Values.s3.env .Values.global.env }}
+            - configMapRef:
+                name: {{ printf "%s-%s" (include "template.fullname" .) "s3" }}
+            {{- end }}
+            {{- if or .Values.s3.secrets .Values.global.secrets }}
+            - secretRef:
+                name: {{ printf "%s-%s" (include "template.fullname" .) "s3" }}
+            {{- end }}
+            {{- if .Values.s3.envFrom }}
+              {{- toYaml .Values.s3.envFrom | nindent 12 }}
+            {{- end }}
+            resources:
+              {{- toYaml .Values.s3.resources | nindent 14 }}
+{{- end }}
