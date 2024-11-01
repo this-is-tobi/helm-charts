@@ -1,7 +1,7 @@
 apiVersion: v2
 name: dashy
 type: application
-version: 0.1.5
+version: 0.1.6
 appVersion: "3.1.0"
 description: A Helm chart to deploy Dashy, a self-hostable personal dashboard that includes status-checking, widgets, themes, icon packs, a UI editor etc...
 home: https://dashy.to
@@ -10,7 +10,7 @@ annotations: {}
 keywords: []
 dependencies:
 - name: keycloak
-  version: 21.4.1
+  version: 24.0.4
   repository: https://charts.bitnami.com/bitnami
   condition: keycloak.enabled
 sources:

@@ -1,7 +1,7 @@
 apiVersion: v2
 name: homarr
 type: application
-version: 0.1.4
+version: 0.1.5
 appVersion: "0.15.6"
 description: Customizable browser's home page to interact with your homeserver's Docker containers (e.g. Sonarr/Radarr)
 home: https://homarr.dev
@@ -10,7 +10,7 @@ annotations: {}
 keywords: []
 dependencies:
 - name: keycloak
-  version: 21.4.1
+  version: 24.0.4
   repository: https://charts.bitnami.com/bitnami
   condition: keycloak.enabled
 sources:
