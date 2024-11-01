@@ -319,6 +319,30 @@ entries:
   dashy:
   - apiVersion: v2
     appVersion: 3.1.0
+    created: "2024-11-01T22:11:41.150017443Z"
+    dependencies:
+    - condition: keycloak.enabled
+      name: keycloak
+      repository: https://charts.bitnami.com/bitnami
+      version: 24.0.4
+    description: A Helm chart to deploy Dashy, a self-hostable personal dashboard
+      that includes status-checking, widgets, themes, icon packs, a UI editor etc...
+    digest: ebe6dd08e8c2bda2269c043d9abb437e9bac7beae7eefefd623ca19a7cf9d737
+    home: https://dashy.to
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: dashy
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/Lissy93/dashy
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/dashy-0.1.6/dashy-0.1.6.tgz
+    version: 0.1.6
+  - apiVersion: v2
+    appVersion: 3.1.0
     created: "2024-07-27T01:01:29.722200737Z"
     dependencies:
     - condition: keycloak.enabled
@@ -436,6 +460,30 @@ entries:
     - https://github.com/this-is-tobi/helm-charts/releases/download/dashy-0.1.1/dashy-0.1.1.tgz
     version: 0.1.1
   homarr:
+  - apiVersion: v2
+    appVersion: 0.15.6
+    created: "2024-11-01T22:11:41.349411865Z"
+    dependencies:
+    - condition: keycloak.enabled
+      name: keycloak
+      repository: https://charts.bitnami.com/bitnami
+      version: 24.0.4
+    description: Customizable browser's home page to interact with your homeserver's
+      Docker containers (e.g. Sonarr/Radarr)
+    digest: b31310748cd74e2071ca73072c41756892cdfca39b87a4556aeb855579add005
+    home: https://homarr.dev
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: homarr
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/ajnart/homarr
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.5/homarr-0.1.5.tgz
+    version: 0.1.5
   - apiVersion: v2
     appVersion: 0.15.6
     created: "2024-10-24T22:30:23.555489588Z"
@@ -556,4 +604,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.0/homarr-0.1.0.tgz
     version: 0.1.0
-generated: "2024-11-01T22:02:40.048133249Z"
+generated: "2024-11-01T22:11:41.349486876Z"
