@@ -461,6 +461,30 @@ entries:
     version: 0.1.1
   homarr:
   - apiVersion: v2
+    appVersion: 0.15.7
+    created: "2024-11-10T22:40:56.571502106Z"
+    dependencies:
+    - condition: keycloak.enabled
+      name: keycloak
+      repository: https://charts.bitnami.com/bitnami
+      version: 24.0.4
+    description: Customizable browser's home page to interact with your homeserver's
+      Docker containers (e.g. Sonarr/Radarr)
+    digest: 4f945d126696caa97b6b73aabc987af429eed57281b425bfdeafefed03057c0d
+    home: https://homarr.dev
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: homarr
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/ajnart/homarr
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.6/homarr-0.1.6.tgz
+    version: 0.1.6
+  - apiVersion: v2
     appVersion: 0.15.6
     created: "2024-11-01T22:11:41.349411865Z"
     dependencies:
@@ -604,4 +628,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.0/homarr-0.1.0.tgz
     version: 0.1.0
-generated: "2024-11-01T22:11:41.349486876Z"
+generated: "2024-11-10T22:40:56.571542342Z"
