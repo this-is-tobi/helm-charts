@@ -21,7 +21,7 @@ Customizable browser's home page to interact with your homeserver's Docker conta
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.bitnami.com/bitnami | keycloak | 24.0.4 |
+| https://charts.bitnami.com/bitnami | keycloak | 24.3.0 |
 
 ## Values
 

@@ -10,7 +10,7 @@ annotations: {}
 keywords: []
 dependencies:
 - name: keycloak
-  version: 24.0.4
+  version: 24.3.0
   repository: https://charts.bitnami.com/bitnami
   condition: keycloak.enabled
 sources:
