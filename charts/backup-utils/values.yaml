@@ -33,7 +33,7 @@ postgresql:
     pullPolicy: "IfNotPresent"
     # -- Tag to use for the postgresql backup.
     ## Overrides the image tag whose default is the chart appVersion.
-    tag: "3.0.0"
+    tag: "3.0.1"
   job:
     # -- The cron rule used for backups. By default it runs everyday at 00:00.
     schedule: "0 0 * * *"
@@ -227,7 +227,7 @@ vault:
     pullPolicy: "IfNotPresent"
     # -- Tag to use for the vault backup.
     ## Overrides the image tag whose default is the chart appVersion.
-    tag: "1.2.0"
+    tag: "1.2.1"
   job:
     # -- The cron rule used for backups. By default it runs everyday at 00:00.
     schedule: "0 0 * * *"
