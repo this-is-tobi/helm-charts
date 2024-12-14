@@ -19,7 +19,9 @@ spec:
   postgresql:
     {{- end }}
     parameters:
-      max_worker_processes: "60"
+      {{- with .Values.parameters }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
     pg_hba:
       - {{ printf "%s %s %s %s %s" "host" .Values.dbName .Values.username "all" "md5" }}
       - {{ printf "%s %s %s %s %s" "host" .Values.dbName "streaming_replica" "all" "md5" }}
