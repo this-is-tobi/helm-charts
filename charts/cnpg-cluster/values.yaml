@@ -24,7 +24,25 @@ pvcSize:
   # -- Size of the data PVC used by each cnpg instance.
   data: "10Gi"
   # -- Size of the WAL PVC used by each cnpg instance (if value is `null` then WAL files are stored within the data PVC).
-  wal: "10Gi"
+  wal: "5Gi"
+# -- Customize Postgresql parameters.
+parameters: {}
+# dynamic_shared_memory_type = "posix"
+# logging_collector = "on"
+# log_destination = "csvlog"
+# log_directory = "/controller/log"
+# log_filename = "postgres"
+# log_rotation_age = "0"
+# log_rotation_size = "0"
+# log_truncate_on_rotation = "false"
+# max_parallel_workers = "32"
+# max_replication_slots = "32"
+# max_worker_processes = "32"
+# shared_memory_type = "mmap"
+# wal_keep_size = "512MB"
+# wal_sender_timeout = "5s"
+# wal_receiver_timeout = "5s"
+# max_slot_wal_keep_size: "-1"
 # -- Additional cnpg cluster annotations.
 annotations: {}
 # -- Additional cnpg cluster labels.
@@ -48,15 +66,21 @@ backup:
   # -- S3 endpoint for cnpg backups.
   endpointURL: ""
   endpointCA:
+    # -- Whether or not to create S3 CA kubernetes secret used for cnpg backups.
+    # It will use `secretName`, `accessKeyId.key`, `accessKeyId.value`, `secretAccessKey.key` and `secretAccessKey.value` to create the secret.
+    create: false
     # -- The secret name containing S3 CA for cnpg backups.
-    name: ""
+    secretName: ""
     # -- The secret key containing S3 CA for cnpg backups.
     key: ""
+    # -- The S3 certificate used for cnpg backups.
+    # Only needed if `backup.endpointCA.create` is set to `true`.
+    value: ""
   s3Credentials:
-    # -- Whether or not to create kuebernetes secret used for cnpg backups.
-    # It will use `name`, `accessKeyId.key`, `accessKeyId.value`, `secretAccessKey.key` and `secretAccessKey.value` to create the secret.
+    # -- Whether or not to create S3 credentials kubernetes secret used for cnpg backups.
+    # It will use `secretName`, `accessKeyId.key`, `accessKeyId.value`, `secretAccessKey.key` and `secretAccessKey.value` to create the secret.
     create: false
-    # -- S3 kuebernetes secret name used for cnpg backups.
+    # -- S3 kubernetes secret name used for cnpg backups.
     secretName: *cnpgNameOverride
     accessKeyId:
       # -- S3 accessKeyId kubernetes secret key used for cnpg backups.
