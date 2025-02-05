@@ -227,7 +227,7 @@ vault:
     pullPolicy: "IfNotPresent"
     # -- Tag to use for the vault backup.
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "1.2.3"
+    tag: "1.3.0"
   job:
     # -- The cron rule used for backups. By default it runs everyday at 00:00.
     schedule: "0 0 * * *"
