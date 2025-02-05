@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 1.1.2](https://img.shields.io/badge/Version-1.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 1.1.3](https://img.shields.io/badge/Version-1.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 A Helm chart for effortless deployment of backup utilities.
 
@@ -110,7 +110,7 @@ A Helm chart for effortless deployment of backup utilities.
 | vault.envFrom | list | `[]` | Vault backup container env variables loaded from configmap or secret reference. |
 | vault.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the vault backup. |
 | vault.image.repository | string | `"ghcr.io/this-is-tobi/tools/vault-backup"` | Repository to use for the vault backup. |
-| vault.image.tag | string | `"1.2.3"` | Tag to use for the vault backup. Overrides the image tag whose default is the chart appVersion. |
+| vault.image.tag | string | `"1.3.0"` | Tag to use for the vault backup. Overrides the image tag whose default is the chart appVersion. |
 | vault.job.backoffLimit | int | `3` | Specifies the number of retries before marking this job failed. |
 | vault.job.concurrencyPolicy | string | `"Forbid"` | Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace". |
 | vault.job.failedJobsHistoryLimit | int | `3` | The number of failed finished jobs to retain. Value must be non-negative integer. |
