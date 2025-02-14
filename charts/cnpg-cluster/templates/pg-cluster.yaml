@@ -33,10 +33,18 @@ spec:
   {{- else if or (eq .Values.mode "replica") (eq .Values.mode "restore") }}
     recovery:
       source: {{ .Values.nameOverride | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+      {{- if .Values.backup.recoveryTarget }}
+      recoveryTarget: 
+        {{- with .Values.backup.recoveryTarget }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
   externalClusters:
   - name: {{ .Values.nameOverride | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
     {{- if or (.Values.backup.enabled) (eq .Values.mode "restore") }}
     barmanObjectStore:
+      wal:
+        maxParallel: {{ .Values.backup.maxParallelWal }}
       destinationPath: {{ .Values.backup.destinationPath }}
       endpointURL: {{ .Values.backup.endpointURL }}
       {{- if .Values.backup.endpointCA.name }}
