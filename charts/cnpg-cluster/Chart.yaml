@@ -11,7 +11,7 @@ keywords: []
 dependencies:
 - name: cloudnative-pg
   alias: cnpg-operator
-  version: 0.22.1
+  version: 0.23.0
   repository: https://cloudnative-pg.github.io/charts
   condition: cnpg-operator.enabled
 sources:
