@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 0.5.0](https://img.shields.io/badge/Version-0.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 0.6.0](https://img.shields.io/badge/Version-0.6.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -20,7 +20,7 @@ A Helm Chart to deploy easily a CNPG cluster
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://cloudnative-pg.github.io/charts | cnpg-operator(cloudnative-pg) | 0.22.1 |
+| https://cloudnative-pg.github.io/charts | cnpg-operator(cloudnative-pg) | 0.23.0 |
 
 ## Values
 
@@ -40,6 +40,8 @@ A Helm Chart to deploy easily a CNPG cluster
 | backup.s3Credentials.accessKeyId.key | string | `"accessKeyId"` | S3 accessKeyId kubernetes secret key used for cnpg backups. |
 | backup.s3Credentials.accessKeyId.value | string | `""` | S3 accessKeyId value used for cnpg backups. Only needed if `backup.s3Credentials.create` is set to `true`. |
 | backup.s3Credentials.create | bool | `false` | Whether or not to create S3 credentials kubernetes secret used for cnpg backups. It will use `secretName`, `accessKeyId.key`, `accessKeyId.value`, `secretAccessKey.key` and `secretAccessKey.value` to create the secret. |
+| backup.s3Credentials.maxParallelWal | int | `8` | The number of parallel process that will be applied when applying wals. |
+| backup.s3Credentials.recoveryTarget | object | `{}` | Recovery target config to perform a point in time recovery when restore. |
 | backup.s3Credentials.secretAccessKey.key | string | `"secretAccessKey"` | S3 secretAccessKey kubernetes secret key used for cnpg backups. |
 | backup.s3Credentials.secretAccessKey.value | string | `""` | S3 secretAccessKey value used for cnpg backups. Only needed if `backup.s3Credentials.create` is set to `true`. |
 | backup.s3Credentials.secretName | string | `""` | S3 kubernetes secret name used for cnpg backups. |

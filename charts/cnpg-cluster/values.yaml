@@ -94,6 +94,12 @@ backup:
       # -- S3 secretAccessKey value used for cnpg backups.
       # Only needed if `backup.s3Credentials.create` is set to `true`.
       value: ""
+    # -- The number of parallel process that will be applied when applying wals.
+    maxParallelWal: 8
+    # -- Recovery target config to perform a point in time recovery when restore.
+    recoveryTarget: {}
+    # backupID: 20250214T120000
+    # targetImmediate: true
   # -- Which compression algorithm should be used for cnpg backups (should be one of "gzip", "bzip2" or "snappy").
   compression: ""
   # -- The cron rule used for cnpg backups. By default it runs every 6 hours.
