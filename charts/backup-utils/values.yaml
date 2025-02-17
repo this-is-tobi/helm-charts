@@ -33,7 +33,7 @@ postgresql:
     pullPolicy: "IfNotPresent"
     # -- Tag to use for the postgresql backup.
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "3.0.2"
+    tag: "3.1.0"
   job:
     # -- The cron rule used for backups. By default it runs everyday at 00:00.
     schedule: "0 0 * * *"

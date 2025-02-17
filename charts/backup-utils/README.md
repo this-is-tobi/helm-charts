@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 1.1.3](https://img.shields.io/badge/Version-1.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 1.1.4](https://img.shields.io/badge/Version-1.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 A Helm chart for effortless deployment of backup utilities.
 
@@ -37,7 +37,7 @@ A Helm chart for effortless deployment of backup utilities.
 | postgresql.envFrom | list | `[]` | Postgresql backup container env variables loaded from configmap or secret reference. |
 | postgresql.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the postgresql backup. |
 | postgresql.image.repository | string | `"ghcr.io/this-is-tobi/tools/pg-backup"` | Repository to use for the postgresql backup. |
-| postgresql.image.tag | string | `"3.0.2"` | Tag to use for the postgresql backup. Overrides the image tag whose default is the chart appVersion. |
+| postgresql.image.tag | string | `"3.1.0"` | Tag to use for the postgresql backup. Overrides the image tag whose default is the chart appVersion. |
 | postgresql.job.backoffLimit | int | `3` | Specifies the number of retries before marking this job failed. |
 | postgresql.job.concurrencyPolicy | string | `"Forbid"` | Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace". |
 | postgresql.job.failedJobsHistoryLimit | int | `3` | The number of failed finished jobs to retain. Value must be non-negative integer. |
