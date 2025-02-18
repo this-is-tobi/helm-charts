@@ -17,7 +17,6 @@ spec:
   imageName: {{ .Values.imageName }}
   {{- end }}
   postgresql:
-    {{- end }}
     parameters:
       {{- with .Values.parameters }}
       {{- toYaml . | nindent 6 }}
@@ -86,9 +85,9 @@ spec:
   primaryUpdateStrategy: {{ .Values.primaryUpdateStrategy }}
   storage:
     size: {{ .Values.pvcSize.data }}
-  {{- if .Values.cnpg.pvcSize.wal }}
+  {{- if .Values.pvcSize.wal }}
   walStorage:
-    size: {{ .Values.cnpg.pvcSize.wal }}
+    size: {{ .Values.pvcSize.wal }}
   {{- end }}
   {{- if .Values.backup.enabled }}
   backup:
