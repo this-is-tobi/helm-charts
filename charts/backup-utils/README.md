@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 1.1.4](https://img.shields.io/badge/Version-1.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 A Helm chart for effortless deployment of backup utilities.
 
@@ -34,10 +34,11 @@ A Helm chart for effortless deployment of backup utilities.
 | postgresql.enabled | bool | `false` | Whether or not postgresql backup should be enabled. |
 | postgresql.env.MC_EXTRA_ARGS | string | `""` | Minio extra cli args used for backup. |
 | postgresql.env.RETENTION | string | `"7d"` | Backup rentention to apply on the bucket, it should follow the pattern `#d#hh#mm#ss` (https://min.io/docs/minio/linux/reference/minio-mc/mc-rm.html#mc.rm.-older-than). |
+| postgresql.env.S3_PATH_STYLE | string | `"true"` | Whether or not S3 path style is used (if the bucket name is included in the S3_ENDPOINT variable, the value should be set to "false"). |
 | postgresql.envFrom | list | `[]` | Postgresql backup container env variables loaded from configmap or secret reference. |
 | postgresql.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the postgresql backup. |
 | postgresql.image.repository | string | `"ghcr.io/this-is-tobi/tools/pg-backup"` | Repository to use for the postgresql backup. |
-| postgresql.image.tag | string | `"3.1.0"` | Tag to use for the postgresql backup. Overrides the image tag whose default is the chart appVersion. |
+| postgresql.image.tag | string | `"3.2.0"` | Tag to use for the postgresql backup. Overrides the image tag whose default is the chart appVersion. |
 | postgresql.job.backoffLimit | int | `3` | Specifies the number of retries before marking this job failed. |
 | postgresql.job.concurrencyPolicy | string | `"Forbid"` | Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace". |
 | postgresql.job.failedJobsHistoryLimit | int | `3` | The number of failed finished jobs to retain. Value must be non-negative integer. |
@@ -70,10 +71,11 @@ A Helm chart for effortless deployment of backup utilities.
 | s3.container.securityContext | object | `{}` | Toggle and define container-level security context. |
 | s3.enabled | bool | `false` | Whether or not s3 backup should be enabled. |
 | s3.env.MC_EXTRA_ARGS | string | `""` | Minio extra cli args used for backup. |
+| s3.env.S3_PATH_STYLE | string | `"true"` | Whether or not S3 path style is used (if the bucket name is included in the S3_ENDPOINT variable, the value should be set to "false"). |
 | s3.envFrom | list | `[]` | S3 backup container env variables loaded from configmap or secret reference. |
 | s3.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the s3 backup. |
 | s3.image.repository | string | `"ghcr.io/this-is-tobi/tools/s3-backup"` | Repository to use for the s3 backup. |
-| s3.image.tag | string | `"1.1.4"` | Tag to use for the s3 backup. Overrides the image tag whose default is the chart appVersion. |
+| s3.image.tag | string | `"1.2.0"` | Tag to use for the s3 backup. Overrides the image tag whose default is the chart appVersion. |
 | s3.job.backoffLimit | int | `3` | Specifies the number of retries before marking this job failed. |
 | s3.job.concurrencyPolicy | string | `"Forbid"` | Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace". |
 | s3.job.failedJobsHistoryLimit | int | `3` | The number of failed finished jobs to retain. Value must be non-negative integer. |
@@ -107,10 +109,11 @@ A Helm chart for effortless deployment of backup utilities.
 | vault.enabled | bool | `false` | Whether or not vault backup should be enabled. |
 | vault.env.MC_EXTRA_ARGS | string | `""` | Minio extra cli args used for backup. |
 | vault.env.RETENTION | string | `"7d"` | Backup rentention to apply on the bucket, it should follow the pattern `#d#hh#mm#ss` (https://min.io/docs/minio/linux/reference/minio-mc/mc-rm.html#mc.rm.-older-than). |
+| vault.env.S3_PATH_STYLE | string | `"true"` | Whether or not S3 path style is used (if the bucket name is included in the S3_ENDPOINT variable, the value should be set to "false"). |
 | vault.envFrom | list | `[]` | Vault backup container env variables loaded from configmap or secret reference. |
 | vault.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the vault backup. |
 | vault.image.repository | string | `"ghcr.io/this-is-tobi/tools/vault-backup"` | Repository to use for the vault backup. |
-| vault.image.tag | string | `"1.3.0"` | Tag to use for the vault backup. Overrides the image tag whose default is the chart appVersion. |
+| vault.image.tag | string | `"1.4.0"` | Tag to use for the vault backup. Overrides the image tag whose default is the chart appVersion. |
 | vault.job.backoffLimit | int | `3` | Specifies the number of retries before marking this job failed. |
 | vault.job.concurrencyPolicy | string | `"Forbid"` | Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace". |
 | vault.job.failedJobsHistoryLimit | int | `3` | The number of failed finished jobs to retain. Value must be non-negative integer. |
