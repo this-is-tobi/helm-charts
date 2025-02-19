@@ -33,7 +33,7 @@ postgresql:
     pullPolicy: "IfNotPresent"
     # -- Tag to use for the postgresql backup.
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "3.1.0"
+    tag: "3.2.0"
   job:
     # -- The cron rule used for backups. By default it runs everyday at 00:00.
     schedule: "0 0 * * *"
@@ -86,6 +86,8 @@ postgresql:
     RETENTION: "7d"
     # -- Minio extra cli args used for backup.
     MC_EXTRA_ARGS: ""
+    # -- Whether or not S3 path style is used (if the bucket name is included in the S3_ENDPOINT variable, the value should be set to "false").
+    S3_PATH_STYLE: "true"
   secrets:
     # -- Host of the postgresql database to backup.
     DB_HOST: ""
@@ -131,7 +133,7 @@ s3:
     pullPolicy: "IfNotPresent"
     # -- Tag to use for the s3 backup.
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "1.1.4"
+    tag: "1.2.0"
   job:
     # -- The cron rule used for backups. By default it runs everyday at 00:00.
     schedule: "0 0 * * *"
@@ -182,6 +184,8 @@ s3:
   env:
     # -- Minio extra cli args used for backup.
     MC_EXTRA_ARGS: ""
+    # -- Whether or not S3 path style is used (if the bucket name is included in the S3_ENDPOINT variable, the value should be set to "false").
+    S3_PATH_STYLE: "true"
   secrets:
     # -- S3 source endpoint used as target destination.
     SOURCE_S3_ENDPOINT: ""
@@ -227,7 +231,7 @@ vault:
     pullPolicy: "IfNotPresent"
     # -- Tag to use for the vault backup.
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "1.3.0"
+    tag: "1.4.0"
   job:
     # -- The cron rule used for backups. By default it runs everyday at 00:00.
     schedule: "0 0 * * *"
@@ -280,6 +284,8 @@ vault:
     RETENTION: "7d"
     # -- Minio extra cli args used for backup.
     MC_EXTRA_ARGS: ""
+    # -- Whether or not S3 path style is used (if the bucket name is included in the S3_ENDPOINT variable, the value should be set to "false").
+    S3_PATH_STYLE: "true"
   secrets:
     # -- Host of the vault server to backup.
     VAULT_ADDR: ""
