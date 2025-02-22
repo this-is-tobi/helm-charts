@@ -270,6 +270,30 @@ entries:
     version: 0.1.0
   cnpg-cluster:
   - apiVersion: v2
+    appVersion: 1.25.0
+    created: "2025-02-22T18:17:57.784557373Z"
+    dependencies:
+    - alias: cnpg-operator
+      condition: cnpg-operator.enabled
+      name: cloudnative-pg
+      repository: https://cloudnative-pg.github.io/charts
+      version: 0.23.0
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: c2fa57a9cf83fa845c9a321cb410fdada38ad63f2de9bf80518f6c125aec6987
+    home: https://cloudnative-pg.io
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-0.7.0/cnpg-cluster-0.7.0.tgz
+    version: 0.7.0
+  - apiVersion: v2
     appVersion: 0.1.0
     created: "2025-02-18T11:08:19.759118926Z"
     dependencies:
@@ -877,4 +901,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.0/homarr-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-19T22:02:10.43744278Z"
+generated: "2025-02-22T18:17:57.784678278Z"
