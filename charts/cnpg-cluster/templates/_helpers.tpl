@@ -103,4 +103,9 @@ Labels
 {{- define "template.labels" -}}
 {{ include "template.common.labels" . }}
 {{ include "template.selectorLabels" . }}
+{{- if .Values.labels }}
+{{ range $key, $val := .Values.labels }}
+{{- $key }}: {{ $val }}
+{{- end }}
+{{- end }}
 {{- end }}

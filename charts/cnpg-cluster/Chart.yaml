@@ -1,8 +1,8 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 0.6.2
-appVersion: "0.1.0"
+version: 0.7.0
+appVersion: "1.25.0"
 description: A Helm Chart to deploy easily a CNPG cluster
 home: https://cloudnative-pg.io
 deprecated: false
@@ -16,6 +16,7 @@ dependencies:
   condition: cnpg-operator.enabled
 sources:
 - https://github.com/this-is-tobi/helm-charts
+- https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
 maintainers:
 - name: this-is-tobi
   email: this-is-tobi@proton.me

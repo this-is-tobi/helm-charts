@@ -1,87 +1,30 @@
 apiVersion: postgresql.io/v1
 kind: Cluster
 metadata:
-  name: {{ .Values.nameOverride | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
-  labels:
-    {{- include "template.labels" . | nindent 4 }}
-    {{- with .Values.labels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-  annotations:
-    {{- with .Values.annotations }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+  name: {{ include "template.fullname" . }}
+  labels: {{- include "template.labels" . | nindent 4 }}
+  {{- if .Values.annotations }}
+  annotations: {{- toYaml .Values.annotations | nindent 4 }}
+  {{- end }}
 spec:
   instances: {{ .Values.instances }}
   {{- if .Values.imageName }}
   imageName: {{ .Values.imageName }}
   {{- end }}
+  {{- if and .Values.imageCredentials.username .Values.imageCredentials.password }}
+  imagePullSecrets:
+  - name: {{ include "template.fullname" . }}-pullsecret
+  {{- end }}
   postgresql:
-    parameters:
-      {{- with .Values.parameters }}
-      {{- toYaml . | nindent 6 }}
-      {{- end }}
-    pg_hba:
-      - {{ printf "%s %s %s %s %s" "host" .Values.dbName .Values.username "all" "md5" }}
-      - {{ printf "%s %s %s %s %s" "host" .Values.dbName "streaming_replica" "all" "md5" }}
-  bootstrap:
-  {{- if eq .Values.mode "primary" }}
-    initdb:
-      database: {{ .Values.dbName }}
-      owner: {{ .Values.username }}
-  {{- else if or (eq .Values.mode "replica") (eq .Values.mode "restore") }}
-    recovery:
-      source: {{ .Values.nameOverride | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
-      {{- if .Values.backup.recoveryTarget }}
-      recoveryTarget: 
-        {{- with .Values.backup.recoveryTarget }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-      {{- end }}
-  externalClusters:
-  - name: {{ .Values.nameOverride | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
-    {{- if or (.Values.backup.enabled) (eq .Values.mode "restore") }}
-    barmanObjectStore:
-      wal:
-        maxParallel: {{ .Values.backup.maxParallelWal }}
-      destinationPath: {{ .Values.backup.destinationPath }}
-      endpointURL: {{ .Values.backup.endpointURL }}
-      {{- if .Values.backup.endpointCA.name }}
-      endpointCA:
-        name: {{ .Values.backup.endpointCA.name }}
-        key: {{ .Values.backup.endpointCA.key }}
-      {{- end }}
-      s3Credentials:
-        accessKeyId:
-          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
-          key: {{ .Values.backup.s3Credentials.accessKeyId.key }}
-        secretAccessKey:
-          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
-          key: {{ .Values.backup.s3Credentials.secretAccessKey.key }}
+    {{- if .Values.parameters }}
+    parameters: {{- toYaml .Values.parameters | nindent 6 }}
     {{- end }}
-    {{- if eq .Values.mode "replica" }}
-    connectionParameters:
-      host: {{ .Values.replica.host }}
-      port: {{ .Values.replica.port }}
-      dbname: {{ .Values.dbName }}
-      sslmode: prefer
-    sslKey:
-      name: {{ (printf "%s-%s" .Values.nameOverride "replication") | default (printf "%s-%s-%s" (include "template.fullname" .) "pg-cluster" "replication") }}
-      key: tls.key
-    sslCert:
-      name: {{ (printf "%s-%s" .Values.nameOverride "replication") | default (printf "%s-%s-%s" (include "template.fullname" .) "pg-cluster" "replication") }}
-      key: tls.crt
-    sslRootCert:
-      name: {{ (printf "%s-%s" .Values.nameOverride "ca") | default (printf "%s-%s-%s" (include "template.fullname" .) "pg-cluster" "ca") }}
-      key: ca.crt
+    {{- if .Values.pgHba }}
+    pg_hba: {{- toYaml .Values.pgHba | nindent 6 }}
     {{- end }}
-  {{- end }}
-  {{- if eq .Values.mode "replica" }}
-  replica:
-    enabled: true
-    source: {{ .Values.nameOverride | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
-  {{- end }}
   enableSuperuserAccess: {{ .Values.enableSuperuserAccess }}
+  superuserSecret:
+    name: {{ printf "%s-%s" (include "template.fullname" .) "admin" }}
   primaryUpdateStrategy: {{ .Values.primaryUpdateStrategy }}
   storage:
     size: {{ .Values.pvcSize.data }}
@@ -89,20 +32,103 @@ spec:
   walStorage:
     size: {{ .Values.pvcSize.wal }}
   {{- end }}
+  resources: {{- toYaml .Values.resources | nindent 4 }}
+  {{- if eq .Values.mode "primary" }}
+  bootstrap:
+    initdb:
+      database: {{ .Values.dbName | default .Values.fullnameOverride | default .Values.nameOverride | default .Release.Name }}
+      owner: {{ .Values.username | default .Values.fullnameOverride | default .Values.nameOverride | default .Release.Name }}
+      secret:
+        name: {{ printf "%s-%s" (include "template.fullname" .) "app" }}
+      {{- if .Values.initDb.extraArgs }}
+      {{- toYaml .Values.initDb.extraArgs | nindent 6 }}
+      {{- end }}
+  {{- else if eq .Values.mode "recovery" }}
+  bootstrap:
+    recovery:
+      source: {{ .Values.recovery.clusterName | default (printf "%s-%s" (include "template.fullname" .) "source") }}
+      {{- if .Values.recovery.extraArgs }}
+      {{- toYaml .Values.recovery.extraArgs | nindent 6 }}
+      {{- end }}
+  externalClusters:
+  - name: {{ .Values.recovery.clusterName | default (printf "%s-%s" (include "template.fullname" .) "source") }}
+    barmanObjectStore:
+      wal:
+        maxParallel: {{ .Values.recovery.maxParallelWal }}
+      destinationPath: {{ .Values.recovery.destinationPath }}
+      endpointURL: {{ .Values.recovery.endpointURL }}
+      {{- if .Values.recovery.endpointCA.secretName }}
+      endpointCA:
+        name: {{ .Values.recovery.endpointCA.secretName | default (printf "%s-%s" (include "template.fullname" .) "recovery-ca") }}
+        key: {{ .Values.recovery.endpointCA.key }}
+      {{- end }}
+      s3Credentials:
+        accessKeyId:
+          name: {{ .Values.recovery.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "recovery-creds") }}
+          key: {{ .Values.recovery.s3Credentials.accessKeyId.key }}
+        secretAccessKey:
+          name: {{ .Values.recovery.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "recovery-creds") }}
+          key: {{ .Values.recovery.s3Credentials.secretAccessKey.key }}
+  {{- else if eq .Values.mode "replica" }}
+  bootstrap:
+    recovery:
+      source: {{ .Values.replica.clusterName | default (printf "%s-%s" (include "template.fullname" .) "source") }}
+      {{- if .Values.replica.extraArgs }}
+      {{- toYaml .Values.replica.extraArgs | nindent 6 }}
+      {{- end }}
+  externalClusters:
+  - name: {{ .Values.replica.clusterName | default (printf "%s-%s" (include "template.fullname" .) "source") }}
+    barmanObjectStore:
+      wal:
+        maxParallel: {{ .Values.replica.maxParallelWal }}
+      destinationPath: {{ .Values.replica.destinationPath }}
+      endpointURL: {{ .Values.replica.endpointURL }}
+      {{- if .Values.replica.endpointCA.secretName }}
+      endpointCA:
+        name: {{ .Values.replica.endpointCA.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-ca") }}
+        key: {{ .Values.replica.endpointCA.key }}
+      {{- end }}
+      s3Credentials:
+        accessKeyId:
+          name: {{ .Values.replica.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-creds") }}
+          key: {{ .Values.replica.s3Credentials.accessKeyId.key }}
+        secretAccessKey:
+          name: {{ .Values.replica.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-creds") }}
+          key: {{ .Values.replica.s3Credentials.secretAccessKey.key }}
+    connectionParameters:
+      host: {{ .Values.replica.host }}
+      port: {{ .Values.replica.port }}
+      dbname: {{ .Values.replica.dbName }}
+      sslmode: {{ .Values.replica.sslMode }}
+    sslKey:
+      name: {{ printf "%s-%s" (include "template.fullname" .) "replica" }}
+      key: tls.key
+    sslCert:
+      name: {{ printf "%s-%s" (include "template.fullname" .) "replica" }}
+      key: tls.crt
+    sslRootCert:
+      name: {{ printf "%s-%s" (include "template.fullname" .) "ca" }}
+      key: ca.crt
+  replica:
+    enabled: true
+    source: {{ .Values.replica.clusterName | default (printf "%s-%s" (include "template.fullname" .) "source") }}
+  {{- end }}
   {{- if .Values.backup.enabled }}
   backup:
     barmanObjectStore:
       destinationPath: {{ .Values.backup.destinationPath }}
       endpointURL: {{ .Values.backup.endpointURL }}
+      {{- if .Values.backup.endpointCA.secretName }}
       endpointCA:
-        name: {{ .Values.backup.endpointCA.name }}
+        name: {{ .Values.backup.endpointCA.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-ca") }}
         key: {{ .Values.backup.endpointCA.key }}
+      {{- end }}
       s3Credentials:
         accessKeyId:
-          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
           key: {{ .Values.backup.s3Credentials.accessKeyId.key }}
         secretAccessKey:
-          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
           key: {{ .Values.backup.s3Credentials.secretAccessKey.key }}
       {{- if .Values.backup.compression }}
       data:
