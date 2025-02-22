@@ -2,12 +2,14 @@
 apiVersion: postgresql.io/v1
 kind: ScheduledBackup
 metadata:
-  name: {{ .Values.nameOverride | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
-  labels:
-    {{- include "template.labels" . | nindent 4 }}
+  name: {{ include "template.fullname" . }}
+  labels: {{- include "template.labels" . | nindent 4 }}
+  {{- if .Values.annotations }}
+  annotations: {{- toYaml .Values.annotations | nindent 4 }}
+  {{- end }}
 spec:
   schedule: {{ .Values.backup.cron }}
   backupOwnerReference: self
   cluster:
-    name: {{ .Values.nameOverride | default (printf "%s-%s" (include "template.fullname" .) "pg-cluster") }}
+    name: {{ include "template.fullname" . }}
 {{- end }}
