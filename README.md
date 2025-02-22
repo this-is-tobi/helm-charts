@@ -7,12 +7,12 @@ This repository hosts a set of personal Helm Charts and exposes a Helm Repositor
 
 ## Chart list
 
-| Chart                                        | Application                                | Description                         |
-| -------------------------------------------- | ------------------------------------------ | ----------------------------------- |
-| [charts/backup-utils](./charts/backup-utils) | -                                          | Easy backup tools deployment.       |
-| [charts/cnpg-cluster](./charts/cnpg-cluster) | [CNPG](https://cloudnative-pg.io)          | Easy CNPG cluster deployment.       |
-| [charts/dashy](./charts/dashy)               | [Dashy](https://github.com/lissy93/dashy)  | A self-hostable personal dashboard. |
-| [charts/homarr](./charts/homarr)             | [Homarr](https://github.com/ajnart/homarr) | A self-hostable personal dashboard. |
+| Chart                                 | Application                                | Description                         | Last version |
+| ------------------------------------- | ------------------------------------------ | ----------------------------------- | ------------ |
+| [backup-utils](./charts/backup-utils) | -                                          | Easy backup tools deployment.       | `1.2.0`      |
+| [cnpg-cluster](./charts/cnpg-cluster) | [CNPG](https://cloudnative-pg.io)          | Easy CNPG cluster deployment.       | `0.7.0`      |
+| [dashy](./charts/dashy)               | [Dashy](https://github.com/lissy93/dashy)  | A self-hostable personal dashboard. | `0.1.7`      |
+| [homarr](./charts/homarr)             | [Homarr](https://github.com/ajnart/homarr) | A self-hostable personal dashboard. | `0.1.8`      |
 
 ## Usage
 
