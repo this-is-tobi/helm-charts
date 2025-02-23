@@ -1,5 +1,5 @@
 {{- if .Values.backup.enabled }}
-apiVersion: postgresql.io/v1
+apiVersion: postgresql.cnpg.io/v1
 kind: ScheduledBackup
 metadata:
   name: {{ include "template.fullname" . }}
