@@ -111,6 +111,8 @@ recovery:
   # -- Primary cnpg cluster name used for recovery mode.
   clusterName: ""
   # -- Extra configuration of the recovery bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapRecovery).
+  # -- The number of parallel process that will be applied when applying wals.
+  maxParallelWal: 8
   extraArgs: {}
     # recoveryTarget:
     #   backupID: 20250214T120000
@@ -160,6 +162,8 @@ replica:
   # -- SSL connection config used for replica mode.
   sslMode: "prefer"
   # -- Extra configuration of the replica bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapConfiguration).
+  # -- The number of parallel process that will be applied when applying wals.
+  maxParallelWal: 8
   extraArgs: {}
 backup:
   # -- Whether or not cnpg cluster deployment should be enabled.
@@ -197,8 +201,6 @@ backup:
       # -- S3 secretAccessKey value used for cnpg backups.
       # Only needed if `backup.s3Credentials.create` is set to `true`.
       value: ""
-  # -- The number of parallel process that will be applied when applying wals.
-  maxParallelWal: 8
   # -- Which compression algorithm should be used for cnpg backups (should be one of "gzip", "bzip2" or "snappy"), leave blank to disable compression.
   compression: ""
   # -- The cron rule used for cnpg backups. By default it runs every 6 hours.
