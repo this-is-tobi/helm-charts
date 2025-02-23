@@ -108,6 +108,12 @@ recovery:
       # -- S3 secretAccessKey value used used for recovery mode.
       # Only needed if `recovery.s3Credentials.create` is set to `true`.
       value: ""
+    region:
+      # -- S3 region kubernetes secret key used used for recovery mode.
+      key: "region"
+      # -- S3 region value used used for recovery mode.
+      # Only needed if `recovery.s3Credentials.create` is set to `true`.
+      value: "us-east1"
   # -- Primary cnpg cluster name used for recovery mode.
   clusterName: ""
   # -- Extra configuration of the recovery bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapRecovery).
@@ -151,6 +157,12 @@ replica:
       # -- S3 secretAccessKey value used used for replica mode.
       # Only needed if `replica.s3Credentials.create` is set to `true`.
       value: ""
+    region:
+      # -- S3 region kubernetes secret key used used for replica mode.
+      key: "region"
+      # -- S3 region value used used for replica mode.
+      # Only needed if `replica.s3Credentials.create` is set to `true`.
+      value: "us-east1"
   # -- Primary cnpg cluster name used for replica mode.
   clusterName: ""
   # -- Primary cnpg cluster host used for replica mode.
@@ -201,6 +213,12 @@ backup:
       # -- S3 secretAccessKey value used for cnpg backups.
       # Only needed if `backup.s3Credentials.create` is set to `true`.
       value: ""
+    region:
+      # -- S3 region kubernetes secret key used used for cnpg backups.
+      key: "region"
+      # -- S3 region value used used for cnpg backups.
+      # Only needed if `backup.s3Credentials.create` is set to `true`.
+      value: "us-east1"
   # -- Which compression algorithm should be used for cnpg backups (should be one of "gzip", "bzip2" or "snappy"), leave blank to disable compression.
   compression: ""
   # -- The cron rule used for cnpg backups. By default it runs every 6 hours.

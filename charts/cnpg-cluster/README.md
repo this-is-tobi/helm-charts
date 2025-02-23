@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 0.7.2](https://img.shields.io/badge/Version-0.7.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
+![Version: 0.8.0](https://img.shields.io/badge/Version-0.8.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -41,6 +41,8 @@ A Helm Chart to deploy easily a CNPG cluster
 | backup.s3Credentials.accessKeyId.key | string | `"accessKeyId"` | S3 accessKeyId kubernetes secret key used for cnpg backups. |
 | backup.s3Credentials.accessKeyId.value | string | `""` | S3 accessKeyId value used for cnpg backups. Only needed if `backup.s3Credentials.create` is set to `true`. |
 | backup.s3Credentials.create | bool | `false` | Whether or not to create S3 credentials kubernetes secret used for cnpg backups. It will use `secretName`, `accessKeyId.key`, `accessKeyId.value`, `secretAccessKey.key` and `secretAccessKey.value` to create the secret. |
+| backup.s3Credentials.region.key | string | `"region"` | S3 region kubernetes secret key used used for cnpg backups. |
+| backup.s3Credentials.region.value | string | `"us-east1"` | S3 region value used used for cnpg backups. Only needed if `backup.s3Credentials.create` is set to `true`. |
 | backup.s3Credentials.secretAccessKey.key | string | `"secretAccessKey"` | S3 secretAccessKey kubernetes secret key used for cnpg backups. |
 | backup.s3Credentials.secretAccessKey.value | string | `""` | S3 secretAccessKey value used for cnpg backups. Only needed if `backup.s3Credentials.create` is set to `true`. |
 | backup.s3Credentials.secretName | string | `""` | S3 kubernetes secret name used for cnpg backups, leave it empty to auto-generate the secret name. |
@@ -79,6 +81,8 @@ A Helm Chart to deploy easily a CNPG cluster
 | recovery.s3Credentials.accessKeyId.key | string | `"accessKeyId"` | S3 accessKeyId kubernetes secret key used used for recovery mode. |
 | recovery.s3Credentials.accessKeyId.value | string | `""` | S3 accessKeyId value used used for recovery mode. Only needed if `recovery.s3Credentials.create` is set to `true`. |
 | recovery.s3Credentials.create | bool | `false` | Whether or not to create S3 credentials kubernetes secret used used for recovery mode. It will use `secretName`, `accessKeyId.key`, `accessKeyId.value`, `secretAccessKey.key` and `secretAccessKey.value` to create the secret. |
+| recovery.s3Credentials.region.key | string | `"region"` | S3 region kubernetes secret key used used for recovery mode. |
+| recovery.s3Credentials.region.value | string | `"us-east1"` | S3 region value used used for recovery mode. Only needed if `recovery.s3Credentials.create` is set to `true`. |
 | recovery.s3Credentials.secretAccessKey.key | string | `"secretAccessKey"` | S3 secretAccessKey kubernetes secret key used used for recovery mode. |
 | recovery.s3Credentials.secretAccessKey.value | string | `""` | S3 secretAccessKey value used used for recovery mode. Only needed if `recovery.s3Credentials.create` is set to `true`. |
 | recovery.s3Credentials.secretName | string | `""` | S3 kubernetes secret name used used for recovery mode, leave it empty to auto-generate the secret name. |
@@ -97,6 +101,8 @@ A Helm Chart to deploy easily a CNPG cluster
 | replica.s3Credentials.accessKeyId.key | string | `"accessKeyId"` | S3 accessKeyId kubernetes secret key used used for replica mode. |
 | replica.s3Credentials.accessKeyId.value | string | `""` | S3 accessKeyId value used used for replica mode. Only needed if `replica.s3Credentials.create` is set to `true`. |
 | replica.s3Credentials.create | bool | `false` | Whether or not to create S3 credentials kubernetes secret used used for replica mode. It will use `secretName`, `accessKeyId.key`, `accessKeyId.value`, `secretAccessKey.key` and `secretAccessKey.value` to create the secret. |
+| replica.s3Credentials.region.key | string | `"region"` | S3 region kubernetes secret key used used for replica mode. |
+| replica.s3Credentials.region.value | string | `"us-east1"` | S3 region value used used for replica mode. Only needed if `replica.s3Credentials.create` is set to `true`. |
 | replica.s3Credentials.secretAccessKey.key | string | `"secretAccessKey"` | S3 secretAccessKey kubernetes secret key used used for replica mode. |
 | replica.s3Credentials.secretAccessKey.value | string | `""` | S3 secretAccessKey value used used for replica mode. Only needed if `replica.s3Credentials.create` is set to `true`. |
 | replica.s3Credentials.secretName | string | `""` | S3 kubernetes secret name used used for replica mode, leave it empty to auto-generate the secret name. |
