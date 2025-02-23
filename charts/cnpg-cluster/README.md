@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
+![Version: 0.7.1](https://img.shields.io/badge/Version-0.7.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -37,7 +37,6 @@ A Helm Chart to deploy easily a CNPG cluster
 | backup.endpointCA.secretName | string | `""` | The secret name containing S3 CA for cnpg backups, leave it empty to auto-generate the secret name. |
 | backup.endpointCA.value | string | `""` | The S3 certificate used for cnpg backups. Only needed if `backup.endpointCA.create` is set to `true`. |
 | backup.endpointURL | string | `""` | S3 endpoint for cnpg backups. |
-| backup.maxParallelWal | int | `8` | The number of parallel process that will be applied when applying wals. |
 | backup.retentionPolicy | string | `"14d"` | Retention policy for cnpg backups recurrences. |
 | backup.s3Credentials.accessKeyId.key | string | `"accessKeyId"` | S3 accessKeyId kubernetes secret key used for cnpg backups. |
 | backup.s3Credentials.accessKeyId.value | string | `""` | S3 accessKeyId value used for cnpg backups. Only needed if `backup.s3Credentials.create` is set to `true`. |
@@ -75,7 +74,8 @@ A Helm Chart to deploy easily a CNPG cluster
 | recovery.endpointCA.secretName | string | `""` | The secret name containing S3 CA used for recovery mode, leave it empty to auto-generate the secret name. |
 | recovery.endpointCA.value | string | `""` | The S3 certificate used used for recovery mode. Only needed if `recovery.endpointCA.create` is set to `true`. |
 | recovery.endpointURL | string | `""` | S3 endpoint used for recovery mode. |
-| recovery.extraArgs | object | `{}` | Extra configuration of the recovery bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapRecovery). |
+| recovery.extraArgs | object | `{}` |  |
+| recovery.maxParallelWal | int | `8` | The number of parallel process that will be applied when applying wals. |
 | recovery.s3Credentials.accessKeyId.key | string | `"accessKeyId"` | S3 accessKeyId kubernetes secret key used used for recovery mode. |
 | recovery.s3Credentials.accessKeyId.value | string | `""` | S3 accessKeyId value used used for recovery mode. Only needed if `recovery.s3Credentials.create` is set to `true`. |
 | recovery.s3Credentials.create | bool | `false` | Whether or not to create S3 credentials kubernetes secret used used for recovery mode. It will use `secretName`, `accessKeyId.key`, `accessKeyId.value`, `secretAccessKey.key` and `secretAccessKey.value` to create the secret. |
@@ -90,8 +90,9 @@ A Helm Chart to deploy easily a CNPG cluster
 | replica.endpointCA.secretName | string | `""` | The secret name containing S3 CA used for replica mode, leave it empty to auto-generate the secret name. |
 | replica.endpointCA.value | string | `""` | The S3 certificate used used for replica mode. Only needed if `replica.endpointCA.create` is set to `true`. |
 | replica.endpointURL | string | `""` | S3 endpoint used for replica mode. |
-| replica.extraArgs | object | `{}` | Extra configuration of the replica bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapConfiguration). |
+| replica.extraArgs | object | `{}` |  |
 | replica.host | string | `""` | Primary cnpg cluster host used for replica mode. |
+| replica.maxParallelWal | int | `8` | The number of parallel process that will be applied when applying wals. |
 | replica.port | int | `5432` | Primary cnpg cluster port used for replica mode. |
 | replica.s3Credentials.accessKeyId.key | string | `"accessKeyId"` | S3 accessKeyId kubernetes secret key used used for replica mode. |
 | replica.s3Credentials.accessKeyId.value | string | `""` | S3 accessKeyId value used used for replica mode. Only needed if `replica.s3Credentials.create` is set to `true`. |
