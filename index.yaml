@@ -3,6 +3,23 @@ entries:
   backup-utils:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2025-02-24T02:23:31.512577283Z"
+    description: A Helm chart for effortless deployment of backup utilities.
+    digest: 4e2cd26f4dd88c5058b1a04d014182e784896ce8dced7f7f5fec183449761281
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: backup-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/this-is-tobi/tools
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-1.2.1/backup-utils-1.2.1.tgz
+    version: 1.2.1
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2025-02-19T22:02:10.437267244Z"
     description: A Helm chart for effortless deployment of backup utilities.
     digest: 4887fafec8c81bd50016ccaf0e0c769a0bb2c2734f6ae65f12c7d74bceaaf543
@@ -973,4 +990,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.0/homarr-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-23T00:58:04.708779273Z"
+generated: "2025-02-24T02:23:31.512745607Z"
