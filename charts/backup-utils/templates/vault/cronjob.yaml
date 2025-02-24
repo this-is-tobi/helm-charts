@@ -55,7 +55,7 @@ spec:
             securityContext:
               {{- toYaml .Values.vault.container.securityContext | nindent 14 }}
             {{- end }}
-            image: {{ printf "%s:%s" .Values.vault.image.repository (.Values.vault.image.tag | default printf "%s" "latest") }}
+            image: {{ printf "%s:%s" .Values.vault.image.repository (.Values.vault.image.tag | default "latest") }}
             imagePullPolicy: {{ .Values.vault.image.pullPolicy }}
             {{- if .Values.vault.container.command }}
             command:
