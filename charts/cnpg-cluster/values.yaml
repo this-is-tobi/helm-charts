@@ -20,12 +20,23 @@ instances: 3
 # -- Name of the image used for database. 
 # By default (empty string), the operator will install the latest available minor version of the latest major version of PostgreSQL when the operator was released
 imageName: ""
-# -- Username of the database user (Default is `fullnameOverride` > `nameOverride` > name of the Helm release).
-username: ""
-# -- Password of the database user (leave empty to auto-generate the password).
-password: ""
-# -- Password of the postgres superuser (leave empty to auto-generate the password).
-postgresPassword: ""
+credentials:
+  # -- Username of the database user (Default is `fullnameOverride` > `nameOverride` > name of the Helm release).
+  username: ""
+  # -- Password of the database user (leave empty to auto-generate the password).
+  password: ""
+  # -- Password of the postgres superuser (leave empty to auto-generate the password).
+  postgresPassword: ""
+  existingSecrets:
+    # -- Enable the load of the following secrets to bootstrap the database, instead of generating them with the previous values.
+    enabled: false
+    app:
+      # -- Name of the kubernetes secret to retrieve app user auth infos. Secret should be of type `kubernetes.io/basic-auth` with `username` and `password` keys.
+      secretName: ""
+    postgres:
+      # -- Name of the kubernetes secret to retrieve postgres superuser auth infos. Secret should be of type `kubernetes.io/basic-auth` with `username` and `password` keys.
+      secretName: ""
+
 # -- Name of the database (Default is `fullnameOverride` > `nameOverride` > name of the Helm release).
 dbName: ""
 # -- Enable superuser access.
