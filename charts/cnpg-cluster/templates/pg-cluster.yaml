@@ -27,7 +27,7 @@ spec:
     {{- if eq .Values.credentials.existingSecrets.enabled false }}
     name: {{ printf "%s-%s" (include "template.fullname" .) "admin" }}
     {{- else }}
-    name: {{ .Values.credentials.existingSecrets.app.secretName }}
+    name: {{ .Values.credentials.existingSecrets.postgres.secretName }}
     {{- end }}
   primaryUpdateStrategy: {{ .Values.primaryUpdateStrategy }}
   storage:
