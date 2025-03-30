@@ -51,8 +51,8 @@ A [template folder](./template/) is available for easy integration of new chart,
 
 3. Optionally add other services :
     ```sh
-    cp -R ./charts/<chart_name>/templates/server ./charts/<chart_name>/templates/<service_name>
-    find ./charts/<chart_name>/templates/<service_name> -type f -exec perl -pi -e 's/"server"/"<service_name>"/g' {} \;
+    cp -R ./charts/<chart_name>/templates/app ./charts/<chart_name>/templates/<service_name>
+    find ./charts/<chart_name>/templates/<service_name> -type f -exec perl -pi -e 's/"app"/"<service_name>"/g' {} \;
     ```
     
     Next, add the appropriate block to the `./charts/<chart_name>/values.yaml` file.
