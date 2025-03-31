@@ -247,6 +247,17 @@ resources:
     memory: "1Gi"
     # -- CPU limit for the database instance.
     cpu: "500m"
+pooler:
+  # -- Whether or not Pgbouncer should be enabled.
+  enabled: false
+  # -- The number of replicas we want 
+  instances: 3
+  # -- Which instances we must forward traffic to.
+  type: "rw"
+  # -- The PgBouncer configuration (see. https://www.pgbouncer.org/config.html).
+  pgbouncer: {}
+  # -- The template of the Pod to be created (see. https://cloudnative-pg.io/documentation/current/connection_pooling/#pod-templates).
+  template: {}
 
 
 # CNPG operator configuration

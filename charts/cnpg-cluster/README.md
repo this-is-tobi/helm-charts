@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 0.9.1](https://img.shields.io/badge/Version-0.9.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
+![Version: 0.10.0](https://img.shields.io/badge/Version-0.10.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -70,6 +70,11 @@ A Helm Chart to deploy easily a CNPG cluster
 | nodePort | string | `nil` | Port used for NodePort service. Needs `exposed` tu be true. |
 | parameters | object | `{}` | Customize Postgresql parameters. |
 | pgHba | list | `[]` | Client authentication entries for pg_hba.conf file (See. https://www.postgresql.org/docs/current/auth-pg-hba-conf.html). |
+| pooler.enabled | bool | `false` | Whether or not Pgbouncer should be enabled. |
+| pooler.instances | int | `3` | The number of replicas we want  |
+| pooler.pgbouncer | object | `{}` | The PgBouncer configuration (see. https://www.pgbouncer.org/config.html). |
+| pooler.template | object | `{}` | The template of the Pod to be created (see. https://cloudnative-pg.io/documentation/current/connection_pooling/#pod-templates). |
+| pooler.type | string | `"rw"` | Which instances we must forward traffic to. |
 | primaryUpdateStrategy | string | `"unsupervised"` | Rolling update strategy used : unsupervised: automated update of the primary once all replicas have been upgraded (default) supervised: requires manual supervision to perform the switchover of the primary |
 | pvcSize.data | string | `"10Gi"` | Size of the data PVC used by each cnpg instance. |
 | pvcSize.wal | string | `"5Gi"` | Size of the WAL PVC used by each cnpg instance (if value is `null` then WAL files are stored within the data PVC). |

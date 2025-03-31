@@ -13,7 +13,7 @@ spec:
   {{- end }}
   {{- if and .Values.imageCredentials.username .Values.imageCredentials.password }}
   imagePullSecrets:
-  - name: {{ include "template.fullname" . }}-pullsecret
+  - name: {{ printf "%s-%s" (include "template.fullname" .) "pullsecret" }}
   {{- end }}
   postgresql:
     {{- if .Values.parameters }}
