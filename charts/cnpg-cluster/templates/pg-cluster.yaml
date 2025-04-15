@@ -55,6 +55,14 @@ spec:
   bootstrap:
     recovery:
       source: {{ .Values.recovery.clusterName | default (printf "%s-%s" (include "template.fullname" .) "source") }}
+      database: {{ .Values.dbName | default .Values.fullnameOverride | default .Values.nameOverride | default .Release.Name }}
+      owner: {{ .Values.credentials.username | default .Values.fullnameOverride | default .Values.nameOverride | default .Release.Name }}
+      secret:
+        {{- if eq .Values.credentials.existingSecrets.enabled false }}
+        name: {{ printf "%s-%s" (include "template.fullname" .) "app" }}
+        {{- else }}
+        name: {{ .Values.credentials.existingSecrets.app.secretName }}
+        {{- end }}
       {{- if .Values.recovery.extraArgs }}
       {{- toYaml .Values.recovery.extraArgs | nindent 6 }}
       {{- end }}
@@ -84,6 +92,8 @@ spec:
   bootstrap:
     recovery:
       source: {{ .Values.replica.clusterName | default (printf "%s-%s" (include "template.fullname" .) "source") }}
+      database: {{ .Values.dbName | default .Values.fullnameOverride | default .Values.nameOverride | default .Release.Name }}
+      owner: {{ .Values.credentials.username | default .Values.fullnameOverride | default .Values.nameOverride | default .Release.Name }}
       {{- if .Values.replica.extraArgs }}
       {{- toYaml .Values.replica.extraArgs | nindent 6 }}
       {{- end }}
