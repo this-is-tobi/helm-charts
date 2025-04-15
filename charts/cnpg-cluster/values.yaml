@@ -130,6 +130,7 @@ recovery:
   # -- Extra configuration of the recovery bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapRecovery).
   # -- The number of parallel process that will be applied when applying wals.
   maxParallelWal: 8
+  # -- Extra configuration of the initDb bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB).
   extraArgs: {}
     # recoveryTarget:
     #   backupID: 20250214T120000
@@ -187,6 +188,7 @@ replica:
   # -- Extra configuration of the replica bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapConfiguration).
   # -- The number of parallel process that will be applied when applying wals.
   maxParallelWal: 8
+  # -- Extra configuration of the initDb bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB).
   extraArgs: {}
 backup:
   # -- Whether or not cnpg cluster deployment should be enabled.
