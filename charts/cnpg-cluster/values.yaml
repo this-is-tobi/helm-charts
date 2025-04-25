@@ -6,53 +6,72 @@ fullnameOverride: ""
 # Image credentials configuration.
 imageCredentials:
   # -- Registry to pull images from.
+  # @section -- Image pull secret
   registry: ""
   # -- Username to pull images.
+  # @section -- Image pull secret
   username: ""
   # -- Password to pull images.
+  # @section -- Image pull secret
   password: ""
   # -- Email to pull images.
+  # @section -- Image pull secret
   email: ""
 
 # CNPG configuration
 # -- Number of instances to spawn in the cluster.
+# @section -- Database
 instances: 3
 # -- Name of the image used for database. 
 # By default (empty string), the operator will install the latest available minor version of the latest major version of PostgreSQL when the operator was released
+# @section -- Database
 imageName: ""
 credentials:
   # -- Username of the database user (Default is `fullnameOverride` > `nameOverride` > name of the Helm release).
+  # @section -- Database
   username: ""
   # -- Password of the database user (leave empty to auto-generate the password).
+  # @section -- Database
   password: ""
   # -- Password of the postgres superuser (leave empty to auto-generate the password).
+  # @section -- Database
   postgresPassword: ""
   existingSecrets:
     # -- Enable the load of the following secrets to bootstrap the database, instead of generating them with the previous values.
+    # @section -- Database
     enabled: false
     app:
       # -- Name of the kubernetes secret to retrieve app user auth infos. Secret should be of type `kubernetes.io/basic-auth` with `username` and `password` keys.
+      # @section -- Database
       secretName: ""
     postgres:
       # -- Name of the kubernetes secret to retrieve postgres superuser auth infos. Secret should be of type `kubernetes.io/basic-auth` with `username` and `password` keys.
+      # @section -- Database
       secretName: ""
 
 # -- Name of the database (Default is `fullnameOverride` > `nameOverride` > name of the Helm release).
+# @section -- Database
 dbName: ""
 # -- Enable superuser access.
+# @section -- Database
 enableSuperuserAccess: true
 # -- Client authentication entries for pg_hba.conf file (See. https://www.postgresql.org/docs/current/auth-pg-hba-conf.html).
+# @section -- Database
 pgHba: []
-# -- Rolling update strategy used :
-# unsupervised: automated update of the primary once all replicas have been upgraded (default)
-# supervised: requires manual supervision to perform the switchover of the primary
+# -- Rolling update strategy used.
+# `unsupervised` for automated update of the primary once all replicas have been upgraded (default).
+# `supervised` for manual supervision to perform the switchover of the primary.
+# @section -- Database
 primaryUpdateStrategy: "unsupervised"
 pvcSize: 
   # -- Size of the data PVC used by each cnpg instance.
-  data: "10Gi"
+  # @section -- Resources
+  data: "2Gi"
   # -- Size of the WAL PVC used by each cnpg instance (if value is `null` then WAL files are stored within the data PVC).
-  wal: "5Gi"
+  # @section -- Resources
+  wal: "1Gi"
 # -- Customize Postgresql parameters.
+# @section -- Database
 parameters: {}
 # dynamic_shared_memory_type = "posix"
 # logging_collector = "on"
@@ -75,190 +94,259 @@ annotations: {}
 # -- Additional cnpg cluster labels.
 labels: {}
 # -- Whether or not a NodePort service should be created to exposed the database.
+# @section -- Database
 exposed: false
 # -- Port used for NodePort service. Needs `exposed` tu be true.
-nodePort:
+# @section -- Database
+nodePort: 30000
 # -- Mode used to deploy the cnpg cluster, it should be `primary`, `replica` or `recovery`.
+# @section -- Database
 mode: "primary"
 initDb:
   # -- Extra configuration of the initDb bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB).
+  # @section -- Database
   extraArgs: {}
   # encoding: UTF8
   # dataChecksums: false
 recovery:
   # -- S3 destination path used for recovery mode (it should be set like `s3://<bucket_name>/<path>`).
+  # @section -- Recovery mode
   destinationPath: ""
   # -- S3 endpoint used for recovery mode.
+  # @section -- Recovery mode
   endpointURL: ""
   endpointCA:
-    # -- Whether or not to create S3 CA kubernetes secret used used for recovery mode.
+    # -- Whether or not to create S3 CA kubernetes secret used for recovery mode.
     # It will use `secretName`, `endpointCA.key` and `endpointCA.value` to create the secret.
+    # @section -- Recovery mode
     create: false
     # -- The secret name containing S3 CA used for recovery mode, leave it empty to auto-generate the secret name.
+    # @section -- Recovery mode
     secretName: ""
     # -- The secret key containing S3 CA used for recovery mode.
+    # @section -- Recovery mode
     key: "ca.crt"
-    # -- The S3 certificate used used for recovery mode.
+    # -- The S3 certificate used for recovery mode.
     # Only needed if `recovery.endpointCA.create` is set to `true`.
+    # @section -- Recovery mode
     value: ""
   s3Credentials:
-    # -- Whether or not to create S3 credentials kubernetes secret used used for recovery mode.
+    # -- Whether or not to create S3 credentials kubernetes secret used for recovery mode.
     # It will use `secretName`, `accessKeyId.key`, `accessKeyId.value`, `secretAccessKey.key` and `secretAccessKey.value` to create the secret.
+    # @section -- Recovery mode
     create: false
-    # -- S3 kubernetes secret name used used for recovery mode, leave it empty to auto-generate the secret name.
+    # -- S3 kubernetes secret name used for recovery mode, leave it empty to auto-generate the secret name.
+    # @section -- Recovery mode
     secretName: ""
     accessKeyId:
-      # -- S3 accessKeyId kubernetes secret key used used for recovery mode.
+      # -- S3 accessKeyId kubernetes secret key used for recovery mode.
+      # @section -- Recovery mode
       key: "accessKeyId"
-      # -- S3 accessKeyId value used used for recovery mode.
+      # -- S3 accessKeyId value used for recovery mode.
       # Only needed if `recovery.s3Credentials.create` is set to `true`.
+      # @section -- Recovery mode
       value: ""
     secretAccessKey:
-      # -- S3 secretAccessKey kubernetes secret key used used for recovery mode.
+      # -- S3 secretAccessKey kubernetes secret key used for recovery mode.
+      # @section -- Recovery mode
       key: "secretAccessKey"
-      # -- S3 secretAccessKey value used used for recovery mode.
+      # -- S3 secretAccessKey value used for recovery mode.
       # Only needed if `recovery.s3Credentials.create` is set to `true`.
+      # @section -- Recovery mode
       value: ""
     region:
-      # -- S3 region kubernetes secret key used used for recovery mode.
+      # -- S3 region kubernetes secret key used for recovery mode.
+      # @section -- Recovery mode
       key: "region"
-      # -- S3 region value used used for recovery mode.
+      # -- S3 region value used for recovery mode.
       # Only needed if `recovery.s3Credentials.create` is set to `true`.
+      # @section -- Recovery mode
       value: "us-east1"
   # -- Primary cnpg cluster name used for recovery mode.
+  # @section -- Recovery mode
   clusterName: ""
   # -- Extra configuration of the recovery bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapRecovery).
   # -- The number of parallel process that will be applied when applying wals.
+  # @section -- Recovery mode
   maxParallelWal: 8
   # -- Extra configuration of the initDb bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB).
+  # @section -- Recovery mode
   extraArgs: {}
     # recoveryTarget:
     #   backupID: 20250214T120000
     #   targetImmediate: true
 replica:
   # -- S3 destination path used for replica mode (it should be set like `s3://<bucket_name>/<path>`).
+  # @section -- Replica mode
   destinationPath: ""
   # -- S3 endpoint used for replica mode.
+  # @section -- Replica mode
   endpointURL: ""
   endpointCA:
-    # -- Whether or not to create S3 CA kubernetes secret used used for replica mode.
+    # -- Whether or not to create S3 CA kubernetes secret used for replica mode.
     # It will use `secretName`, `endpointCA.key` and `endpointCA.value` to create the secret.
+    # @section -- Replica mode
     create: false
     # -- The secret name containing S3 CA used for replica mode, leave it empty to auto-generate the secret name.
+    # @section -- Replica mode
     secretName: ""
     # -- The secret key containing S3 CA used for replica mode.
+    # @section -- Replica mode
     key: "ca.crt"
-    # -- The S3 certificate used used for replica mode.
+    # -- The S3 certificate used for replica mode.
     # Only needed if `replica.endpointCA.create` is set to `true`.
+    # @section -- Replica mode
     value: ""
   s3Credentials:
-    # -- Whether or not to create S3 credentials kubernetes secret used used for replica mode.
+    # -- Whether or not to create S3 credentials kubernetes secret used for replica mode.
     # It will use `secretName`, `accessKeyId.key`, `accessKeyId.value`, `secretAccessKey.key` and `secretAccessKey.value` to create the secret.
+    # @section -- Replica mode
     create: false
-    # -- S3 kubernetes secret name used used for replica mode, leave it empty to auto-generate the secret name.
+    # -- S3 kubernetes secret name used for replica mode, leave it empty to auto-generate the secret name.
+    # @section -- Replica mode
     secretName: ""
     accessKeyId:
-      # -- S3 accessKeyId kubernetes secret key used used for replica mode.
+      # -- S3 accessKeyId kubernetes secret key used for replica mode.
+      # @section -- Replica mode
       key: "accessKeyId"
-      # -- S3 accessKeyId value used used for replica mode.
+      # -- S3 accessKeyId value used for replica mode.
       # Only needed if `replica.s3Credentials.create` is set to `true`.
+      # @section -- Replica mode
       value: ""
     secretAccessKey:
-      # -- S3 secretAccessKey kubernetes secret key used used for replica mode.
+      # -- S3 secretAccessKey kubernetes secret key used for replica mode.
+      # @section -- Replica mode
       key: "secretAccessKey"
-      # -- S3 secretAccessKey value used used for replica mode.
+      # -- S3 secretAccessKey value used for replica mode.
       # Only needed if `replica.s3Credentials.create` is set to `true`.
+      # @section -- Replica mode
       value: ""
     region:
-      # -- S3 region kubernetes secret key used used for replica mode.
+      # -- S3 region kubernetes secret key used for replica mode.
+      # @section -- Replica mode
       key: "region"
-      # -- S3 region value used used for replica mode.
+      # -- S3 region value used for replica mode.
       # Only needed if `replica.s3Credentials.create` is set to `true`.
+      # @section -- Replica mode
       value: "us-east1"
   # -- Primary cnpg cluster name used for replica mode.
+  # @section -- Replica mode
   clusterName: ""
   # -- Primary cnpg cluster host used for replica mode.
+  # @section -- Replica mode
   host: ""
   # -- Primary cnpg cluster port used for replica mode.
+  # @section -- Replica mode
   port: 5432
   # -- Primary database name used for replica mode.
+  # @section -- Replica mode
   dbName: ""
   # -- SSL connection config used for replica mode.
+  # @section -- Replica mode
   sslMode: "prefer"
   # -- Extra configuration of the replica bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapConfiguration).
   # -- The number of parallel process that will be applied when applying wals.
+  # @section -- Replica mode
   maxParallelWal: 8
   # -- Extra configuration of the initDb bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB).
+  # @section -- Replica mode
   extraArgs: {}
 backup:
   # -- Whether or not cnpg cluster deployment should be enabled.
+  # @section -- Backup
   enabled: false
   # -- S3 destination path for cnpg backups (it should be set like `s3://<bucket_name>/<path>`).
+  # @section -- Backup
   destinationPath: ""
   # -- S3 endpoint for cnpg backups.
+  # @section -- Backup
   endpointURL: ""
   endpointCA:
     # -- Whether or not to create S3 CA kubernetes secret used for cnpg backups.
     # It will use `secretName`, `endpointCA.key` and `endpointCA.value` to create the secret.
+    # @section -- Backup
     create: false
     # -- The secret name containing S3 CA for cnpg backups, leave it empty to auto-generate the secret name.
+    # @section -- Backup
     secretName: ""
     # -- The secret key containing S3 CA for cnpg backups.
+    # @section -- Backup
     key: "ca.crt"
     # -- The S3 certificate used for cnpg backups.
     # Only needed if `backup.endpointCA.create` is set to `true`.
+    # @section -- Backup
     value: ""
   s3Credentials:
     # -- Whether or not to create S3 credentials kubernetes secret used for cnpg backups.
     # It will use `secretName`, `accessKeyId.key`, `accessKeyId.value`, `secretAccessKey.key` and `secretAccessKey.value` to create the secret.
+    # @section -- Backup
     create: false
     # -- S3 kubernetes secret name used for cnpg backups, leave it empty to auto-generate the secret name.
+    # @section -- Backup
     secretName: ""
     accessKeyId:
       # -- S3 accessKeyId kubernetes secret key used for cnpg backups.
+      # @section -- Backup
       key: "accessKeyId"
       # -- S3 accessKeyId value used for cnpg backups.
       # Only needed if `backup.s3Credentials.create` is set to `true`.
+      # @section -- Backup
       value: ""
     secretAccessKey:
       # -- S3 secretAccessKey kubernetes secret key used for cnpg backups.
+      # @section -- Backup
       key: "secretAccessKey"
       # -- S3 secretAccessKey value used for cnpg backups.
       # Only needed if `backup.s3Credentials.create` is set to `true`.
+      # @section -- Backup
       value: ""
     region:
-      # -- S3 region kubernetes secret key used used for cnpg backups.
+      # -- S3 region kubernetes secret key used for cnpg backups.
+      # @section -- Backup
       key: "region"
-      # -- S3 region value used used for cnpg backups.
+      # -- S3 region value used for cnpg backups.
       # Only needed if `backup.s3Credentials.create` is set to `true`.
+      # @section -- Backup
       value: "us-east1"
   # -- Which compression algorithm should be used for cnpg backups (should be one of "gzip", "bzip2" or "snappy"), leave blank to disable compression.
+  # @section -- Backup
   compression: ""
   # -- The cron rule used for cnpg backups. By default it runs every 6 hours.
+  # @section -- Backup
   cron: "0 0 */6 * * *"
   # -- Retention policy for cnpg backups recurrences.
+  # @section -- Backup
   retentionPolicy: "14d"
 resources:
   requests:
     # -- Memory request for the database instance.
+    # @section -- Resources
     memory: "512Mi"
     # -- CPU request for the database instance.
+    # @section -- Resources
     cpu: "250m"
   limits:
     # -- Memory limit for the database instance.
+    # @section -- Resources
     memory: "1Gi"
     # -- CPU limit for the database instance.
+    # @section -- Resources
     cpu: "500m"
 pooler:
   # -- Whether or not Pgbouncer should be enabled.
+  # @section -- Pooler
   enabled: false
   # -- The number of replicas we want 
+  # @section -- Pooler
   instances: 3
   # -- Which instances we must forward traffic to.
+  # @section -- Pooler
   type: "rw"
   # -- The PgBouncer configuration (see. https://www.pgbouncer.org/config.html).
+  # @section -- Pooler
   pgbouncer: {}
   # -- The template of the Pod to be created (see. https://cloudnative-pg.io/documentation/current/connection_pooling/#pod-templates).
+  # @section -- Pooler
   template: {}
 
 
