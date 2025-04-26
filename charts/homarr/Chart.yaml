@@ -1,7 +1,7 @@
 apiVersion: v2
 name: homarr
 type: application
-version: 0.1.8
+version: 0.1.9
 appVersion: "0.15.10"
 description: Customizable browser's home page to interact with your homeserver's Docker containers (e.g. Sonarr/Radarr)
 home: https://homarr.dev

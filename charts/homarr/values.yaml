@@ -6,35 +6,47 @@ fullnameOverride: ""
 # Image credentials configuration.
 imageCredentials:
   # -- Registry to pull images from.
+  # @section -- Image pull secret
   registry: ""
   # -- Username to pull images.
+  # @section -- Image pull secret
   username: ""
   # -- Password to pull images.
+  # @section -- Image pull secret
   password: ""
   # -- Email to pull images.
+  # @section -- Image pull secret
   email: ""
 
 # Global configuration.
 global:
   # -- Map of environment variables to inject into backend and frontend containers.
+  # @section -- Global
   env: {}
   # -- Map of environment variables to inject into backend and frontend containers.
+  # @section -- Global
   secrets: {}
 
 # Ingress configuration
 ingress:
   # -- Whether or not ingress should be enabled.
+  # @section -- Ingress
   enabled: true
   # -- Defines which ingress controller will implement the resource.
+  # @section -- Ingress
   className: ""
   # -- Additional ingress annotations.
+  # @section -- Ingress
   annotations: {}
   # -- Additional ingress labels.
+  # @section -- Ingress
   labels: {}
   # -- The list of hosts to be covered by ingress record.
+  # @section -- Ingress
   hosts:
   - "domain.local"
   # -- Enable TLS configuration.
+  # @section -- Ingress
   tls: []
   # - secretName: domain.local-tls
   #   hosts:
@@ -43,24 +55,32 @@ ingress:
 # Server configuration.
 server:
   # -- The number of application controller pods to run.
+  # @section -- Server
   replicaCount: 1
   ## Server image.
   image:
     # -- Repository to use for the server.
+    # @section -- Server
     repository: "ghcr.io/ajnart/homarr"
     # -- Image pull policy for the server.
+    # @section -- Server
     pullPolicy: "Always"
     # -- Tag to use for the server.
-    ## Overrides the image tag whose default is the chart appVersion.
+    # Overrides the image tag whose default is the chart appVersion.
+    # @section -- Server
     tag: ""
   # -- Annotations for the server deployed pods.
+  # @section -- Server
   podAnnotations: {}
   # -- Labels for the server deployed pods.
+  # @section -- Server
   podLabels: {}
   # -- Toggle and define pod-level security context.
+  # @section -- Server
   podSecurityContext: {}
     # fsGroup: 2000
   # -- Init containers to add to the server pod.
+  # @section -- Server
   initContainers: []
   # - name: wait-for-keycloak
   #   image: docker.io/curlimages/curl:latest
@@ -74,12 +94,16 @@ server:
   #     name: custom-volume
   container:
     # -- server container port.
+    # @section -- Server
     port: 7575
     # -- server container command.
+    # @section -- Server
     command: []
     # -- server container command args.
+    # @section -- Server
     args: []
     # -- Toggle and define container-level security context.
+    # @section -- Server
     securityContext: {}
       # capabilities:
       #   drop:
@@ -88,6 +112,7 @@ server:
       # runAsNonRoot: true
       # runAsUser: 1000
   # -- Extra containers to add to the server pod as sidecars.
+  # @section -- Server
   extraContainers: []
   # - name: fluentd
   #   image: "fluentd"
@@ -95,64 +120,88 @@ server:
   #     - mountPath: /my-volume/config
   #       name: config
   # -- server container env variables loaded from configmap or secret reference.
+  # @section -- Server
   envFrom: []
   # - configMapRef:
   #     name: my-config
   # - secretRef:
   #     name: my-secret
   # -- server container env variables, it will be injected into a configmap and loaded into the container.
+  # @section -- Server
   env: {}
   # -- server container env secrets, it will be injected into a secret and loaded into the container.
+  # @section -- Server
   secrets: {}
   # -- server container healthcheck endpoint.
+  # @section -- Server
   healthcheckPath: "/"
   ## Deployment strategy for CPN server deployment.
   strategy:
     # -- Strategy type used to replace old Pods by new ones, can be "Recreate" or "RollingUpdate".
+    # @section -- Server
     type: "RollingUpdate"
   ## Startup probe for server.
   startupProbe:
     # -- Whether or not enable the probe.
+    # @section -- Server
     enabled: true
     # -- Number of seconds after the container has started before probe is initiated.
+    # @section -- Server
     initialDelaySeconds: 0
     # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    # @section -- Server
     successThreshold: 1
     # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
+    # @section -- Server
     failureThreshold: 10
     # -- How often (in seconds) to perform the probe.
+    # @section -- Server
     periodSeconds: 10
     # -- Number of seconds after which the probe times out.
+    # @section -- Server
     timeoutSeconds: 5
   ## Readiness probe for server.
   readinessProbe:
     # -- Whether or not enable the probe.
+    # @section -- Server
     enabled: true
     # -- Number of seconds after the container has started before probe is initiated.
+    # @section -- Server
     initialDelaySeconds: 15
     # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    # @section -- Server
     successThreshold: 2
     # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
+    # @section -- Server
     failureThreshold: 2
     # -- How often (in seconds) to perform the probe.
+    # @section -- Server
     periodSeconds: 10
     # -- Number of seconds after which the probe times out.
+    # @section -- Server
     timeoutSeconds: 5
   ## Liveness probe for server.
   livenessProbe:
     # -- Whether or not enable the probe.
+    # @section -- Server
     enabled: true
     # -- Whether or not enable the probe.
+    # @section -- Server
     initialDelaySeconds: 30
     # -- Number of seconds after the container has started before probe is initiated.
+    # @section -- Server
     successThreshold: 1
     # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    # @section -- Server
     failureThreshold: 3
     # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
+    # @section -- Server
     periodSeconds: 30
     # -- How often (in seconds) to perform the probe.
+    # @section -- Server
     timeoutSeconds: 5
   # -- Host aliases that will be injected at pod-level into /etc/hosts.
+  # @section -- Server
   hostAliases: []
   # - ip: "127.0.0.1"
   #   hostnames:
@@ -163,13 +212,15 @@ server:
   #   - "foo.remote"
   #   - "bar.remote"
   # -- List of extra volumes to add.
+  # @section -- Server
   extraVolumes: []
   # - name: extra-vol
   #   path: /host/path
   #   type: hostPath
   # - name: extra-vol-cm
   #   type: configMap
-  # -- List of extra mounts to add (normally used with extraVolumes)
+  # -- List of extra mounts to add (normally used with extraVolumes).
+  # @section -- Server
   extraVolumeMounts: []
   # - name: extra-vol
   #   mountPath: /volume/path
@@ -177,170 +228,232 @@ server:
   #   mountPath: /volume/cm/path
   service:
     # -- server service type.
+    # @section -- Server
     type: "ClusterIP"
     # -- server service port.
+    # @section -- Server
     port: 80
   resources:
     requests:
       # -- Memory request for the server.
+      # @section -- Server
       memory: "256Mi"
       # -- CPU request for the server.
+      # @section -- Server
       cpu: "100m"
     limits:
       # -- Memory limit for the server.
+      # @section -- Server
       memory: "2Gi"
       # -- CPU limit for the server.
+      # @section -- Server
       cpu: "500m"
   autoscaling:
     # -- Enable Horizontal Pod Autoscaler ([HPA]) for the server.
+    # @section -- Server
     enabled: false
     # -- Minimum number of replicas for the server [HPA].
+    # @section -- Server
     minReplicas: 1
     # -- Maximum number of replicas for the server [HPA].
+    # @section -- Server
     maxReplicas: 3
     # -- Average CPU utilization percentage for the server [HPA].
+    # @section -- Server
     targetCPUUtilizationPercentage: 80
     # -- Average memory utilization percentage for the server [HPA].
+    # @section -- Server
     targetMemoryUtilizationPercentage: 80
   # -- Default node selector for server.
+  # @section -- Server
   nodeSelector: {}
   # -- Default tolerations for server.
+  # @section -- Server
   tolerations: []
   # -- Default affinity for server.
+  # @section -- Server
   affinity: {}
     # Server configuration.
   serviceAccount:
     # -- Create a service account for the API.
+    # @section -- Server
     create: false
     # -- Annotations applied to created service account.
+    # @section -- Server
     annotations: {}
     # -- Service account name.
+    # @section -- Server
     name: "server-sa"
   persistence:
     configs:
       # -- Name for the homarr-configs PersistentVolumeClaim.
+      # @section -- Server
       name: homarr-configs
       # -- Enable homarr-configs persistent storage.
+      # @section -- Server
       enabled: false
       # -- Storage class name for homarr-configs.
+      # @section -- Server
       storageClassName: ""
       # -- Access mode for homarr-configs.
+      # @section -- Server
       accessMode: "ReadWriteOnce"
       # -- Storage size for homarr-configs.
+      # @section -- Server
       size: "100Mi"
       # -- Mount path inside the pod for homarr-configs.
+      # @section -- Server
       mountPath: "/app/data/configs"
     icons:
       # -- Name for the homarr-icons PersistentVolumeClaim.
+      # @section -- Server
       name: homarr-icons
-      # -- Enable homarr-icons persistent storage
+      # -- Enable homarr-icons persistent storage.
+      # @section -- Server
       enabled: false
       # -- Storage class name for homarr-icons.
+      # @section -- Server
       storageClassName: ""
       # -- Access mode for homarr-icons.
+      # @section -- Server
       accessMode: "ReadWriteOnce"
       # -- Storage size for homarr-icons.
+      # @section -- Server
       size: "100Mi"
       # -- Mount path inside the pod for homarr-icons.
+      # @section -- Server
       mountPath: "/app/public/icons"
     data:
       # -- Name for the homarr-data PersistentVolumeClaim.
+      # @section -- Server
       name: homarr-data
-      # -- Enable homarr-database persistent storage
+      # -- Enable homarr-database persistent storage.
+      # @section -- Server
       enabled: false
       # -- Storage class name for homarr-data.
+      # @section -- Server
       storageClassName: ""
       # -- Access mode for homarr-data.
+      # @section -- Server
       accessMode: "ReadWriteOnce"
       # -- Storage size for homarr-data.
+      # @section -- Server
       size: "100Mi"
       # -- Mount path inside the pod for homarr-data.
+      # @section -- Server
       mountPath: "/data"
   auth:
     # -- Select Which provider to use between credentials, ldap and oidc.
     # Multiple providers can be enabled with a comma separated list (ex: 'credentials,oidc'), it is highly recommended to just enable one provider.
+    # @section -- Server
     provider: "credentials"
     # -- URL to redirect to after clicking logging out.
+    # @section -- Server
     logoutRedirectUri: "domain.local"
     # -- Time for the session to time out. Can be set as pure number, which will automatically be used in seconds, or followed by s, m, h or d for seconds, minutes, hours or days. (ex: "30m").
+    # @section -- Server
     sessionExpiryTime: "30d"
     oidc:
       # -- URI of OIDC provider.
+      # @section -- Server
       URI: ""
       # -- ID of OIDC client (application).
+      # @section -- Server
       CLIENT_ID: ""
       # -- Secret of OIDC client (application).
+      # @section -- Server
       CLIENT_SECRET: ""
       # -- Display name of provider (in login screen).
+      # @section -- Server
       CLIENT_NAME: "OIDC"
       # -- Admin group.
+      # @section -- Server
       ADMIN_GROUP: "admin"
       # -- Owner group.
+      # @section -- Server
       OWNER_GROUP: "admin"
       # -- Timeout in milliseconds.
+      # @section -- Server
       TIMEOUT: 3500
       # -- Automatically redirect to OIDC login.
+      # @section -- Server
       AUTO_LOGIN: false
     ldap:
       # -- URI of your LDAP server.
+      # @section -- Server
       URI: ""
       # -- Base dn of your LDAP server.
+      # @section -- Server
       BASE: ""
       # -- User used for finding users and groups.
+      # @section -- Server
       BIND_DN: ""
       # -- Password for bind user.
+      # @section -- Server
       BIND_PASSWORD: ""
       # -- Attribute used for username.
+      # @section -- Server
       USERNAME_ATTRIBUTE: "uid"
       # -- Attribute used for mail field.
+      # @section -- Server
       USER_MAIL_ATTRIBUTE: "mail"
       # -- Class used for querying groups.
+      # @section -- Server
       GROUP_CLASS: "groupOfUniqueNames"
       # -- Attribute used for querying group member.
+      # @section -- Server
       GROUP_MEMBER_ATTRIBUTE: "member"
       # -- User attribute used for comparing with group member.
+      # @section -- Server
       GROUP_MEMBER_USER_ATTRIBUTE: "dn"
       # -- Admin group.
+      # @section -- Server
       ADMIN_GROUP: "admin"
       # -- Owner group.
+      # @section -- Server
       OWNER_GROUP: "admin"
       # -- Search scopes between base, one and sub.
+      # @section -- Server
       SEARCH_SCOPE: "base"
       # -- Extra arguments for user search filter (& based).
+      # @section -- Server
       USERNAME_FILTER_EXTRA_ARG: ""
       # -- Extra arguments for user's groups search filter (& based).
+      # @section -- Server
       GROUP_FILTER_EXTRA_ARG: ""
   # -- Any TZ identifier from the wikipedia page (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Default to your local timezone.
+  # @section -- Server
   timezone: ""
 
 
 # Keycloak configuration.
 ## Ref: https://artifacthub.io/packages/helm/bitnami/keycloak
 keycloak:
+  # -- Whether or not keycloak should be deployed (See. https://artifacthub.io/packages/helm/bitnami/keycloak?modal=values).
   enabled: false
-  nameOverride: "keycloak"
-  auth:
-    adminUser: ""
-    adminPassword: ""
-  ingress:
-    enabled: true
-    ingressClassName: ""
-    annotations: {}
-    hostname: "keycloak.domain.local"
-    path: "/"
-    tls: false
-    secrets: []
-  production: true
-  proxy: "edge"
-  tls:
-    enabled: false
-    autoGenerated: false
-  postgresql:
-    nameOverride: "keycloak-db"
-    enabled: true
-    auth:
-      postgresPassword: ""
-      username: ""
-      password: ""
-      database: "keycloak"
-      architecture: "standalone"
+  # nameOverride: "keycloak"
+  # auth:
+  #   adminUser: ""
+  #   adminPassword: ""
+  # ingress:
+  #   enabled: true
+  #   ingressClassName: ""
+  #   annotations: {}
+  #   hostname: "keycloak.domain.local"
+  #   path: "/"
+  #   tls: false
+  #   secrets: []
+  # production: true
+  # proxy: "edge"
+  # tls:
+  #   enabled: false
+  #   autoGenerated: false
+  # postgresql:
+  #   nameOverride: "keycloak-db"
+  #   enabled: true
+  #   auth:
+  #     postgresPassword: ""
+  #     username: ""
+  #     password: ""
+  #     database: "keycloak"
+  #     architecture: "standalone"
