@@ -27,7 +27,7 @@ instances: 3
 # @section -- Database
 imageName: ""
 credentials:
-  # -- Username of the database user (Default is `fullnameOverride` > `nameOverride` > name of the Helm release).
+  # -- Username of the database user (not used when `credentials.existingSecrets.enabled` is set to `true`, instead the `username` key of the secret `credentials.existingSecrets.app.secretName` is used).
   # @section -- Database
   username: ""
   # -- Password of the database user (leave empty to auto-generate the password).

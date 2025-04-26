@@ -100,7 +100,7 @@ cnpg-cluster:
 | credentials.existingSecrets.postgres.secretName | string | `""` | Name of the kubernetes secret to retrieve postgres superuser auth infos. Secret should be of type `kubernetes.io/basic-auth` with `username` and `password` keys. |
 | credentials.password | string | `""` | Password of the database user (leave empty to auto-generate the password). |
 | credentials.postgresPassword | string | `""` | Password of the postgres superuser (leave empty to auto-generate the password). |
-| credentials.username | string | `""` | Username of the database user (Default is `fullnameOverride` > `nameOverride` > name of the Helm release). |
+| credentials.username | string | `""` | Username of the database user (not used when `credentials.existingSecrets.enabled` is set to `true`, instead the `username` key of the secret `credentials.existingSecrets.app.secretName` is used). |
 | dbName | string | `""` | Name of the database (Default is `fullnameOverride` > `nameOverride` > name of the Helm release). |
 | enableSuperuserAccess | bool | `true` | Enable superuser access. |
 | exposed | bool | `false` | Whether or not a NodePort service should be created to exposed the database. |
