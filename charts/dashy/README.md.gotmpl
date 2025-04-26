@@ -1,11 +1,17 @@
 {{ template "chart.header" . }}
+
 {{ template "chart.badgesSection" . }}
+
 {{ template "chart.description" . }}
+
 {{ template "chart.homepageLine" . }}
 
 {{ template "chart.maintainersSection" . }}
+
 {{ template "chart.sourcesSection" . }}
+
 {{ template "chart.kubeVersionLine" . }}
+
 {{ template "chart.requirementsSection" . }}
 
 ## Installing the Chart
@@ -43,16 +49,17 @@ dependencies:
 - name: {{ template "chart.name" . }}
   version: {{ template "chart.version" . }}
   repository: https://this-is-tobi.github.io/helm-charts
-  condition: cnpg-cluster.enabled
+  condition: {{ template "chart.name" . }}.enabled
 ```
 
 `values.yaml`:
 
 ```yaml
 [...]
-cnpg-cluster:
+{{ template "chart.name" . }}:
   enabled: true
 ```
 
 {{ template "chart.valuesSection" . }}
+
 {{ template "helm-docs.versionFooter" . }}

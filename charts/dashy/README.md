@@ -1,7 +1,9 @@
 # dashy
 
-![Version: 0.1.8](https://img.shields.io/badge/Version-0.1.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.0](https://img.shields.io/badge/AppVersion-3.1.0-informational?style=flat-square)
+![Version: 0.1.9](https://img.shields.io/badge/Version-0.1.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.0](https://img.shields.io/badge/AppVersion-3.1.0-informational?style=flat-square)
+
 A Helm chart to deploy Dashy, a self-hostable personal dashboard that includes status-checking, widgets, themes, icon packs, a UI editor etc...
+
 **Homepage:** <https://dashy.to>
 
 ## Maintainers
@@ -9,6 +11,7 @@ A Helm chart to deploy Dashy, a self-hostable personal dashboard that includes s
 | Name | Email | Url |
 | ---- | ------ | --- |
 | this-is-tobi | <this-is-tobi@proton.me> | <https://this-is-tobi.com> |
+
 ## Source Code
 
 * <https://github.com/this-is-tobi/helm-charts>
@@ -18,7 +21,7 @@ A Helm chart to deploy Dashy, a self-hostable personal dashboard that includes s
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.bitnami.com/bitnami | keycloak | 24.3.0 |
+| https://charts.bitnami.com/bitnami | keycloak | >=24.3.0 |
 
 ## Installing the Chart
 
@@ -38,7 +41,7 @@ helm install <release_name> tobi/dashy
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: dashy
-  targetRevision: 0.1.8
+  targetRevision: 0.1.9
   helm:
     releaseName: <release_name>
     parameters: []
@@ -53,16 +56,16 @@ sources:
 [...]
 dependencies:
 - name: dashy
-  version: 0.1.8
+  version: 0.1.9
   repository: https://this-is-tobi.github.io/helm-charts
-  condition: cnpg-cluster.enabled
+  condition: dashy.enabled
 ```
 
 `values.yaml`:
 
 ```yaml
 [...]
-cnpg-cluster:
+dashy:
   enabled: true
 ```
 

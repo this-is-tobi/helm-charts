@@ -177,3 +177,5 @@ spec:
       {{- end }}
     retentionPolicy: {{ .Values.backup.retentionPolicy }}
   {{- end }}
+  monitoring:
+    enablePodMonitor: {{ .Values.monitoring.enabled }} 

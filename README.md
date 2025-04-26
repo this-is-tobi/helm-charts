@@ -9,10 +9,10 @@ This repository hosts a set of personal Helm Charts and exposes a Helm Repositor
 
 | Chart                                 | Application                                | Description                         | Last version |
 | ------------------------------------- | ------------------------------------------ | ----------------------------------- | ------------ |
-| [backup-utils](./charts/backup-utils) | -                                          | Easy backup tools deployment.       | `1.2.3`      |
-| [cnpg-cluster](./charts/cnpg-cluster) | [CNPG](https://cloudnative-pg.io)          | Easy CNPG cluster deployment.       | `0.10.2`     |
-| [dashy](./charts/dashy)               | [Dashy](https://github.com/lissy93/dashy)  | A self-hostable personal dashboard. | `0.1.8`      |
-| [homarr](./charts/homarr)             | [Homarr](https://github.com/ajnart/homarr) | A self-hostable personal dashboard. | `0.1.9`      |
+| [backup-utils](./charts/backup-utils) | -                                          | Easy backup tools deployment.       | `1.2.4`      |
+| [cnpg-cluster](./charts/cnpg-cluster) | [CNPG](https://cloudnative-pg.io)          | Easy CNPG cluster deployment.       | `0.11.0`     |
+| [dashy](./charts/dashy)               | [Dashy](https://github.com/lissy93/dashy)  | A self-hostable personal dashboard. | `0.1.9`      |
+| [homarr](./charts/homarr)             | [Homarr](https://github.com/ajnart/homarr) | A self-hostable personal dashboard. | `0.1.10`     |
 
 ## Usage
 
@@ -36,6 +36,14 @@ sources:
     releaseName: <release_name>
     parameters: []
     values: ""
+```
+
+## Dependencies updates
+
+A script is available to help upgrade charts dependencies :
+
+```sh
+./ci/scripts/update-charts-dependencies.sh
 ```
 
 ## Template
