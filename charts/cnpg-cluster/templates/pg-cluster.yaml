@@ -40,8 +40,12 @@ spec:
   {{- if eq .Values.mode "primary" }}
   bootstrap:
     initdb:
-      database: {{ .Values.dbName | default .Values.fullnameOverride | default .Values.nameOverride | default .Release.Name }}
-      owner: {{ .Values.credentials.username | default .Values.fullnameOverride | default .Values.nameOverride | default .Release.Name }}
+      database: {{ .Values.dbName | default (include "template.fullname" .) }}
+      {{- if .Values.credentials.existingSecrets.enabled }}
+      owner: {{ (lookup "v1" "Secret" .Release.Namespace .Values.credentials.existingSecrets.app.secretName).data.username | b64dec }} 
+      {{- else }}
+      owner: {{ .Values.credentials.username | default (include "template.fullname" .) }}
+      {{ end }}
       secret:
         {{- if eq .Values.credentials.existingSecrets.enabled false }}
         name: {{ printf "%s-%s" (include "template.fullname" .) "app" }}
@@ -55,8 +59,12 @@ spec:
   bootstrap:
     recovery:
       source: {{ .Values.recovery.clusterName | default (printf "%s-%s" (include "template.fullname" .) "source") }}
-      database: {{ .Values.dbName | default .Values.fullnameOverride | default .Values.nameOverride | default .Release.Name }}
-      owner: {{ .Values.credentials.username | default .Values.fullnameOverride | default .Values.nameOverride | default .Release.Name }}
+      database: {{ .Values.dbName | default (include "template.fullname" .) }}
+      {{- if .Values.credentials.existingSecrets.enabled }}
+      owner: {{ (lookup "v1" "Secret" .Release.Namespace .Values.credentials.existingSecrets.app.secretName).data.username | b64dec }} 
+      {{- else }}
+      owner: {{ .Values.credentials.username | default (include "template.fullname" .) }}
+      {{ end }}
       secret:
         {{- if eq .Values.credentials.existingSecrets.enabled false }}
         name: {{ printf "%s-%s" (include "template.fullname" .) "app" }}
@@ -92,8 +100,12 @@ spec:
   bootstrap:
     recovery:
       source: {{ .Values.replica.clusterName | default (printf "%s-%s" (include "template.fullname" .) "source") }}
-      database: {{ .Values.dbName | default .Values.fullnameOverride | default .Values.nameOverride | default .Release.Name }}
-      owner: {{ .Values.credentials.username | default .Values.fullnameOverride | default .Values.nameOverride | default .Release.Name }}
+      database: {{ .Values.dbName | default (include "template.fullname" .) }}
+      {{- if .Values.credentials.existingSecrets.enabled }}
+      owner: {{ (lookup "v1" "Secret" .Release.Namespace .Values.credentials.existingSecrets.app.secretName).data.username | b64dec }} 
+      {{- else }}
+      owner: {{ .Values.credentials.username | default (include "template.fullname" .) }}
+      {{ end }}
       {{- if .Values.replica.extraArgs }}
       {{- toYaml .Values.replica.extraArgs | nindent 6 }}
       {{- end }}

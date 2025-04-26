@@ -6,60 +6,80 @@ fullnameOverride: ""
 # Image credentials configuration.
 imageCredentials:
   # -- Registry to pull images from.
+  # @section -- Image pull secret
   registry: ""
   # -- Username to pull images.
+  # @section -- Image pull secret
   username: ""
   # -- Password to pull images.
+  # @section -- Image pull secret
   password: ""
   # -- Email to pull images.
+  # @section -- Image pull secret
   email: ""
 
 # Global configuration.
 global:
   # -- Map of environment variables to inject into backend and frontend containers.
+  # @section -- Global
   env: {}
   # -- Map of environment variables to inject into backend and frontend containers.
+  # @section -- Global
   secrets: {}
 
 # App configuration.
 app:
   # -- The number of application controller pods to run.
+  # @section -- App
   replicaCount: 1
   ## App image.
   image:
     # -- Repository to use for the app.
+    # @section -- App
     repository: "docker.io/debian"
     # -- Image pull policy for the app.
+    # @section -- App
     pullPolicy: "Always"
     # -- Tag to use for the app.
-    ## Overrides the image tag whose default is the chart appVersion.
+    # @section -- App
+    # Overrides the image tag whose default is the chart appVersion.
     tag: ""
   ## Ingress configuration.
   ingress:
     # -- Whether or not ingress should be enabled.
+    # @section -- App
     enabled: true
     # -- Defines which ingress controller will implement the resource.
+    # @section -- App
     className: ""
     # -- Additional ingress annotations.
+    # @section -- App
     annotations: {}
     # -- Additional ingress labels.
+    # @section -- App
     labels: {}
     # -- The list of hosts to be covered by ingress record.
+    # @section -- App
     hosts:
     - "domain.local"
     # -- Enable TLS configuration.
+    # @section -- App
     tls: []
     # - secretName: domain.local-tls
     #   hosts:
     #   - domain.local
   # -- Annotations for the app deployed pods.
+  # @section -- App
   podAnnotations: {}
   # -- Labels for the app deployed pods.
+  # @section -- App
   podLabels: {}
   # -- Toggle and define pod-level security context.
+  # @section -- App
   podSecurityContext: {}
     # fsGroup: 2000
   # -- Init containers to add to the app pod.
+  # @section -- App
   initContainers: []
   # - name: wait-for-keycloak
   #   image: docker.io/curlimages/curl:latest
@@ -73,12 +93,16 @@ app:
   #     name: custom-volume
   container:
     # -- app container port.
+    # @section -- App
     port: 8080
     # -- app container command.
+    # @section -- App
     command: []
     # -- app container command args.
+    # @section -- App
     args: []
     # -- Toggle and define container-level security context.
+    # @section -- App
     securityContext: {}
       # capabilities:
       #   drop:
@@ -87,6 +111,7 @@ app:
       # runAsNonRoot: true
       # runAsUser: 1000
   # -- Extra containers to add to the app pod as sidecars.
+  # @section -- App
   extraContainers: []
   # - name: fluentd
   #   image: "fluentd"
@@ -94,64 +119,88 @@ app:
   #     - mountPath: /my-volume/config
   #       name: config
   # -- app container env variables loaded from configmap or secret reference.
+  # @section -- App
   envFrom: []
   # - configMapRef:
   #     name: my-config
   # - secretRef:
   #     name: my-secret
   # -- app container env variables, it will be injected into a configmap and loaded into the container.
+  # @section -- App
   env: {}
   # -- app container env secrets, it will be injected into a secret and loaded into the container.
+  # @section -- App
   secrets: {}
   # -- app container healthcheck endpoint.
+  # @section -- App
   healthcheckPath: "/"
   ## Deployment strategy for CPN app deployment.
   strategy:
     # -- Strategy type used to replace old Pods by new ones, can be "Recreate" or "RollingUpdate".
+    # @section -- App
     type: "RollingUpdate"
   ## Startup probe for app.
   startupProbe:
     # -- Whether or not enable the probe.
+    # @section -- App
     enabled: true
     # -- Number of seconds after the container has started before probe is initiated.
+    # @section -- App
     initialDelaySeconds: 0
     # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    # @section -- App
     successThreshold: 1
     # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
+    # @section -- App
     failureThreshold: 10
     # -- How often (in seconds) to perform the probe.
+    # @section -- App
     periodSeconds: 10
     # -- Number of seconds after which the probe times out.
+    # @section -- App
     timeoutSeconds: 5
   ## Readiness probe for app.
   readinessProbe:
     # -- Whether or not enable the probe.
+    # @section -- App
     enabled: true
     # -- Number of seconds after the container has started before probe is initiated.
+    # @section -- App
     initialDelaySeconds: 15
     # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    # @section -- App
     successThreshold: 2
     # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
+    # @section -- App
     failureThreshold: 2
     # -- How often (in seconds) to perform the probe.
+    # @section -- App
     periodSeconds: 10
     # -- Number of seconds after which the probe times out.
+    # @section -- App
     timeoutSeconds: 5
   ## Liveness probe for app.
   livenessProbe:
     # -- Whether or not enable the probe.
+    # @section -- App
     enabled: true
     # -- Whether or not enable the probe.
+    # @section -- App
     initialDelaySeconds: 30
     # -- Number of seconds after the container has started before probe is initiated.
+    # @section -- App
     successThreshold: 1
     # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    # @section -- App
     failureThreshold: 3
     # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
+    # @section -- App
     periodSeconds: 30
     # -- How often (in seconds) to perform the probe.
+    # @section -- App
     timeoutSeconds: 5
   # -- Host aliases that will be injected at pod-level into /etc/hosts.
+  # @section -- App
   hostAliases: []
   # - ip: "127.0.0.1"
   #   hostnames:
@@ -162,13 +211,15 @@ app:
   #   - "foo.remote"
   #   - "bar.remote"
   # -- List of extra volumes to add.
+  # @section -- App
   extraVolumes: []
   # - name: extra-vol
   #   path: /host/path
   #   type: hostPath
   # - name: extra-vol-cm
   #   type: configMap
-  # -- List of extra mounts to add (normally used with extraVolumes)
+  # -- List of extra mounts to add (normally used with extraVolumes).
+  # @section -- App
   extraVolumeMounts: []
   # - name: extra-vol
   #   mountPath: /volume/path
@@ -176,44 +227,61 @@ app:
   #   mountPath: /volume/cm/path
   service:
     # -- app service type.
+    # @section -- App
     type: "ClusterIP"
     # -- app service port.
+    # @section -- App
     port: 80
   resources:
     requests:
       # -- Memory request for the app.
+      # @section -- App
       memory: "256Mi"
       # -- CPU request for the app.
+      # @section -- App
       cpu: "100m"
     limits:
       # -- Memory limit for the app.
+      # @section -- App
       memory: "2Gi"
       # -- CPU limit for the app.
+      # @section -- App
       cpu: "500m"
   autoscaling:
     # -- Enable Horizontal Pod Autoscaler ([HPA]) for the app.
+    # @section -- App
     enabled: false
     # -- Minimum number of replicas for the app [HPA].
+    # @section -- App
     minReplicas: 1
     # -- Maximum number of replicas for the app [HPA].
+    # @section -- App
     maxReplicas: 3
     # -- Average CPU utilization percentage for the app [HPA].
+    # @section -- App
     targetCPUUtilizationPercentage: 80
     # -- Average memory utilization percentage for the app [HPA].
+    # @section -- App
     targetMemoryUtilizationPercentage: 80
   # -- Default node selector for app.
+  # @section -- App
   nodeSelector: {}
   # -- Default tolerations for app.
+  # @section -- App
   tolerations: []
   # -- Default affinity for app.
+  # @section -- App
   affinity: {}
     # App configuration.
   serviceAccount:
     # -- Create a service account for the API.
+    # @section -- App
     create: false
     # -- Annotations applied to created service account.
+    # @section -- App
     annotations: {}
     # -- Service account name.
+    # @section -- App
     name: "app-sa"
 
 # Keycloak configuration.

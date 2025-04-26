@@ -2,12 +2,18 @@ name: Lint and Test Charts
 
 on:
   pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
     paths:
       - 'charts/**'
   workflow_dispatch:
 
 jobs:
   lint-chart:
+    if: ${{ !github.event.pull_request.draft }}
     name: Lint and test chart
     runs-on: ubuntu-latest
     steps:
@@ -43,6 +49,7 @@ jobs:
         run: ct install --config ./ci/configs/chart-testing.yaml
 
   lint-docs:
+    if: ${{ !github.event.pull_request.draft }}
     name: Lint docs
     runs-on: ubuntu-latest
     steps:

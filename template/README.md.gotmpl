@@ -1,0 +1,58 @@
+{{ template "chart.header" . }}
+{{ template "chart.badgesSection" . }}
+{{ template "chart.description" . }}
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+{{ template "chart.sourcesSection" . }}
+{{ template "chart.kubeVersionLine" . }}
+{{ template "chart.requirementsSection" . }}
+
+## Installing the Chart
+
+### CLI
+
+```sh
+helm repo add tobi https://this-is-tobi.github.io/helm-charts
+helm install <release_name> tobi/{{ template "chart.name" . }}
+```
+
+### ArgoCD
+
+`application.yaml` :
+
+```yaml
+[...]
+sources:
+- repoURL: https://this-is-tobi.github.io/helm-charts
+  chart: {{ template "chart.name" . }}
+  targetRevision: {{ template "chart.version" . }}
+  helm:
+    releaseName: <release_name>
+    parameters: []
+    values: ""
+```
+
+### Helm dependency
+
+`Chart.yaml`:
+
+```yaml
+[...]
+dependencies:
+- name: {{ template "chart.name" . }}
+  version: {{ template "chart.version" . }}
+  repository: https://this-is-tobi.github.io/helm-charts
+  condition: {{ template "chart.name" . }}.enabled
+```
+
+`values.yaml`:
+
+```yaml
+[...]
+cnpg-cluster:
+  enabled: true
+```
+
+{{ template "chart.valuesSection" . }}
+{{ template "helm-docs.versionFooter" . }}

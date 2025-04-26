@@ -1,10 +1,57 @@
 # app-name
 
 ![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
-
 A Helm chart to deploy ...
 
+## Installing the Chart
+
+### CLI
+
+```sh
+helm repo add tobi https://this-is-tobi.github.io/helm-charts
+helm install <release_name> tobi/app-name
+```
+
+### ArgoCD
+
+`application.yaml` :
+
+```yaml
+[...]
+sources:
+- repoURL: https://this-is-tobi.github.io/helm-charts
+  chart: app-name
+  targetRevision: 0.1.0
+  helm:
+    releaseName: <release_name>
+    parameters: []
+    values: ""
+```
+
+### Helm dependency
+
+`Chart.yaml`:
+
+```yaml
+[...]
+dependencies:
+- name: app-name
+  version: 0.1.0
+  repository: https://this-is-tobi.github.io/helm-charts
+  condition: app-name.enabled
+```
+
+`values.yaml`:
+
+```yaml
+[...]
+cnpg-cluster:
+  enabled: true
+```
+
 ## Values
+
+### App
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
@@ -21,13 +68,13 @@ A Helm chart to deploy ...
 | app.env | object | `{}` | app container env variables, it will be injected into a configmap and loaded into the container. |
 | app.envFrom | list | `[]` | app container env variables loaded from configmap or secret reference. |
 | app.extraContainers | list | `[]` | Extra containers to add to the app pod as sidecars. |
-| app.extraVolumeMounts | list | `[]` | List of extra mounts to add (normally used with extraVolumes) |
+| app.extraVolumeMounts | list | `[]` | List of extra mounts to add (normally used with extraVolumes). |
 | app.extraVolumes | list | `[]` | List of extra volumes to add. |
 | app.healthcheckPath | string | `"/"` | app container healthcheck endpoint. |
 | app.hostAliases | list | `[]` | Host aliases that will be injected at pod-level into /etc/hosts. |
 | app.image.pullPolicy | string | `"Always"` | Image pull policy for the app. |
 | app.image.repository | string | `"docker.io/debian"` | Repository to use for the app. |
-| app.image.tag | string | `""` | Tag to use for the app. # Overrides the image tag whose default is the chart appVersion. |
+| app.image.tag | string | `""` | Tag to use for the app. Overrides the image tag whose default is the chart appVersion. |
 | app.ingress.annotations | object | `{}` | Additional ingress annotations. |
 | app.ingress.className | string | `""` | Defines which ingress controller will implement the resource. |
 | app.ingress.enabled | bool | `true` | Whether or not ingress should be enabled. |
@@ -70,13 +117,28 @@ A Helm chart to deploy ...
 | app.startupProbe.timeoutSeconds | int | `5` | Number of seconds after which the probe times out. |
 | app.strategy.type | string | `"RollingUpdate"` | Strategy type used to replace old Pods by new ones, can be "Recreate" or "RollingUpdate". |
 | app.tolerations | list | `[]` | Default tolerations for app. |
-| fullnameOverride | string | `""` | String to fully override the default application name. |
+
+### Global
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
 | global.env | object | `{}` | Map of environment variables to inject into backend and frontend containers. |
 | global.secrets | object | `{}` | Map of environment variables to inject into backend and frontend containers. |
+
+### Image pull secret
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
 | imageCredentials.email | string | `""` | Email to pull images. |
 | imageCredentials.password | string | `""` | Password to pull images. |
 | imageCredentials.registry | string | `""` | Registry to pull images from. |
 | imageCredentials.username | string | `""` | Username to pull images. |
+
+### Other Values
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| fullnameOverride | string | `""` | String to fully override the default application name. |
 | nameOverride | string | `""` | Provide a name in place of the default application name. |
 
 ----------------------------------------------

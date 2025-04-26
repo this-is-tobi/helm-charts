@@ -1,0 +1,8 @@
+# artifacthub-repo.yml
+repositoryID: f375aa57-9766-4a04-b07f-7c4a966a1621
+owners:
+- name: tobi-or-not
+  email: this-is-tobi@proton.me
+ignore: []
+# - name: package1
+#   version: beta # Regular expression (when omitted, all versions are ignored)
