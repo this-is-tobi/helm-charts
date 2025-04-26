@@ -3,6 +3,23 @@ entries:
   backup-utils:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2025-04-26T18:42:39.1255434Z"
+    description: A Helm chart for effortless deployment of backup utilities.
+    digest: c6bb7b0dca4c6a06772a772921d51ef766ed6726adb71d7486b0d3bcce460fb1
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: backup-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/this-is-tobi/tools
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-1.2.4/backup-utils-1.2.4.tgz
+    version: 1.2.4
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2025-04-26T18:03:37.305116482Z"
     description: A Helm chart for effortless deployment of backup utilities.
     digest: 99f511a345de986c3b9f936c9f8b68ac785d9706ba574a0c1afe012ec2f96b9b
@@ -320,6 +337,30 @@ entries:
     - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-0.1.0/backup-utils-0.1.0.tgz
     version: 0.1.0
   cnpg-cluster:
+  - apiVersion: v2
+    appVersion: 1.25.0
+    created: "2025-04-26T18:42:39.24862984Z"
+    dependencies:
+    - alias: cnpg-operator
+      condition: cnpg-operator.enabled
+      name: cloudnative-pg
+      repository: https://cloudnative-pg.github.io/charts
+      version: '>=0.20.0'
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: e59b6ae141d5cf400e105acd7a868c6bd520eec7e62332d2d9726c9e9e7bf500
+    home: https://cloudnative-pg.io
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-0.11.0/cnpg-cluster-0.11.0.tgz
+    version: 0.11.0
   - apiVersion: v2
     appVersion: 1.25.0
     created: "2025-04-26T18:03:37.440118909Z"
@@ -763,6 +804,30 @@ entries:
   dashy:
   - apiVersion: v2
     appVersion: 3.1.0
+    created: "2025-04-26T18:42:39.460580136Z"
+    dependencies:
+    - condition: keycloak.enabled
+      name: keycloak
+      repository: https://charts.bitnami.com/bitnami
+      version: '>=24.3.0'
+    description: A Helm chart to deploy Dashy, a self-hostable personal dashboard
+      that includes status-checking, widgets, themes, icon packs, a UI editor etc...
+    digest: 80422f074d07506c0e56853ad63ffa74ab3ff3b06712e9a3bca2a2cd6f5505ce
+    home: https://dashy.to
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: dashy
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/Lissy93/dashy
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/dashy-0.1.9/dashy-0.1.9.tgz
+    version: 0.1.9
+  - apiVersion: v2
+    appVersion: 3.1.0
     created: "2025-04-26T18:03:37.563835143Z"
     dependencies:
     - condition: keycloak.enabled
@@ -952,6 +1017,30 @@ entries:
     - https://github.com/this-is-tobi/helm-charts/releases/download/dashy-0.1.1/dashy-0.1.1.tgz
     version: 0.1.1
   homarr:
+  - apiVersion: v2
+    appVersion: 0.15.10
+    created: "2025-04-26T18:42:39.566838267Z"
+    dependencies:
+    - condition: keycloak.enabled
+      name: keycloak
+      repository: https://charts.bitnami.com/bitnami
+      version: '>=24.3.0'
+    description: Customizable browser's home page to interact with your homeserver's
+      Docker containers (e.g. Sonarr/Radarr)
+    digest: d5689a9175a1a9d9c6f7f0802973ec17a11769186cbabebd8dd5b5c87d40cff1
+    home: https://homarr.dev
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: homarr
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/ajnart/homarr
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.10/homarr-0.1.10.tgz
+    version: 0.1.10
   - apiVersion: v2
     appVersion: 0.15.10
     created: "2025-04-26T18:03:37.700752709Z"
@@ -1192,4 +1281,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.0/homarr-0.1.0.tgz
     version: 0.1.0
-generated: "2025-04-26T18:03:37.701044336Z"
+generated: "2025-04-26T18:42:39.567089597Z"
