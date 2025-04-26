@@ -348,6 +348,19 @@ pooler:
   # -- The template of the Pod to be created (see. https://cloudnative-pg.io/documentation/current/connection_pooling/#pod-templates).
   # @section -- Pooler
   template: {}
+monitoring:
+  # -- Specifies whether the monitoring should be enabled. Requires Prometheus Operator CRDs.
+  # @section -- Monitoring
+  enabled: false
+  # -- Metrics relabel configurations to apply to samples before ingestion.
+  # @section -- Monitoring
+  podMonitorMetricRelabelings: []
+  # -- Relabel configurations to apply to samples before scraping.
+  # @section -- Monitoring
+  podMonitorRelabelings: []
+  # -- Additional labels for the podMonitor
+  # @section -- Monitoring
+  podMonitorAdditionalLabels: {}
 
 
 # CNPG operator configuration

@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 0.10.3](https://img.shields.io/badge/Version-0.10.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
+![Version: 0.11.0](https://img.shields.io/badge/Version-0.11.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -41,7 +41,7 @@ helm install <release_name> tobi/cnpg-cluster
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 0.10.3
+  targetRevision: 0.11.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -56,7 +56,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 0.10.3
+  version: 0.11.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -124,6 +124,15 @@ cnpg-cluster:
 | imageCredentials.password | string | `""` | Password to pull images. |
 | imageCredentials.registry | string | `""` | Registry to pull images from. |
 | imageCredentials.username | string | `""` | Username to pull images. |
+
+### Monitoring
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| monitoring.enabled | bool | `false` | Specifies whether the monitoring should be enabled. Requires Prometheus Operator CRDs. |
+| monitoring.podMonitorAdditionalLabels | object | `{}` | Additional labels for the podMonitor |
+| monitoring.podMonitorMetricRelabelings | list | `[]` | Metrics relabel configurations to apply to samples before ingestion. |
+| monitoring.podMonitorRelabelings | list | `[]` | Relabel configurations to apply to samples before scraping. |
 
 ### Pooler
 
