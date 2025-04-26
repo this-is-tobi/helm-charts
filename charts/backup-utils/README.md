@@ -1,7 +1,6 @@
 # backup-utils
 
-![Version: 1.2.2](https://img.shields.io/badge/Version-1.2.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
-
+![Version: 1.2.3](https://img.shields.io/badge/Version-1.2.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 A Helm chart for effortless deployment of backup utilities.
 
 ## Maintainers
@@ -9,24 +8,79 @@ A Helm chart for effortless deployment of backup utilities.
 | Name | Email | Url |
 | ---- | ------ | --- |
 | this-is-tobi | <this-is-tobi@proton.me> | <https://this-is-tobi.com> |
-
 ## Source Code
 
 * <https://github.com/this-is-tobi/helm-charts>
 * <https://github.com/this-is-tobi/tools>
 
+## Installing the Chart
+
+### CLI
+
+```sh
+helm repo add tobi https://this-is-tobi.github.io/helm-charts
+helm install <release_name> tobi/backup-utils
+```
+
+### ArgoCD
+
+`application.yaml` :
+
+```yaml
+[...]
+sources:
+- repoURL: https://this-is-tobi.github.io/helm-charts
+  chart: backup-utils
+  targetRevision: 1.2.3
+  helm:
+    releaseName: <release_name>
+    parameters: []
+    values: ""
+```
+
+### Helm dependency
+
+`Chart.yaml`:
+
+```yaml
+[...]
+dependencies:
+- name: backup-utils
+  version: 1.2.3
+  repository: https://this-is-tobi.github.io/helm-charts
+  condition: cnpg-cluster.enabled
+```
+
+`values.yaml`:
+
+```yaml
+[...]
+cnpg-cluster:
+  enabled: true
+```
+
 ## Values
+
+### Global
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| fullnameOverride | string | `""` | String to fully override the default application name. |
 | global.env | object | `{}` | Map of environment variables to inject into backend and frontend containers. |
 | global.secrets | object | `{}` | Map of environment variables to inject into backend and frontend containers. |
+
+### Image pull secret
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
 | imageCredentials.email | string | `""` | Email to pull images. |
 | imageCredentials.password | string | `""` | Password to pull images. |
 | imageCredentials.registry | string | `""` | Registry to pull images from. |
 | imageCredentials.username | string | `""` | Username to pull images. |
-| nameOverride | string | `""` | Provide a name in place of the default application name. |
+
+### Postgresql
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
 | postgresql.container.args | list | `[]` | Postgresql backup container command args. |
 | postgresql.container.command | list | `[]` | Postgresql backup container command. |
 | postgresql.container.port | int | `8080` | Postgresql backup container port. |
@@ -65,6 +119,11 @@ A Helm chart for effortless deployment of backup utilities.
 | postgresql.secrets.S3_BUCKET_PREFIX | string | `""` | S3 bucket prefix used as target destination (the folder prefix used in the bucket). |
 | postgresql.secrets.S3_ENDPOINT | string | `""` | S3 endpoint used as target destination. |
 | postgresql.secrets.S3_SECRET_KEY | string | `""` | S3 secret key. |
+
+### S3
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
 | s3.container.args | list | `[]` | S3 backup container command args. |
 | s3.container.command | list | `[]` | S3 backup container command. |
 | s3.container.port | int | `8080` | S3 backup container port. |
@@ -102,6 +161,11 @@ A Helm chart for effortless deployment of backup utilities.
 | s3.secrets.TARGET_S3_BUCKET_PREFIX | string | `""` | S3 target bucket prefix used as target destination (the folder prefix used in the bucket). |
 | s3.secrets.TARGET_S3_ENDPOINT | string | `""` | S3 target endpoint used as target destination. |
 | s3.secrets.TARGET_S3_SECRET_KEY | string | `""` | S3 target secret key. |
+
+### Vault
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
 | vault.container.args | list | `[]` | Vault backup container command args. |
 | vault.container.command | list | `[]` | Vault backup container command. |
 | vault.container.port | int | `8080` | Vault backup container port. |
@@ -138,6 +202,13 @@ A Helm chart for effortless deployment of backup utilities.
 | vault.secrets.VAULT_ADDR | string | `""` | Host of the vault server to backup. |
 | vault.secrets.VAULT_EXTRA_ARGS | string | `""` | Vault extra cli args used for backup. |
 | vault.secrets.VAULT_TOKEN | string | `""` | Token of the vault server used for backup. |
+
+### Other Values
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| fullnameOverride | string | `""` | String to fully override the default application name. |
+| nameOverride | string | `""` | Provide a name in place of the default application name. |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)
