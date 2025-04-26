@@ -6,35 +6,47 @@ fullnameOverride: ""
 # Image credentials configuration.
 imageCredentials:
   # -- Registry to pull images from.
+  # @section -- Image pull secret
   registry: ""
   # -- Username to pull images.
+  # @section -- Image pull secret
   username: ""
   # -- Password to pull images.
+  # @section -- Image pull secret
   password: ""
   # -- Email to pull images.
+  # @section -- Image pull secret
   email: ""
 
 # Global configuration.
 global:
   # -- Map of environment variables to inject into backend and frontend containers.
+  # @section -- Global
   env: {}
   # -- Map of environment variables to inject into backend and frontend containers.
+  # @section -- Global
   secrets: {}
 
 # Ingress configuration
 ingress:
   # -- Whether or not ingress should be enabled.
+  # @section -- Ingress
   enabled: true
   # -- Defines which ingress controller will implement the resource.
+  # @section -- Ingress
   className: ""
   # -- Additional ingress annotations.
+  # @section -- Ingress
   annotations: {}
   # -- Additional ingress labels.
+  # @section -- Ingress
   labels: {}
   # -- The list of hosts to be covered by ingress record.
+  # @section -- Ingress
   hosts:
   - "domain.local"
   # -- Enable TLS configuration.
+  # @section -- Ingress
   tls: []
   # - secretName: domain.local-tls
   #   hosts:
@@ -43,24 +55,31 @@ ingress:
 # Server configuration.
 server:
   # -- The number of application controller pods to run.
+  # @section -- Server
   replicaCount: 1
   ## Server image.
   image:
     # -- Repository to use for the server.
+    # @section -- Server
     repository: "docker.io/lissy93/dashy"
     # -- Image pull policy for the server.
+    # @section -- Server
     pullPolicy: "Always"
-    # -- Tag to use for the server.
-    ## Overrides the image tag whose default is the chart appVersion.
+    # -- Tag to use for the server. Overrides the image tag whose default is the chart appVersion.
+    # @section -- Server
     tag: ""
   # -- Annotations for the server deployed pods.
+  # @section -- Server
   podAnnotations: {}
   # -- Labels for the server deployed pods.
+  # @section -- Server
   podLabels: {}
   # -- Toggle and define pod-level security context.
+  # @section -- Server
   podSecurityContext: {}
     # fsGroup: 2000
   # -- Init containers to add to the server pod.
+  # @section -- Server
   initContainers: []
   # - name: wait-for-keycloak
   #   image: docker.io/curlimages/curl:latest
@@ -74,12 +93,16 @@ server:
   #     name: custom-volume
   container:
     # -- server container port.
+    # @section -- Server
     port: 8080
     # -- server container command.
+    # @section -- Server
     command: []
     # -- server container command args.
+    # @section -- Server
     args: []
     # -- Toggle and define container-level security context.
+    # @section -- Server
     securityContext: {}
       # capabilities:
       #   drop:
@@ -88,6 +111,7 @@ server:
       # runAsNonRoot: true
       # runAsUser: 1000
   # -- Extra containers to add to the server pod as sidecars.
+  # @section -- Server
   extraContainers: []
   # - name: fluentd
   #   image: "fluentd"
@@ -95,64 +119,88 @@ server:
   #     - mountPath: /my-volume/config
   #       name: config
   # -- server container env variables loaded from configmap or secret reference.
+  # @section -- Server
   envFrom: []
   # - configMapRef:
   #     name: my-config
   # - secretRef:
   #     name: my-secret
   # -- server container env variables, it will be injected into a configmap and loaded into the container.
+  # @section -- Server
   env: {}
   # -- server container env secrets, it will be injected into a secret and loaded into the container.
+  # @section -- Server
   secrets: {}
   # -- server container healthcheck endpoint.
+  # @section -- Server
   healthcheckPath: "/"
   ## Deployment strategy for CPN server deployment.
   strategy:
     # -- Strategy type used to replace old Pods by new ones, can be "Recreate" or "RollingUpdate".
+    # @section -- Server
     type: "RollingUpdate"
   ## Startup probe for server.
   startupProbe:
     # -- Whether or not enable the probe.
+    # @section -- Server
     enabled: true
     # -- Number of seconds after the container has started before probe is initiated.
+    # @section -- Server
     initialDelaySeconds: 0
     # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    # @section -- Server
     successThreshold: 1
     # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
+    # @section -- Server
     failureThreshold: 10
     # -- How often (in seconds) to perform the probe.
+    # @section -- Server
     periodSeconds: 10
     # -- Number of seconds after which the probe times out.
+    # @section -- Server
     timeoutSeconds: 5
   ## Readiness probe for server.
   readinessProbe:
     # -- Whether or not enable the probe.
+    # @section -- Server
     enabled: true
     # -- Number of seconds after the container has started before probe is initiated.
+    # @section -- Server
     initialDelaySeconds: 15
     # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    # @section -- Server
     successThreshold: 2
     # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
+    # @section -- Server
     failureThreshold: 2
     # -- How often (in seconds) to perform the probe.
+    # @section -- Server
     periodSeconds: 10
     # -- Number of seconds after which the probe times out.
+    # @section -- Server
     timeoutSeconds: 5
   ## Liveness probe for server.
   livenessProbe:
     # -- Whether or not enable the probe.
+    # @section -- Server
     enabled: true
     # -- Whether or not enable the probe.
+    # @section -- Server
     initialDelaySeconds: 30
     # -- Number of seconds after the container has started before probe is initiated.
+    # @section -- Server
     successThreshold: 1
     # -- Minimum consecutive successes for the probe to be considered successful after having failed.
+    # @section -- Server
     failureThreshold: 3
     # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
+    # @section -- Server
     periodSeconds: 30
     # -- How often (in seconds) to perform the probe.
+    # @section -- Server
     timeoutSeconds: 5
   # -- Host aliases that will be injected at pod-level into /etc/hosts.
+  # @section -- Server
   hostAliases: []
   # - ip: "127.0.0.1"
   #   hostnames:
@@ -163,13 +211,15 @@ server:
   #   - "foo.remote"
   #   - "bar.remote"
   # -- List of extra volumes to add.
+  # @section -- Server
   extraVolumes: []
   # - name: extra-vol
   #   path: /host/path
   #   type: hostPath
   # - name: extra-vol-cm
   #   type: configMap
-  # -- List of extra mounts to add (normally used with extraVolumes)
+  # -- List of extra mounts to add (normally used with extraVolumes).
+  # @section -- Server
   extraVolumeMounts: []
   # - name: extra-vol
   #   mountPath: /volume/path
@@ -177,48 +227,68 @@ server:
   #   mountPath: /volume/cm/path
   service:
     # -- server service type.
+    # @section -- Server
     type: "ClusterIP"
     # -- server service port.
+    # @section -- Server
     port: 80
   resources:
     requests:
       # -- Memory request for the server.
+      # @section -- Server
       memory: "256Mi"
       # -- CPU request for the server.
+      # @section -- Server
       cpu: "100m"
     limits:
       # -- Memory limit for the server.
+      # @section -- Server
       memory: "2Gi"
       # -- CPU limit for the server.
+      # @section -- Server
       cpu: "500m"
   autoscaling:
     # -- Enable Horizontal Pod Autoscaler ([HPA]) for the server.
+    # @section -- Server
     enabled: false
     # -- Minimum number of replicas for the server [HPA].
+    # @section -- Server
     minReplicas: 1
     # -- Maximum number of replicas for the server [HPA].
+    # @section -- Server
     maxReplicas: 3
     # -- Average CPU utilization percentage for the server [HPA].
+    # @section -- Server
     targetCPUUtilizationPercentage: 80
     # -- Average memory utilization percentage for the server [HPA].
+    # @section -- Server
     targetMemoryUtilizationPercentage: 80
   # -- Default node selector for server.
+  # @section -- Server
   nodeSelector: {}
   # -- Default tolerations for server.
+  # @section -- Server
   tolerations: []
   # -- Default affinity for server.
+  # @section -- Server
   affinity: {}
     # Server configuration.
+    # @section -- Server
   serviceAccount:
     # -- Create a service account for the API.
+    # @section -- Server
     create: false
     # -- Annotations applied to created service account.
+    # @section -- Server
     annotations: {}
     # -- Service account name.
+    # @section -- Server
     name: "server-sa"
   # -- Mount path for the config file inside the container.
+  # @section -- Server
   configMountPath: /app/user-data
   # -- Application custom configuration that will be mount inside the container.
+  # @section -- Server
   config:
     pageInfo:
       title: Home
@@ -295,33 +365,35 @@ server:
     #       cols: 1
     #       itemSize: large
 
+
 # Keycloak configuration.
 ## Ref: https://artifacthub.io/packages/helm/bitnami/keycloak
 keycloak:
+  # -- Whether or not keycloak should be deployed (See. https://artifacthub.io/packages/helm/bitnami/keycloak?modal=values).
   enabled: false
-  nameOverride: "keycloak"
-  auth:
-    adminUser: ""
-    adminPassword: ""
-  ingress:
-    enabled: true
-    ingressClassName: ""
-    annotations: {}
-    hostname: "keycloak.domain.local"
-    path: "/"
-    tls: false
-    secrets: []
-  production: true
-  proxy: "edge"
-  tls:
-    enabled: false
-    autoGenerated: false
-  postgresql:
-    nameOverride: "keycloak-db"
-    enabled: true
-    auth:
-      postgresPassword: ""
-      username: ""
-      password: ""
-      database: "keycloak"
-      architecture: "standalone"
+  # nameOverride: "keycloak"
+  # auth:
+  #   adminUser: ""
+  #   adminPassword: ""
+  # ingress:
+  #   enabled: true
+  #   ingressClassName: ""
+  #   annotations: {}
+  #   hostname: "keycloak.domain.local"
+  #   path: "/"
+  #   tls: false
+  #   secrets: []
+  # production: true
+  # proxy: "edge"
+  # tls:
+  #   enabled: false
+  #   autoGenerated: false
+  # postgresql:
+  #   nameOverride: "keycloak-db"
+  #   enabled: true
+  #   auth:
+  #     postgresPassword: ""
+  #     username: ""
+  #     password: ""
+  #     database: "keycloak"
+  #     architecture: "standalone"
