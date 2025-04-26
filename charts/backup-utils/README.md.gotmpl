@@ -4,12 +4,6 @@
 
 {{ template "chart.description" . }}
 
-{{ template "chart.homepageLine" . }}
-
-{{ template "chart.maintainersSection" . }}
-
-{{ template "chart.sourcesSection" . }}
-
 {{ template "chart.kubeVersionLine" . }}
 
 {{ template "chart.requirementsSection" . }}
@@ -61,5 +55,14 @@ dependencies:
 ```
 
 {{ template "chart.valuesSection" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+## Sources
+
+{{ template "chart.homepageLine" . }}
+
+**Source code:**
+{{ template "chart.sourcesList" . }}
 
 {{ template "helm-docs.versionFooter" . }}
