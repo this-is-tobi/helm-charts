@@ -38,6 +38,14 @@ sources:
     values: ""
 ```
 
+## Dependencies updates
+
+A script is available to help upgrade charts dependencies :
+
+```sh
+./ci/scripts/update-charts-dependencies.sh
+```
+
 ## Template
 
 A [template folder](./template/) is available for easy integration of new chart, to use it follow the steps bellow :
