@@ -1,7 +1,9 @@
 # cnpg-cluster
 
-![Version: 0.10.2](https://img.shields.io/badge/Version-0.10.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
+![Version: 0.10.3](https://img.shields.io/badge/Version-0.10.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
+
 A Helm Chart to deploy easily a CNPG cluster
+
 **Homepage:** <https://cloudnative-pg.io>
 
 ## Maintainers
@@ -9,6 +11,7 @@ A Helm Chart to deploy easily a CNPG cluster
 | Name | Email | Url |
 | ---- | ------ | --- |
 | this-is-tobi | <this-is-tobi@proton.me> | <https://this-is-tobi.com> |
+
 ## Source Code
 
 * <https://github.com/this-is-tobi/helm-charts>
@@ -38,7 +41,7 @@ helm install <release_name> tobi/cnpg-cluster
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 0.10.2
+  targetRevision: 0.10.3
   helm:
     releaseName: <release_name>
     parameters: []
@@ -53,7 +56,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 0.10.2
+  version: 0.10.3
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```

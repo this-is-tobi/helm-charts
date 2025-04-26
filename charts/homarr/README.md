@@ -1,7 +1,9 @@
 # homarr
 
-![Version: 0.1.9](https://img.shields.io/badge/Version-0.1.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.15.10](https://img.shields.io/badge/AppVersion-0.15.10-informational?style=flat-square)
+![Version: 0.1.10](https://img.shields.io/badge/Version-0.1.10-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.15.10](https://img.shields.io/badge/AppVersion-0.15.10-informational?style=flat-square)
+
 Customizable browser's home page to interact with your homeserver's Docker containers (e.g. Sonarr/Radarr)
+
 **Homepage:** <https://homarr.dev>
 
 ## Maintainers
@@ -9,6 +11,7 @@ Customizable browser's home page to interact with your homeserver's Docker conta
 | Name | Email | Url |
 | ---- | ------ | --- |
 | this-is-tobi | <this-is-tobi@proton.me> | <https://this-is-tobi.com> |
+
 ## Source Code
 
 * <https://github.com/this-is-tobi/helm-charts>
@@ -18,7 +21,7 @@ Customizable browser's home page to interact with your homeserver's Docker conta
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.bitnami.com/bitnami | keycloak | 24.3.0 |
+| https://charts.bitnami.com/bitnami | keycloak | >=24.3.0 |
 
 ## Installing the Chart
 
@@ -38,7 +41,7 @@ helm install <release_name> tobi/homarr
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: homarr
-  targetRevision: 0.1.9
+  targetRevision: 0.1.10
   helm:
     releaseName: <release_name>
     parameters: []
@@ -53,16 +56,16 @@ sources:
 [...]
 dependencies:
 - name: homarr
-  version: 0.1.9
+  version: 0.1.10
   repository: https://this-is-tobi.github.io/helm-charts
-  condition: cnpg-cluster.enabled
+  condition: homarr.enabled
 ```
 
 `values.yaml`:
 
 ```yaml
 [...]
-cnpg-cluster:
+homarr:
   enabled: true
 ```
 

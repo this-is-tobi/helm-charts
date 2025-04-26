@@ -1,6 +1,7 @@
 # backup-utils
 
-![Version: 1.2.3](https://img.shields.io/badge/Version-1.2.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 1.2.4](https://img.shields.io/badge/Version-1.2.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+
 A Helm chart for effortless deployment of backup utilities.
 
 ## Maintainers
@@ -8,6 +9,7 @@ A Helm chart for effortless deployment of backup utilities.
 | Name | Email | Url |
 | ---- | ------ | --- |
 | this-is-tobi | <this-is-tobi@proton.me> | <https://this-is-tobi.com> |
+
 ## Source Code
 
 * <https://github.com/this-is-tobi/helm-charts>
@@ -31,7 +33,7 @@ helm install <release_name> tobi/backup-utils
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: backup-utils
-  targetRevision: 1.2.3
+  targetRevision: 1.2.4
   helm:
     releaseName: <release_name>
     parameters: []
@@ -46,16 +48,16 @@ sources:
 [...]
 dependencies:
 - name: backup-utils
-  version: 1.2.3
+  version: 1.2.4
   repository: https://this-is-tobi.github.io/helm-charts
-  condition: cnpg-cluster.enabled
+  condition: backup-utils.enabled
 ```
 
 `values.yaml`:
 
 ```yaml
 [...]
-cnpg-cluster:
+backup-utils:
   enabled: true
 ```
 

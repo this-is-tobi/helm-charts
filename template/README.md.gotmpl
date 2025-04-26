@@ -1,11 +1,17 @@
 {{ template "chart.header" . }}
+
 {{ template "chart.badgesSection" . }}
+
 {{ template "chart.description" . }}
+
 {{ template "chart.homepageLine" . }}
 
 {{ template "chart.maintainersSection" . }}
+
 {{ template "chart.sourcesSection" . }}
+
 {{ template "chart.kubeVersionLine" . }}
+
 {{ template "chart.requirementsSection" . }}
 
 ## Installing the Chart
@@ -50,9 +56,10 @@ dependencies:
 
 ```yaml
 [...]
-cnpg-cluster:
+{{ template "chart.name" . }}:
   enabled: true
 ```
 
 {{ template "chart.valuesSection" . }}
+
 {{ template "helm-docs.versionFooter" . }}
