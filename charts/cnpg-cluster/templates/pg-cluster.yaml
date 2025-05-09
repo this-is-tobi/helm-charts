@@ -149,7 +149,7 @@ spec:
     enabled: true
     source: {{ .Values.replica.clusterName | default (include "template.fullname" .) }}
   {{- end }}
-  {{- if and .Values.backup.enabled (equal .Values.mode "primary") }}
+  {{- if and .Values.backup.enabled (eq .Values.mode "primary") }}
   backup:
     barmanObjectStore:
       destinationPath: {{ .Values.backup.destinationPath }}
