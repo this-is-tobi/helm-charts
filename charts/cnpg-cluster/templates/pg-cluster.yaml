@@ -58,7 +58,7 @@ spec:
   {{- else if eq .Values.mode "recovery" }}
   bootstrap:
     recovery:
-      source: {{ .Values.recovery.clusterName | default (printf "%s-%s" (include "template.fullname" .) "source") }}
+      source: {{ .Values.recovery.clusterName | default (include "template.fullname" .) }}
       database: {{ .Values.dbName | default (include "template.fullname" .) }}
       {{- if .Values.credentials.existingSecrets.enabled }}
       owner: {{ (lookup "v1" "Secret" .Release.Namespace .Values.credentials.existingSecrets.app.secretName).data.username | b64dec }} 
@@ -75,7 +75,7 @@ spec:
       {{- toYaml .Values.recovery.extraArgs | nindent 6 }}
       {{- end }}
   externalClusters:
-  - name: {{ .Values.recovery.clusterName | default (printf "%s-%s" (include "template.fullname" .) "source") }}
+  - name: {{ .Values.recovery.clusterName | default (include "template.fullname" .) }}
     barmanObjectStore:
       wal:
         maxParallel: {{ .Values.recovery.maxParallelWal }}
@@ -99,7 +99,7 @@ spec:
   {{- else if eq .Values.mode "replica" }}
   bootstrap:
     recovery:
-      source: {{ .Values.replica.clusterName | default (printf "%s-%s" (include "template.fullname" .) "source") }}
+      source: {{ .Values.replica.clusterName | default (include "template.fullname" .) }}
       database: {{ .Values.dbName | default (include "template.fullname" .) }}
       {{- if .Values.credentials.existingSecrets.enabled }}
       owner: {{ (lookup "v1" "Secret" .Release.Namespace .Values.credentials.existingSecrets.app.secretName).data.username | b64dec }} 
@@ -110,7 +110,7 @@ spec:
       {{- toYaml .Values.replica.extraArgs | nindent 6 }}
       {{- end }}
   externalClusters:
-  - name: {{ .Values.replica.clusterName | default (printf "%s-%s" (include "template.fullname" .) "source") }}
+  - name: {{ .Values.replica.clusterName | default (include "template.fullname" .) }}
     barmanObjectStore:
       wal:
         maxParallel: {{ .Values.replica.maxParallelWal }}
@@ -147,9 +147,9 @@ spec:
       key: ca.crt
   replica:
     enabled: true
-    source: {{ .Values.replica.clusterName | default (printf "%s-%s" (include "template.fullname" .) "source") }}
+    source: {{ .Values.replica.clusterName | default (include "template.fullname" .) }}
   {{- end }}
-  {{- if .Values.backup.enabled }}
+  {{- if and .Values.backup.enabled (equal .Values.mode "primary") }}
   backup:
     barmanObjectStore:
       destinationPath: {{ .Values.backup.destinationPath }}
