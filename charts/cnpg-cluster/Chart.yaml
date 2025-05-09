@@ -1,7 +1,7 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 1.0.1
+version: 1.0.2
 appVersion: "1.25.0"
 description: A Helm Chart to deploy easily a CNPG cluster
 home: https://cloudnative-pg.io
