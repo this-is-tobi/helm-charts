@@ -43,7 +43,7 @@ postgresql:
     # -- Tag to use for the postgresql backup.
     # Overrides the image tag whose default is the chart appVersion.
     # @section -- Postgresql
-    tag: "3.3.0"
+    tag: "3.4.0"
   job:
     # -- The cron rule used for backups. By default it runs everyday at 00:00.
     # @section -- Postgresql
@@ -316,7 +316,7 @@ vault:
     # -- Tag to use for the vault backup.
     # Overrides the image tag whose default is the chart appVersion.
     # @section -- Vault
-    tag: "1.5.0"
+    tag: "1.5.1"
   job:
     # -- The cron rule used for backups. By default it runs everyday at 00:00.
     # @section -- Vault
