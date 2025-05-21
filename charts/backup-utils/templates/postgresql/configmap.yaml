@@ -1,14 +1,17 @@
-{{- if and .Values.postgresql.enabled (or .Values.postgresql.env .Values.global.env) -}}
-kind: ConfigMap
+{{- range $index, $backup := .Values.postgresql }}
+{{- if and $backup.enabled (or $backup.env $.Values.global.env) -}}
+---
 apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: {{ printf "%s-%s" (include "template.fullname" .) "postgresql" }}
-  labels: {{- include "template.postgresql.labels" . | nindent 4 }}
+  name: {{ printf "%s-%s-%s" (include "template.fullname" $) "postgresql" ($index | toString) }}
+  labels: {{- include "template.labels" (list $ (printf "%s-%s" "postgresql" ($index | toString))) | nindent 4 }}
 data:
-  {{- if .Values.global.env -}}
-  {{- include "template.env" .Values.global | indent 2 }}
+  {{- if $.Values.global.env -}}
+  {{- include "template.env" $.Values.global | indent 2 }}
   {{- end -}}
-  {{- if .Values.postgresql.env -}}
-  {{- include "template.env" .Values.postgresql | indent 2 }}
+  {{- if $backup.env -}}
+  {{- include "template.env" $backup | indent 2 }}
   {{- end -}}
+{{- end }}
 {{- end }}

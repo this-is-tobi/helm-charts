@@ -1,89 +1,92 @@
-{{- if .Values.vault.enabled -}}
+{{- range $index, $backup := .Values.vault }}
+{{- if $backup.enabled -}}
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ printf "%s-%s" (include "template.fullname" .) "vault" }}
+  name: {{ printf "%s-%s" (include "template.fullname" $) "vault" }}
   labels:
-    {{- include "template.vault.labels" . | nindent 4 }}
+    {{- include "template.labels" (list $ (printf "%s-%s" "vault" ($index | toString))) | nindent 4 }}
 spec:
-  schedule: {{ .Values.vault.job.schedule }}
-  successfulJobsHistoryLimit: {{ .Values.vault.job.successfulJobsHistoryLimit }}
-  failedJobsHistoryLimit: {{ .Values.vault.job.failedJobsHistoryLimit }}
-  concurrencyPolicy: {{ .Values.vault.job.concurrencyPolicy }}
-  timeZone: {{ .Values.vault.job.timeZone }}
+  schedule: {{ $backup.job.schedule }}
+  successfulJobsHistoryLimit: {{ $backup.job.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ $backup.job.failedJobsHistoryLimit }}
+  concurrencyPolicy: {{ $backup.job.concurrencyPolicy }}
+  timeZone: {{ $backup.job.timeZone }}
   jobTemplate:
     metadata:
-      {{- if .Values.vault.jobAnnotations }}
+      {{- if $backup.jobAnnotations }}
       annotations:
-        {{- with .Values.vault.jobAnnotations }}
+        {{- with $backup.jobAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- end }}
       labels:
-        {{- include "template.vault.selectorLabels" . | nindent 8 }}
-        {{- with .Values.vault.jobLabels }}
+        {{- include "template.selectorLabels" (list $ (printf "%s-%s" "vault" ($index | toString))) | nindent 8 }}
+        {{- with $backup.jobLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      backoffLimit: {{ .Values.vault.job.backoffLimit }}
+      backoffLimit: {{ $backup.job.backoffLimit }}
       template:
         metadata:
-          {{- if .Values.vault.podAnnotations }}
+          {{- if $backup.podAnnotations }}
           annotations:
-            {{- with .Values.vault.podAnnotations }}
+            {{- with $backup.podAnnotations }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
           labels:
-            {{- include "template.vault.selectorLabels" . | nindent 12 }}
-            {{- with .Values.vault.podLabels }}
+            {{- include "template.selectorLabels" (list $ (printf "%s-%s" "vault" ($index | toString))) | nindent 12 }}
+            {{- with $backup.podLabels }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
         spec:
-          {{- if and .Values.imageCredentials.username .Values.imageCredentials.password }}
+          {{- if and $.Values.imageCredentials.username $.Values.imageCredentials.password }}
           imagePullSecrets:
           - name: {{ include "template.name" . }}-pullsecret
           {{- end }}
-          restartPolicy: {{ .Values.vault.restartPolicy }}
-          {{- if .Values.vault.podSecurityContext }}
+          restartPolicy: {{ $backup.restartPolicy }}
+          {{- if $backup.podSecurityContext }}
           securityContext:
-            {{- toYaml .Values.vault.podSecurityContext | nindent 12 }}
+            {{- toYaml $backup.podSecurityContext | nindent 12 }}
           {{- end }}
           containers:
           - name: vault
-            {{- if .Values.vault.container.securityContext }}
+            {{- if $backup.container.securityContext }}
             securityContext:
-              {{- toYaml .Values.vault.container.securityContext | nindent 14 }}
+              {{- toYaml $backup.container.securityContext | nindent 14 }}
             {{- end }}
-            image: {{ printf "%s:%s" .Values.vault.image.repository (.Values.vault.image.tag | default "latest") }}
-            imagePullPolicy: {{ .Values.vault.image.pullPolicy }}
-            {{- if .Values.vault.container.command }}
+            image: {{ printf "%s:%s" $backup.image.repository ($backup.image.tag | default "latest") }}
+            imagePullPolicy: {{ $backup.image.pullPolicy }}
+            {{- if $backup.container.command }}
             command:
-            {{- range .Values.vault.container.command }}
+            {{- range $backup.container.command }}
             - {{ . | quote }}
             {{- end }}
             {{- end }}
-            {{- if .Values.vault.container.args }}
+            {{- if $backup.container.args }}
             args:
-            {{- range .Values.vault.container.args }}
+            {{- range $backup.container.args }}
             - {{ . | quote }}
             {{- end }}
             {{- end }}
             ports:
-            - containerPort: {{ .Values.vault.container.port }}
+            - containerPort: {{ $backup.container.port }}
               protocol: TCP
             envFrom:
-            {{- if or .Values.vault.env .Values.global.env }}
+            {{- if or $backup.env $.Values.global.env }}
             - configMapRef:
-                name: {{ printf "%s-%s" (include "template.fullname" .) "vault" }}
+                name: {{ printf "%s-%s" (include "template.fullname" $) "vault" }}
             {{- end }}
-            {{- if or .Values.vault.secrets .Values.global.secrets }}
+            {{- if or $backup.secrets $.Values.global.secrets }}
             - secretRef:
-                name: {{ printf "%s-%s" (include "template.fullname" .) "vault" }}
+                name: {{ printf "%s-%s" (include "template.fullname" $) "vault" }}
             {{- end }}
-            {{- if .Values.vault.envFrom }}
-              {{- toYaml .Values.vault.envFrom | nindent 12 }}
+            {{- if $backup.envFrom }}
+              {{- toYaml $backup.envFrom | nindent 12 }}
             {{- end }}
             resources:
-              {{- toYaml .Values.vault.resources | nindent 14 }}
+              {{- toYaml $backup.resources | nindent 14 }}
+{{- end }}
 {{- end }}
