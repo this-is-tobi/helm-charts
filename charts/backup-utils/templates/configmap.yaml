@@ -1,0 +1,17 @@
+{{- range $backupName, $backup := .Values.backups }}
+{{- if and $backup.enabled (or $backup.env $.Values.global.env) }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-%s" (include "helper.fullname" $) (include "helper.toKebabCase" $backupName) }}
+  labels: {{- include "helper.labels" (list $ $backupName) | nindent 4 }}
+data:
+{{- if $.Values.global.env }}
+{{- include "helper.env" $.Values.global | indent 2 }}
+{{- end }}
+{{- if $backup.env }}
+{{- include "helper.env" $backup | indent 2 }}
+{{- end }}
+{{- end }}
+{{- end }}
