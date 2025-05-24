@@ -1,7 +1,7 @@
 remote: origin
 target-branch: main
 chart-dirs:
-  - charts
+- charts
 helm-extra-args: ''
 validate-chart-schema: true
 validate-chart-values: true
@@ -10,4 +10,5 @@ validate-yaml: true
 exclude-deprecated: true
 excluded-charts:
 - cnpg-cluster
+- vso-utils
 debug: true

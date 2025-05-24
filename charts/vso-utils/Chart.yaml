@@ -1,0 +1,23 @@
+apiVersion: v2
+name: vso-utils
+type: application
+version: 0.0.1
+appVersion: "0.1.0"
+description: A Helm chart for effortless deployment of Vault Secret Operator utilities.
+deprecated: false
+annotations: {}
+keywords: []
+dependencies:
+- name: vault-secrets-operator
+  alias: vso
+  version: ">=0.10.0"
+  repository: https://helm.releases.hashicorp.com
+  condition: vso.enabled
+sources:
+- https://github.com/this-is-tobi/helm-charts
+- https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator
+- https://developer.hashicorp.com/vault/docs/deploy/kubernetes/vso
+maintainers:
+- name: this-is-tobi
+  email: this-is-tobi@proton.me
+  url: https://this-is-tobi.com
