@@ -1435,4 +1435,29 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.0/homarr-0.1.0.tgz
     version: 0.1.0
-generated: "2025-05-12T21:16:15.658776825Z"
+  vso-utils:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2025-05-24T19:00:46.325296909Z"
+    dependencies:
+    - alias: vso
+      condition: vso.enabled
+      name: vault-secrets-operator
+      repository: https://helm.releases.hashicorp.com
+      version: '>=0.10.0'
+    description: A Helm chart for effortless deployment of Vault Secret Operator utilities.
+    digest: c4d1d6ccfad87a6222aa8b8acb8ae2424d4bc3276be1ca6639299870114352d8
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: vso-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator
+    - https://developer.hashicorp.com/vault/docs/deploy/kubernetes/vso
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
+    version: 0.0.1
+generated: "2025-05-24T19:00:46.325438032Z"
