@@ -29,8 +29,8 @@ global:
 
 # Postgresql backup configuration.
 postgresql:
-  # -- Whether or not postgresql backup should be enabled.
-  # @section -- Postgresql
+-   # -- Whether or not postgresql backup should be enabled.
+    # @section -- Postgresql
   enabled: false
   ## Postgresql backup image.
   image:
@@ -167,8 +167,8 @@ postgresql:
 
 # S3 backup configuration.
 s3:
-  # -- Whether or not s3 backup should be enabled.
-  # @section -- S3
+-   # -- Whether or not s3 backup should be enabled.
+    # @section -- S3
   enabled: false
   ## S3 backup image.
   image:
@@ -302,8 +302,8 @@ s3:
 
 # Vault backup configuration.
 vault:
-  # -- Whether or not vault backup should be enabled.
-  # @section -- Vault
+-   # -- Whether or not vault backup should be enabled.
+    # @section -- Vault
   enabled: false
   ## Vault backup image.
   image:

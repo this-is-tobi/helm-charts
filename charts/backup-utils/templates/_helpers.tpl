@@ -91,36 +91,20 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "template.postgresql.selectorLabels" -}}
-app.kubernetes.io/name: {{ printf "%s-%s" (include "template.name" .) "postgresql" }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{- define "template.s3.selectorLabels" -}}
-app.kubernetes.io/name: {{ printf "%s-%s" (include "template.name" .) "s3" }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{- define "template.vault.selectorLabels" -}}
-app.kubernetes.io/name: {{ printf "%s-%s" (include "template.name" .) "vault" }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{- define "template.selectorLabels" -}}
+{{- $root := index . 0 }}
+{{- $app := index . 1 -}}
+app.kubernetes.io/name: {{ printf "%s-%s" (include "template.name" $root) $app }}
+app.kubernetes.io/instance: {{ $root.Release.Name }}
 {{- end }}
 
 
 {{/*
 App labels
 */}}
-{{- define "template.postgresql.labels" -}}
-{{ include "template.common.labels" . }}
-{{ include "template.postgresql.selectorLabels" . }}
-{{- end }}
-
-{{- define "template.s3.labels" -}}
-{{ include "template.common.labels" . }}
-{{ include "template.s3.selectorLabels" . }}
-{{- end }}
-
-{{- define "template.vault.labels" -}}
-{{ include "template.common.labels" . }}
-{{ include "template.vault.selectorLabels" . }}
+{{- define "template.labels" -}}
+{{- $root := index . 0 }}
+{{- $app := index . 1 -}}
+{{ include "template.common.labels" $root }}
+{{ include "template.selectorLabels" (list $root $app) }}
 {{- end }}

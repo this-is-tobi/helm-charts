@@ -1,14 +1,17 @@
-{{- if and .Values.vault.enabled (or .Values.vault.env .Values.global.env) -}}
-kind: ConfigMap
+{{- range $index, $backup := .Values.vault }}
+{{- if and $backup.enabled (or $backup.env $.Values.global.env) -}}
+---
 apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: {{ printf "%s-%s" (include "template.fullname" .) "vault" }}
-  labels: {{- include "template.vault.labels" . | nindent 4 }}
+  name: {{ printf "%s-%s-%s" (include "template.fullname" $) "vault" ($index | toString) }}
+  labels: {{- include "template.labels" (list $ (printf "%s-%s" "vault" ($index | toString))) | nindent 4 }}
 data:
-  {{- if .Values.global.env -}}
-  {{- include "template.env" .Values.global | indent 2 }}
+  {{- if $.Values.global.env -}}
+  {{- include "template.env" $.Values.global | indent 2 }}
   {{- end -}}
-  {{- if .Values.vault.env -}}
-  {{- include "template.env" .Values.vault | indent 2 }}
+  {{- if $backup.env -}}
+  {{- include "template.env" $backup | indent 2 }}
   {{- end -}}
+{{- end }}
 {{- end }}

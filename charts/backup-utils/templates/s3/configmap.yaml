@@ -1,14 +1,17 @@
-{{- if and .Values.s3.enabled (or .Values.s3.env .Values.global.env) -}}
-kind: ConfigMap
+{{- range $index, $backup := .Values.s3 }}
+{{- if and $backup.enabled (or $backup.env $.Values.global.env) -}}
+---
 apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: {{ printf "%s-%s" (include "template.fullname" .) "s3" }}
-  labels: {{- include "template.s3.labels" . | nindent 4 }}
+  name: {{ printf "%s-%s-%s" (include "template.fullname" $) "s3" ($index | toString) }}
+  labels: {{- include "template.labels" (list $ (printf "%s-%s" "s3" ($index | toString))) | nindent 4 }}
 data:
-  {{- if .Values.global.env -}}
-  {{- include "template.env" .Values.global | indent 2 }}
+  {{- if $.Values.global.env -}}
+  {{- include "template.env" $.Values.global | indent 2 }}
   {{- end -}}
-  {{- if .Values.s3.env -}}
-  {{- include "template.env" .Values.s3 | indent 2 }}
+  {{- if $backup.env -}}
+  {{- include "template.env" $backup | indent 2 }}
   {{- end -}}
+{{- end }}
 {{- end }}
