@@ -41,11 +41,7 @@ spec:
   bootstrap:
     initdb:
       database: {{ .Values.dbName | default (include "template.fullname" .) }}
-      {{- if .Values.credentials.existingSecrets.enabled }}
-      owner: {{ (lookup "v1" "Secret" .Release.Namespace .Values.credentials.existingSecrets.app.secretName).data.username | b64dec }} 
-      {{- else }}
       owner: {{ .Values.credentials.username | default (include "template.fullname" .) }}
-      {{ end }}
       secret:
         {{- if eq .Values.credentials.existingSecrets.enabled false }}
         name: {{ printf "%s-%s" (include "template.fullname" .) "app" }}
@@ -60,11 +56,7 @@ spec:
     recovery:
       source: {{ .Values.recovery.clusterName | default (include "template.fullname" .) }}
       database: {{ .Values.dbName | default (include "template.fullname" .) }}
-      {{- if .Values.credentials.existingSecrets.enabled }}
-      owner: {{ (lookup "v1" "Secret" .Release.Namespace .Values.credentials.existingSecrets.app.secretName).data.username | b64dec }} 
-      {{- else }}
       owner: {{ .Values.credentials.username | default (include "template.fullname" .) }}
-      {{ end }}
       secret:
         {{- if eq .Values.credentials.existingSecrets.enabled false }}
         name: {{ printf "%s-%s" (include "template.fullname" .) "app" }}
@@ -101,11 +93,7 @@ spec:
     recovery:
       source: {{ .Values.replica.clusterName | default (include "template.fullname" .) }}
       database: {{ .Values.dbName | default (include "template.fullname" .) }}
-      {{- if .Values.credentials.existingSecrets.enabled }}
-      owner: {{ (lookup "v1" "Secret" .Release.Namespace .Values.credentials.existingSecrets.app.secretName).data.username | b64dec }} 
-      {{- else }}
       owner: {{ .Values.credentials.username | default (include "template.fullname" .) }}
-      {{ end }}
       {{- if .Values.replica.extraArgs }}
       {{- toYaml .Values.replica.extraArgs | nindent 6 }}
       {{- end }}
