@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 1.0.2](https://img.shields.io/badge/Version-1.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
+![Version: 1.0.3](https://img.shields.io/badge/Version-1.0.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -28,7 +28,7 @@ helm install <release_name> tobi/cnpg-cluster
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 1.0.2
+  targetRevision: 1.0.3
   helm:
     releaseName: <release_name>
     parameters: []
@@ -43,7 +43,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 1.0.2
+  version: 1.0.3
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -90,7 +90,7 @@ cnpg-cluster:
 | credentials.existingSecrets.postgres.secretName | string | `""` | Name of the kubernetes secret to retrieve postgres superuser auth infos. Secret should be of type `kubernetes.io/basic-auth` with `username` and `password` keys. |
 | credentials.password | string | `""` | Password of the database user (leave empty to auto-generate the password). |
 | credentials.postgresPassword | string | `""` | Password of the postgres superuser (leave empty to auto-generate the password). |
-| credentials.username | string | `""` | Username of the database user (not used when `credentials.existingSecrets.enabled` is set to `true`, instead the `username` key of the secret `credentials.existingSecrets.app.secretName` is used). |
+| credentials.username | string | `""` | Username of the database user (it is used for the database owner - needed also if `credentials.existingSecrets.enabled` is set to `true`). |
 | dbName | string | `""` | Name of the database (Default is `fullnameOverride` > `nameOverride` > name of the Helm release). |
 | enableSuperuserAccess | bool | `true` | Enable superuser access. |
 | exposed | bool | `false` | Whether or not a NodePort service should be created to exposed the database. |
