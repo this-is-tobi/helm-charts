@@ -1,89 +1,92 @@
-{{- if .Values.postgresql.enabled -}}
+{{- range $index, $backup := $.Values.postgresql }}
+{{- if $backup.enabled -}}
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ printf "%s-%s" (include "template.fullname" .) "postgresql" }}
+  name: {{ printf "%s-%s-%s" (include "template.fullname" $) "postgresql" ($index | toString) }}
   labels:
-    {{- include "template.postgresql.labels" . | nindent 4 }}
+    {{- include "template.labels" (list $ (printf "%s-%s" "postgresql" ($index | toString))) | nindent 4 }}
 spec:
-  schedule: {{ .Values.postgresql.job.schedule }}
-  successfulJobsHistoryLimit: {{ .Values.postgresql.job.successfulJobsHistoryLimit }}
-  failedJobsHistoryLimit: {{ .Values.postgresql.job.failedJobsHistoryLimit }}
-  concurrencyPolicy: {{ .Values.postgresql.job.concurrencyPolicy }}
-  timeZone: {{ .Values.postgresql.job.timeZone }}
+  schedule: {{ $backup.job.schedule }}
+  successfulJobsHistoryLimit: {{ $backup.job.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ $backup.job.failedJobsHistoryLimit }}
+  concurrencyPolicy: {{ $backup.job.concurrencyPolicy }}
+  timeZone: {{ $backup.job.timeZone }}
   jobTemplate:
     metadata:
-      {{- if .Values.postgresql.jobAnnotations }}
+      {{- if $backup.jobAnnotations }}
       annotations:
-        {{- with .Values.postgresql.jobAnnotations }}
+        {{- with $backup.jobAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- end }}
       labels:
-        {{- include "template.postgresql.selectorLabels" . | nindent 8 }}
-        {{- with .Values.postgresql.jobLabels }}
+        {{- include "template.selectorLabels" (list $ (printf "%s-%s" "postgresql" ($index | toString))) | nindent 8 }}
+        {{- with $backup.jobLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      backoffLimit: {{ .Values.postgresql.job.backoffLimit }}
+      backoffLimit: {{ $backup.job.backoffLimit }}
       template:
         metadata:
-          {{- if .Values.postgresql.podAnnotations }}
+          {{- if $backup.podAnnotations }}
           annotations:
-            {{- with .Values.postgresql.podAnnotations }}
+            {{- with $backup.podAnnotations }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
           labels:
-            {{- include "template.postgresql.selectorLabels" . | nindent 12 }}
-            {{- with .Values.postgresql.podLabels }}
+            {{- include "template.selectorLabels" (list $ (printf "%s-%s" "postgresql" ($index | toString))) | nindent 12 }}
+            {{- with $backup.podLabels }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
         spec:
-          {{- if and .Values.imageCredentials.username .Values.imageCredentials.password }}
+          {{- if and $.Values.imageCredentials.username $.Values.imageCredentials.password }}
           imagePullSecrets:
           - name: {{ include "template.name" . }}-pullsecret
           {{- end }}
-          restartPolicy: {{ .Values.postgresql.restartPolicy }}
-          {{- if .Values.postgresql.podSecurityContext }}
+          restartPolicy: {{ $backup.restartPolicy }}
+          {{- if $backup.podSecurityContext }}
           securityContext:
-            {{- toYaml .Values.postgresql.podSecurityContext | nindent 12 }}
+            {{- toYaml $backup.podSecurityContext | nindent 12 }}
           {{- end }}
           containers:
           - name: postgresql
-            {{- if .Values.postgresql.container.securityContext }}
+            {{- if $backup.container.securityContext }}
             securityContext:
-              {{- toYaml .Values.postgresql.container.securityContext | nindent 14 }}
+              {{- toYaml $backup.container.securityContext | nindent 14 }}
             {{- end }}
-            image: {{ printf "%s:%s" .Values.postgresql.image.repository (.Values.postgresql.image.tag | default printf "%s" "latest") }}
-            imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
-            {{- if .Values.postgresql.container.command }}
+            image: {{ printf "%s:%s" $backup.image.repository ($backup.image.tag | default "latest") }}
+            imagePullPolicy: {{ $backup.image.pullPolicy }}
+            {{- if $backup.container.command }}
             command:
-            {{- range .Values.postgresql.container.command }}
+            {{- range $backup.container.command }}
             - {{ . | quote }}
             {{- end }}
             {{- end }}
-            {{- if .Values.postgresql.container.args }}
+            {{- if $backup.container.args }}
             args:
-            {{- range .Values.postgresql.container.args }}
+            {{- range $backup.container.args }}
             - {{ . | quote }}
             {{- end }}
             {{- end }}
             ports:
-            - containerPort: {{ .Values.postgresql.container.port }}
+            - containerPort: {{ $backup.container.port }}
               protocol: TCP
             envFrom:
-            {{- if or .Values.postgresql.env .Values.global.env }}
+            {{- if or $backup.env $.Values.global.env }}
             - configMapRef:
-                name: {{ printf "%s-%s" (include "template.fullname" .) "postgresql" }}
+                name: {{ printf "%s-%s" (include "template.fullname" $) "postgresql" }}
             {{- end }}
-            {{- if or .Values.postgresql.secrets .Values.global.secrets }}
+            {{- if or $backup.secrets $.Values.global.secrets }}
             - secretRef:
-                name: {{ printf "%s-%s" (include "template.fullname" .) "postgresql" }}
+                name: {{ printf "%s-%s" (include "template.fullname" $) "postgresql" }}
             {{- end }}
-            {{- if .Values.postgresql.envFrom }}
-              {{- toYaml .Values.postgresql.envFrom | nindent 12 }}
+            {{- if $backup.envFrom }}
+              {{- toYaml $backup.envFrom | nindent 12 }}
             {{- end }}
             resources:
-              {{- toYaml .Values.postgresql.resources | nindent 14 }}
+              {{- toYaml $backup.resources | nindent 14 }}
+{{- end }}
 {{- end }}
