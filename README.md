@@ -41,7 +41,7 @@ sources:
 
 ## Dependencies updates
 
-A script is available to help upgrade charts dependencies :
+A script is available to help upgrade charts dependencies:
 
 ```sh
 ./ci/scripts/update-charts-dependencies.sh
@@ -49,22 +49,50 @@ A script is available to help upgrade charts dependencies :
 
 ## Template
 
-A [template folder](./template/) is available for easy integration of new chart, to use it follow the steps bellow :
+A [template folder](./template/) is available for easy integration of new chart, to use it follow the steps bellow:
 
-1. Copy the template directory :
+1. Copy the template directory:
     ```sh
+    # Clone the template chart
     cp -R ./template ./charts/<chart_name>
+
+    # Rename the chart
+    sed -i "s/chartname/<chart_name>/g" ./charts/<chart_name>/Chart.yaml
     ```
 
-2. Update `./charts/<chart_name>/Chart.yaml` and `./charts/<chart_name>/values.yaml` files.
-
-3. Optionally add other services :
+2. Update the service name.
     ```sh
-    cp -R ./charts/<chart_name>/templates/app ./charts/<chart_name>/templates/<service_name>
-    find ./charts/<chart_name>/templates/<service_name> -type f -exec perl -pi -e 's/"app"/"<service_name>"/g' {} \;
+    # Rename the templates directory
+    mv ./charts/<chart_name>/templates/servicename ./charts/<chart_name>/templates/<service_name>
+
+    # Update service name in template files
+    find ./charts/<chart_name>/templates/<service_name> -type f -exec sed -i "s/servicename/<service_name>/g" ./charts/<chart_name>/values.yaml {} \;
+
+    # Update service name in values file
+    yq eval ".<service_name> = .servicename | del(.servicename)" -i ./charts/<chart_name>/values.yaml
+    sed -i "s/servicename/<service_name>/g" ./charts/<chart_name>/values.yaml
     ```
-    
-    Next, add the appropriate block to the `./charts/<chart_name>/values.yaml` file.
+
+3. Optionally add another service:
+    ```sh
+    # Clone additional service
+    cp -R ./template/templates/servicename ./charts/<chart_name>/templates/<other_service_name>
+
+    # Update service name in template files
+    find ./charts/<chart_name>/templates/<other_service_name> -type f -exec sed -i "s/servicename/<other_service_name>/g" ./charts/<chart_name>/values.yaml {} \;
+
+    # Update service name in values file
+    yq eval ".<other_service_name> = load(\"./template/values.yaml\").servicename" -i ./charts/<chart_name>/values.yaml
+    sed -i "s/servicename/<other_service_name>/g" ./charts/<chart_name>/values.yaml
+    ```
+
+4. Update chart name
+    ```sh
+    # Update chart name in values
+    sed -i "s/chartname/<chart_name>/g" ./charts/<chart_name>/values.yaml
+    ```
+
+> Do not forget to change `<chart_name>`, `<service_name>` and `<other_service_name>` placeholders.
 
 ## Contributions
 

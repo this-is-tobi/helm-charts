@@ -3,20 +3,6 @@ nameOverride: ""
 # -- String to fully override the default application name.
 fullnameOverride: ""
 
-# Image credentials configuration.
-imageCredentials:
-  # -- Registry to pull images from.
-  # @section -- Image pull secret
-  registry: ""
-  # -- Username to pull images.
-  # @section -- Image pull secret
-  username: ""
-  # -- Password to pull images.
-  # @section -- Image pull secret
-  password: ""
-  # -- Email to pull images.
-  # @section -- Image pull secret
-  email: ""
 
 # Global configuration.
 global:
@@ -27,8 +13,12 @@ global:
   # @section -- Global
   secrets: {}
 
+
 # App configuration.
-app:
+servicename:
+  # -- Should the app run as a StatefulSet instead of a Deployment.
+  # @section -- App
+  statefulset: false
   # -- The number of application controller pods to run.
   # @section -- App
   replicaCount: 1
@@ -39,7 +29,7 @@ app:
     repository: "docker.io/debian"
     # -- Image pull policy for the app.
     # @section -- App
-    pullPolicy: "Always"
+    pullPolicy: "IfNotPresent"
     # -- Tag to use for the app.
     # @section -- App
     # Overrides the image tag whose default is the chart appVersion.
@@ -58,10 +48,23 @@ app:
     # -- Additional ingress labels.
     # @section -- App
     labels: {}
-    # -- The list of hosts to be covered by ingress record.
-    # @section -- App
     hosts:
-    - "domain.local"
+    - backend:
+        # -- Name of the backend service linked to the host record.
+        # @section -- App
+        serviceName: ""
+        # -- Port used by the backend service linked to the host record.
+        # @section -- App
+        portNumber: null
+      # -- Name of the host record.
+      # @section -- App
+      name: "domain.local"
+      # -- Path type of the host record.
+      # @section -- App
+      pathType: "Prefix"
+      # -- Path of the host record to manage routing.
+      # @section -- App
+      path: "/"
     # -- Enable TLS configuration.
     # @section -- App
     tls: []
@@ -134,11 +137,22 @@ app:
   # -- app container healthcheck endpoint.
   # @section -- App
   healthcheckPath: "/"
-  ## Deployment strategy for CPN app deployment.
+  ## Deployment strategy for app deployment.
   strategy:
     # -- Strategy type used to replace old Pods by new ones, can be "Recreate" or "RollingUpdate".
     # @section -- App
     type: "RollingUpdate"
+  # -- Image credentials configuration.
+  # @section -- App
+  imagePullSecrets: []
+  # - name: "pullsecret-name-1"
+  #   create: false
+  # - name: "pullsecret-name-2"
+  #   create: true
+  #   registry: ""
+  #   username: ""
+  #   password: ""
+  #   email: ""
   ## Startup probe for app.
   startupProbe:
     # -- Whether or not enable the probe.
@@ -166,7 +180,7 @@ app:
     enabled: true
     # -- Number of seconds after the container has started before probe is initiated.
     # @section -- App
-    initialDelaySeconds: 15
+    initialDelaySeconds: 10
     # -- Minimum consecutive successes for the probe to be considered successful after having failed.
     # @section -- App
     successThreshold: 2
@@ -184,19 +198,19 @@ app:
     # -- Whether or not enable the probe.
     # @section -- App
     enabled: true
-    # -- Whether or not enable the probe.
-    # @section -- App
-    initialDelaySeconds: 30
     # -- Number of seconds after the container has started before probe is initiated.
     # @section -- App
-    successThreshold: 1
+    initialDelaySeconds: 30
     # -- Minimum consecutive successes for the probe to be considered successful after having failed.
     # @section -- App
-    failureThreshold: 3
+    successThreshold: 1
     # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
     # @section -- App
-    periodSeconds: 30
+    failureThreshold: 3
     # -- How often (in seconds) to perform the probe.
+    # @section -- App
+    periodSeconds: 30
+    # -- Number of seconds after which the probe times out.
     # @section -- App
     timeoutSeconds: 5
   # -- Host aliases that will be injected at pod-level into /etc/hosts.
@@ -210,21 +224,48 @@ app:
   #   hostnames:
   #   - "foo.remote"
   #   - "bar.remote"
-  # -- List of extra volumes to add.
+  # -- List of volumes to add.
   # @section -- App
-  extraVolumes: []
-  # - name: extra-vol
-  #   path: /host/path
-  #   type: hostPath
-  # - name: extra-vol-cm
-  #   type: configMap
-  # -- List of extra mounts to add (normally used with extraVolumes).
+  volumes: []
+  # - name: config-volume
+  #   configMap:
+  #     name: log-config
+  #     items:
+  #       - key: log_level
+  #         path: log_level.conf
+  # - name: cache-volume
+  #   emptyDir:
+  #     sizeLimit: 500Mi
+  # - name: image-volume
+  #   image:
+  #     reference: quay.io/crio/artifact:v2
+  #     pullPolicy: IfNotPresent
+  # -- List of volumeClaims to add.
   # @section -- App
-  extraVolumeMounts: []
-  # - name: extra-vol
-  #   mountPath: /volume/path
-  # - name: extra-vol-cm
-  #   mountPath: /volume/cm/path
+  volumeClaims: []
+  # - metadata:
+  #     name: app-volume
+  #   spec:
+  #     accessModes: [ "ReadWriteOnce" ]
+  #     storageClassName: "my-storage-class"
+  #     resources:
+  #       requests:
+  #         storage: 1Gi
+  # -- List of mounts to add (normally used with `volumes` or `volumeClaims`).
+  # @section -- App
+  volumeMounts: []
+  # - name: config-volume
+  #   mountPath: /app/config
+  #   subPath: config
+  #   readOnly: true
+  #   mountPropagation: None
+  #   recursiveReadOnly: Enabled
+  # - name: cache-volume
+  #   mountPath: /app/cache
+  # - name: image-volume
+  #   mountPath: /app/content
+  # - name: storage-volume
+  #   mountPath: /app/storage
   service:
     # -- app service type.
     # @section -- App
@@ -266,15 +307,44 @@ app:
   # -- Default node selector for app.
   # @section -- App
   nodeSelector: {}
+    # kubernetes.io/os: "linux"
+    # kubernetes.io/arch: "amd64"
+    # kubernetes.io/hostname: "node1"
   # -- Default tolerations for app.
   # @section -- App
   tolerations: []
+  # - key: "key1"
+  #   operator: "Equal"
+  #   value: "value1"
+  #   effect: "NoSchedule"
+  #   tolerationSeconds: 3600
+  # - key: "key2"
+  #   operator: "Equal"
+  #   value: "value2"
+  #   effect: "NoExecute"
+  #   tolerationSeconds: 3600
+  # - key: "key3"
+  #   operator: "Exists"
+  #   effect: "PreferNoSchedule"
+  #   tolerationSeconds: 3600
   # -- Default affinity for app.
   # @section -- App
   affinity: {}
+    # podAntiAffinity:
+    #   requiredDuringSchedulingIgnoredDuringExecution:
+    #   - labelSelector:
+    #       matchExpressions:
+    #       - key: "app.kubernetes.io/name"
+    #         operator: "In"
+    #         values:
+    #         - "chartname-servicename"
+    #     topologyKey: "kubernetes.io/hostname"
     # App configuration.
   serviceAccount:
-    # -- Create a service account for the API.
+    # -- Enable the service account.
+    # @section -- App
+    enabled: false
+    # -- Create a service account.
     # @section -- App
     create: false
     # -- Annotations applied to created service account.
@@ -282,7 +352,58 @@ app:
     annotations: {}
     # -- Service account name.
     # @section -- App
-    name: "app-sa"
+    name: "servicename-sa"
+    # -- Should the service account access token be automount in the pod.
+    # @section -- App
+    automountServiceAccountToken: false
+
+
+# -- Add extra specs dynamically to this chart.
+# @section -- Extras
+extraObjects: []
+# - apiVersion: v1
+#   kind: ConfigMap
+#   metadata:
+#     name: my-configmap
+#   data:
+#     key: {{ .Values.fullname }}
+# - |
+#   apiVersion: v1
+#   kind: Secret
+#   metadata:
+#     name: my-secret
+#   type: Opaque
+#   data:
+#     password: {{ "secretpassword" | b64enc | quote }}
+# - apiVersion: secrets.hashicorp.com/v1beta1
+#   kind: VaultStaticSecret
+#   metadata:
+#     name: foo
+#     labels:
+#       foo/bar: "baz"
+#     annotations:
+#       foo/bar: "baz"
+#   spec:
+#     mount: "my-kv"
+#     vaultAuthRef: "my-vault-auth"
+#     path: "dev/foo"
+#     version: 21
+#     type: "kv-v2"
+#     refreshAfter: "30s"
+#     hmacSecretData: true
+#     rolloutRestartTargets:
+#     - kind: Deployment
+#       name: servicename
+#     destination:
+#       create: true
+#       overwrite: true
+#       labels:
+#         foo/bar: "baz"
+#       annotations:
+#         foo/bar: "baz"
+#       name: foo
+#       type: "Opaque"
+
 
 # Keycloak configuration.
 ## Ref: https://artifacthub.io/packages/helm/bitnami/keycloak
