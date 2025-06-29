@@ -214,7 +214,93 @@ servicename:
     create: true
     annotations:
       sa/foo: "bar"
-    name: "servicename-sa"
+    name: ""
+    role:
+      create: true
+      rules:
+      - apiGroups:
+        - argoproj.io
+        resources:
+        - applications
+        - applicationsets
+        - appprojects
+        verbs:
+        - create
+        - get
+        - list
+        - watch
+        - update
+        - delete
+        - patch
+    clusterRole:
+      create: true
+      rules:
+      - apiGroups:
+        - argoproj.io
+        resources:
+        - applications
+        - applicationsets
+        - appprojects
+        verbs:
+        - create
+        - get
+        - list
+        - watch
+        - update
+        - delete
+        - patch
+  networkPolicy:
+    create: true
+    ingress:
+    - from:
+      - ipBlock:
+          cidr: 172.17.0.0/16
+          except:
+          - 172.17.1.0/24
+      - namespaceSelector:
+          matchLabels:
+            project: myproject
+      - podSelector:
+          matchLabels:
+            role: frontend
+      ports:
+      - protocol: TCP
+        port: 6379
+    egress:
+    - to:
+      - ipBlock:
+          cidr: 10.0.0.0/24
+      ports:
+      - protocol: TCP
+        port: 32000
+        endPort: 32768
+  pdb:
+    enabled: true
+  metrics:
+    enabled: true
+    service:
+      annotations: {}
+      labels: {}
+      targetPort: 9090
+    serviceMonitor:
+      enabled: true
+      labels:
+        metrics/foo: "bar"
+      annotations:
+        metrics/foo: "bar"
+      endpoints:
+      - basicAuth:
+          username: "username"
+          password: "password"
+        interval: "30s"
+        path: "/metrics"
+        honorLabels: false
+        relabelings: []
+        metricRelabelings: []
+        selector:
+          prometheus: kube-prometheus
+        scheme: "http"
+        tlsConfig: {}
 
 extraObjects:
 - apiVersion: v1

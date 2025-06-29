@@ -327,7 +327,7 @@ servicename:
   #   operator: "Exists"
   #   effect: "PreferNoSchedule"
   #   tolerationSeconds: 3600
-  # -- Default affinity for app.
+  # -- Affinity used for app pod.
   # @section -- App
   affinity: {}
     # podAntiAffinity:
@@ -339,7 +339,6 @@ servicename:
     #         values:
     #         - "chartname-servicename"
     #     topologyKey: "kubernetes.io/hostname"
-    # App configuration.
   serviceAccount:
     # -- Enable the service account.
     # @section -- App
@@ -352,10 +351,176 @@ servicename:
     annotations: {}
     # -- Service account name.
     # @section -- App
-    name: "servicename-sa"
+    name: ""
     # -- Should the service account access token be automount in the pod.
     # @section -- App
     automountServiceAccountToken: false
+    role:
+      # -- Should the role be created.
+      # @section -- App
+      create: false
+      # -- Role rules associated with the service account.
+      # @section -- App
+      rules: []
+      # - apiGroups:
+      #   - argoproj.io
+      #   resources:
+      #   - applications
+      #   - applicationsets
+      #   - appprojects
+      #   verbs:
+      #   - create
+      #   - get
+      #   - list
+      #   - watch
+      #   - update
+      #   - delete
+      #   - patch
+    clusterRole:
+      # -- Should the clusterRole be created.
+      # @section -- App
+      create: false
+      # -- ClusterRole rules associated with the service account.
+      # @section -- App
+      rules: []
+      # - apiGroups:
+      #   - argoproj.io
+      #   resources:
+      #   - applications
+      #   - applicationsets
+      #   - appprojects
+      #   verbs:
+      #   - create
+      #   - get
+      #   - list
+      #   - watch
+      #   - update
+      #   - delete
+      #   - patch
+  ## Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+  pdb:
+    # -- Deploy a PodDisruptionBudget for the app
+    # @section -- App
+    enabled: false
+    # -- Labels to be added to app pdb.
+    # @section -- App
+    labels: {}
+    # -- Annotations to be added to app pdb.
+    # @section -- App
+    annotations: {}
+    # -- Number of pods that are available after eviction as number or percentage (eg.: 50%).
+    # @section -- App
+    # @default -- `""` (defaults to 0 if not specified)
+    minAvailable: ""
+    # -- Number of pods that are unavailable after eviction as number or percentage (eg.: 50%).
+    # @section -- App
+    ## Has higher precedence over `server.pdb.minAvailable`
+    maxUnavailable: ""
+  networkPolicy:
+    # -- Create NetworkPolicy object for the app.
+    # @section -- App
+    create: false
+    # -- Policy types used in the NetworkPolicy object.
+    # @section -- App
+    policyTypes:
+    - Ingress
+    # -- Ingress rules for the NetworkPolicy object.
+    # @section -- App
+    ingress: []
+    # - from:
+    #   - ipBlock:
+    #       cidr: 172.17.0.0/16
+    #       except:
+    #       - 172.17.1.0/24
+    #   - namespaceSelector:
+    #       matchLabels:
+    #         project: myproject
+    #   - podSelector:
+    #       matchLabels:
+    #         role: frontend
+    #   ports:
+    #   - protocol: TCP
+    #     port: 6379
+    # -- Egress rules for the NetworkPolicy object.
+    # @section -- App
+    egress: []
+    # - to:
+    #   - ipBlock:
+    #       cidr: 10.0.0.0/24
+    #   ports:
+    #   - protocol: TCP
+    #     port: 32000
+    #     endPort: 32768
+  metrics:
+    # -- Deploy metrics service.
+    # @section -- App
+    enabled: false
+    service:
+      # -- Metrics service annotations.
+      # @section -- App
+      annotations: {}
+      # -- Metrics service labels.
+      # @section -- App
+      labels: {}
+      # -- Metrics service port.
+      # @section -- App
+      port: 8080
+      # -- Metrics service target port.
+      # @section -- App
+      targetPort: 8080
+    serviceMonitor:
+      # -- Enable a prometheus ServiceMonitor.
+      # @section -- App
+      enabled: false
+      # -- Prometheus ServiceMonitor labels.
+      # @section -- App
+      labels: {}
+      # -- Prometheus ServiceMonitor annotations.
+      # @section -- App
+      annotations: {}
+      endpoints:
+      - basicAuth:
+          # -- The secret in the service monitor namespace that contains the username for authentication.
+          # @section -- App
+          username: ""
+          # -- The secret in the service monitor namespace that contains the password for authentication.
+          # @section -- App
+          password: ""
+        bearerTokenSecret:
+          # -- Secret name to mount to read bearer token for scraping targets. The secret needs to be in the same namespace as the service monitor and accessible by the Prometheus Operator.
+          # @section -- App
+          name: ""
+          # -- Secret key to mount to read bearer token for scraping targets. The secret needs to be in the same namespace as the service monitor and accessible by the Prometheus Operator.
+          # @section -- App
+          key: ""
+        # -- Prometheus ServiceMonitor interval.
+        # @section -- App
+        interval: "30s"
+        # -- Prometheus ServiceMonitor scrapeTimeout. If empty, Prometheus uses the global scrape timeout unless it is less than the target's scrape interval value in which the latter is used.
+          # @section -- App
+        scrapeTimeout: "10s"
+        # -- Path used by the Prometheus ServiceMonitor to scrape metrics.
+        # @section -- App
+        path: "/metrics"
+        # -- When true, honorLabels preserves the metric’s labels when they collide with the target’s labels.
+        # @section -- App
+        honorLabels: false
+        # -- Prometheus RelabelConfigs to apply to samples before scraping.
+        # @section -- App
+        relabelings: []
+        # -- Prometheus MetricRelabelConfigs to apply to samples before ingestion.
+        # @section -- App
+        metricRelabelings: []
+        # -- Prometheus ServiceMonitor selector.
+        # @section -- App
+        selector: {}
+          # prometheus: kube-prometheus
+        # -- Prometheus ServiceMonitor scheme.
+        # @section -- App
+        scheme: ""
+        # -- Prometheus ServiceMonitor tlsConfig.
+        # @section -- App
+        tlsConfig: {}
 
 
 # -- Add extra specs dynamically to this chart.

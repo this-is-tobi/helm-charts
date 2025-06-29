@@ -1,0 +1,15 @@
+{{- if and .Values.servicename.serviceAccount.enabled .Values.servicename.serviceAccount.role.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ printf "%s-%s" (include "helper.fullname" .) "servicename" }}
+  labels: {{- (include "helper.labels" (dict "root" . "componentName" "servicename")) | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ printf "%s-%s" (include "helper.fullname" .) "servicename" }}
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.servicename.serviceAccount.name | default (printf "%s-%s" (include "helper.fullname" .) "servicename") }}
+  namespace: {{ .Release.Namespace }}
+{{- end }}

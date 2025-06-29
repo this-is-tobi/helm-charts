@@ -60,7 +60,7 @@ A [template folder](./template/) is available for easy integration of new chart,
     sed -i "s/chartname/<chart_name>/g" ./charts/<chart_name>/Chart.yaml
     ```
 
-2. Update the service name.
+2. Update the service name:
     ```sh
     # Rename the templates directory
     mv ./charts/<chart_name>/templates/servicename ./charts/<chart_name>/templates/<service_name>
@@ -86,7 +86,7 @@ A [template folder](./template/) is available for easy integration of new chart,
     sed -i "s/servicename/<other_service_name>/g" ./charts/<chart_name>/values.yaml
     ```
 
-4. Update chart name
+4. Update chart name:
     ```sh
     # Update chart name in values
     sed -i "s/chartname/<chart_name>/g" ./charts/<chart_name>/values.yaml

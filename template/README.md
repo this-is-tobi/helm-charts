@@ -69,7 +69,7 @@ chartname:
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| servicename.affinity | object | `{}` | Default affinity for app. |
+| servicename.affinity | object | `{}` | Affinity used for app pod. |
 | servicename.autoscaling.enabled | bool | `false` | Enable Horizontal Pod Autoscaler ([HPA]) for the app. |
 | servicename.autoscaling.maxReplicas | int | `3` | Maximum number of replicas for the app [HPA]. |
 | servicename.autoscaling.minReplicas | int | `1` | Minimum number of replicas for the app [HPA]. |
@@ -105,7 +105,37 @@ chartname:
 | servicename.livenessProbe.periodSeconds | int | `30` | How often (in seconds) to perform the probe. |
 | servicename.livenessProbe.successThreshold | int | `1` | Minimum consecutive successes for the probe to be considered successful after having failed. |
 | servicename.livenessProbe.timeoutSeconds | int | `5` | Number of seconds after which the probe times out. |
+| servicename.metrics.enabled | bool | `false` | Deploy metrics service. |
+| servicename.metrics.service.annotations | object | `{}` | Metrics service annotations. |
+| servicename.metrics.service.labels | object | `{}` | Metrics service labels. |
+| servicename.metrics.service.port | int | `8080` | Metrics service port. |
+| servicename.metrics.service.targetPort | int | `8080` | Metrics service target port. |
+| servicename.metrics.serviceMonitor.annotations | object | `{}` | Prometheus ServiceMonitor annotations. |
+| servicename.metrics.serviceMonitor.enabled | bool | `false` | Enable a prometheus ServiceMonitor. |
+| servicename.metrics.serviceMonitor.endpoints[0].basicAuth.password | string | `""` | The secret in the service monitor namespace that contains the password for authentication. |
+| servicename.metrics.serviceMonitor.endpoints[0].basicAuth.username | string | `""` | The secret in the service monitor namespace that contains the username for authentication. |
+| servicename.metrics.serviceMonitor.endpoints[0].bearerTokenSecret.key | string | `""` | Secret key to mount to read bearer token for scraping targets. The secret needs to be in the same namespace as the service monitor and accessible by the Prometheus Operator. |
+| servicename.metrics.serviceMonitor.endpoints[0].bearerTokenSecret.name | string | `""` | Secret name to mount to read bearer token for scraping targets. The secret needs to be in the same namespace as the service monitor and accessible by the Prometheus Operator. |
+| servicename.metrics.serviceMonitor.endpoints[0].honorLabels | bool | `false` | When true, honorLabels preserves the metric’s labels when they collide with the target’s labels. |
+| servicename.metrics.serviceMonitor.endpoints[0].interval | string | `"30s"` | Prometheus ServiceMonitor interval. |
+| servicename.metrics.serviceMonitor.endpoints[0].metricRelabelings | list | `[]` | Prometheus MetricRelabelConfigs to apply to samples before ingestion. |
+| servicename.metrics.serviceMonitor.endpoints[0].path | string | `"/metrics"` | Path used by the Prometheus ServiceMonitor to scrape metrics. |
+| servicename.metrics.serviceMonitor.endpoints[0].relabelings | list | `[]` | Prometheus RelabelConfigs to apply to samples before scraping. |
+| servicename.metrics.serviceMonitor.endpoints[0].scheme | string | `""` | Prometheus ServiceMonitor scheme. |
+| servicename.metrics.serviceMonitor.endpoints[0].scrapeTimeout | string | `"10s"` | Prometheus ServiceMonitor scrapeTimeout. If empty, Prometheus uses the global scrape timeout unless it is less than the target's scrape interval value in which the latter is used. |
+| servicename.metrics.serviceMonitor.endpoints[0].selector | object | `{}` | Prometheus ServiceMonitor selector. |
+| servicename.metrics.serviceMonitor.endpoints[0].tlsConfig | object | `{}` | Prometheus ServiceMonitor tlsConfig. |
+| servicename.metrics.serviceMonitor.labels | object | `{}` | Prometheus ServiceMonitor labels. |
+| servicename.networkPolicy.create | bool | `false` | Create NetworkPolicy object for the app. |
+| servicename.networkPolicy.egress | list | `[]` | Egress rules for the NetworkPolicy object. |
+| servicename.networkPolicy.ingress | list | `[]` | Ingress rules for the NetworkPolicy object. |
+| servicename.networkPolicy.policyTypes | list | `["Ingress"]` | Policy types used in the NetworkPolicy object. |
 | servicename.nodeSelector | object | `{}` | Default node selector for app. |
+| servicename.pdb.annotations | object | `{}` | Annotations to be added to app pdb. |
+| servicename.pdb.enabled | bool | `false` | Deploy a PodDisruptionBudget for the app |
+| servicename.pdb.labels | object | `{}` | Labels to be added to app pdb. |
+| servicename.pdb.maxUnavailable | string | `""` | Number of pods that are unavailable after eviction as number or percentage (eg.: 50%). # Has higher precedence over `server.pdb.minAvailable` |
+| servicename.pdb.minAvailable | string | `""` (defaults to 0 if not specified) | Number of pods that are available after eviction as number or percentage (eg.: 50%). |
 | servicename.podAnnotations | object | `{}` | Annotations for the app deployed pods. |
 | servicename.podLabels | object | `{}` | Labels for the app deployed pods. |
 | servicename.podSecurityContext | object | `{}` | Toggle and define pod-level security context. |
@@ -125,9 +155,13 @@ chartname:
 | servicename.service.type | string | `"ClusterIP"` | app service type. |
 | servicename.serviceAccount.annotations | object | `{}` | Annotations applied to created service account. |
 | servicename.serviceAccount.automountServiceAccountToken | bool | `false` | Should the service account access token be automount in the pod. |
+| servicename.serviceAccount.clusterRole.create | bool | `false` | Should the clusterRole be created. |
+| servicename.serviceAccount.clusterRole.rules | list | `[]` | ClusterRole rules associated with the service account. |
 | servicename.serviceAccount.create | bool | `false` | Create a service account. |
 | servicename.serviceAccount.enabled | bool | `false` | Enable the service account. |
-| servicename.serviceAccount.name | string | `"servicename-sa"` | Service account name. |
+| servicename.serviceAccount.name | string | `""` | Service account name. |
+| servicename.serviceAccount.role.create | bool | `false` | Should the role be created. |
+| servicename.serviceAccount.role.rules | list | `[]` | Role rules associated with the service account. |
 | servicename.startupProbe.enabled | bool | `true` | Whether or not enable the probe. |
 | servicename.startupProbe.failureThreshold | int | `10` | Minimum consecutive failures for the probe to be considered failed after having succeeded. |
 | servicename.startupProbe.initialDelaySeconds | int | `0` | Number of seconds after the container has started before probe is initiated. |

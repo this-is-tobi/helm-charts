@@ -97,7 +97,7 @@ Parameters:
 */}}
 {{- define "helper.selectorLabels" -}}
 {{- $root := .root | default $ -}}
-{{- $componentName := .componentName | default "servicename" -}}
+{{- $componentName := .componentName | default "app" -}}
 app.kubernetes.io/name: {{ printf "%s-%s" (include "helper.fullname" $root) $componentName | trunc 63 | trimSuffix "-" }}
 app.kubernetes.io/instance: {{ $root.Release.Name | trunc 63 | trimSuffix "-" }}
 {{- end -}}
@@ -110,7 +110,7 @@ Parameters:
 */}}
 {{- define "helper.labels" -}}
 {{- $root := .root -}}
-{{- $componentName := .componentName | default "servicename" -}}
+{{- $componentName := .componentName | default "app" -}}
 {{ include "helper.commonLabels" $root }}
 {{ include "helper.selectorLabels" (dict "root" $root "componentName" $componentName) }}
 {{- end -}}
