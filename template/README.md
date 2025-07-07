@@ -52,20 +52,22 @@ chartname:
 
 ## Values
 
-### Extras
+### General
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | extraObjects | list | `[]` | Add extra specs dynamically to this chart. |
+| fullnameOverride | string | `""` | String to fully override the default application name. |
+| nameOverride | string | `""` | Provide a name in place of the default application name. |
 
 ### Global
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| global.env | object | `{}` | Map of environment variables to inject into backend and frontend containers. |
-| global.secrets | object | `{}` | Map of environment variables to inject into backend and frontend containers. |
+| global.env | object | `{}` | Map of environment variables to inject into all containers. |
+| global.secrets | object | `{}` | Map of environment variables to inject into all containers. |
 
-### App
+### Servicename
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
@@ -75,14 +77,14 @@ chartname:
 | servicename.autoscaling.minReplicas | int | `1` | Minimum number of replicas for the app [HPA]. |
 | servicename.autoscaling.targetCPUUtilizationPercentage | int | `80` | Average CPU utilization percentage for the app [HPA]. |
 | servicename.autoscaling.targetMemoryUtilizationPercentage | int | `80` | Average memory utilization percentage for the app [HPA]. |
-| servicename.container.args | list | `[]` | app container command args. |
-| servicename.container.command | list | `[]` | app container command. |
-| servicename.container.port | int | `8080` | app container port. |
+| servicename.container.args | list | `[]` | Servicename container command args. |
+| servicename.container.command | list | `[]` | Servicename container command. |
+| servicename.container.port | int | `8080` | Servicename container port. |
 | servicename.container.securityContext | object | `{}` | Toggle and define container-level security context. |
-| servicename.env | object | `{}` | app container env variables, it will be injected into a configmap and loaded into the container. |
-| servicename.envFrom | list | `[]` | app container env variables loaded from configmap or secret reference. |
+| servicename.env | object | `{}` | Servicename container env variables, it will be injected into a configmap and loaded into the container. |
+| servicename.envFrom | list | `[]` | Servicename container env variables loaded from configmap or secret reference. |
 | servicename.extraContainers | list | `[]` | Extra containers to add to the app pod as sidecars. |
-| servicename.healthcheckPath | string | `"/"` | app container healthcheck endpoint. |
+| servicename.healthcheckPath | string | `"/"` | Servicename container healthcheck endpoint. |
 | servicename.hostAliases | list | `[]` | Host aliases that will be injected at pod-level into /etc/hosts. |
 | servicename.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the app. |
 | servicename.image.repository | string | `"docker.io/debian"` | Repository to use for the app. |
@@ -134,7 +136,7 @@ chartname:
 | servicename.pdb.annotations | object | `{}` | Annotations to be added to app pdb. |
 | servicename.pdb.enabled | bool | `false` | Deploy a PodDisruptionBudget for the app |
 | servicename.pdb.labels | object | `{}` | Labels to be added to app pdb. |
-| servicename.pdb.maxUnavailable | string | `""` | Number of pods that are unavailable after eviction as number or percentage (eg.: 50%). # Has higher precedence over `server.pdb.minAvailable` |
+| servicename.pdb.maxUnavailable | string | `""` | Number of pods that are unavailable after eviction as number or percentage (eg.: 50%). Has higher precedence over `servicename.pdb.minAvailable`. |
 | servicename.pdb.minAvailable | string | `""` (defaults to 0 if not specified) | Number of pods that are available after eviction as number or percentage (eg.: 50%). |
 | servicename.podAnnotations | object | `{}` | Annotations for the app deployed pods. |
 | servicename.podLabels | object | `{}` | Labels for the app deployed pods. |
@@ -150,9 +152,9 @@ chartname:
 | servicename.resources.limits.memory | string | `"2Gi"` | Memory limit for the app. |
 | servicename.resources.requests.cpu | string | `"100m"` | CPU request for the app. |
 | servicename.resources.requests.memory | string | `"256Mi"` | Memory request for the app. |
-| servicename.secrets | object | `{}` | app container env secrets, it will be injected into a secret and loaded into the container. |
-| servicename.service.port | int | `80` | app service port. |
-| servicename.service.type | string | `"ClusterIP"` | app service type. |
+| servicename.secrets | object | `{}` | Servicename container env secrets, it will be injected into a secret and loaded into the container. |
+| servicename.service.port | int | `80` | Servicename service port. |
+| servicename.service.type | string | `"ClusterIP"` | Servicename service type. |
 | servicename.serviceAccount.annotations | object | `{}` | Annotations applied to created service account. |
 | servicename.serviceAccount.automountServiceAccountToken | bool | `false` | Should the service account access token be automount in the pod. |
 | servicename.serviceAccount.clusterRole.create | bool | `false` | Should the clusterRole be created. |
@@ -169,18 +171,11 @@ chartname:
 | servicename.startupProbe.successThreshold | int | `1` | Minimum consecutive successes for the probe to be considered successful after having failed. |
 | servicename.startupProbe.timeoutSeconds | int | `5` | Number of seconds after which the probe times out. |
 | servicename.statefulset | bool | `false` | Should the app run as a StatefulSet instead of a Deployment. |
-| servicename.strategy.type | string | `"RollingUpdate"` | Strategy type used to replace old Pods by new ones, can be "Recreate" or "RollingUpdate". |
+| servicename.strategy.type | string | `"RollingUpdate"` | Strategy type used to replace old Pods by new ones, can be `Recreate` or `RollingUpdate`. |
 | servicename.tolerations | list | `[]` | Default tolerations for app. |
 | servicename.volumeClaims | list | `[]` | List of volumeClaims to add. |
 | servicename.volumeMounts | list | `[]` | List of mounts to add (normally used with `volumes` or `volumeClaims`). |
 | servicename.volumes | list | `[]` | List of volumes to add. |
-
-### Other Values
-
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| fullnameOverride | string | `""` | String to fully override the default application name. |
-| nameOverride | string | `""` | Provide a name in place of the default application name. |
 
 ## Sources
 

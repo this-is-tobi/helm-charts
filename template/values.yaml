@@ -1,88 +1,86 @@
 # -- Provide a name in place of the default application name.
+# @section -- General
 nameOverride: ""
 # -- String to fully override the default application name.
+# @section -- General
 fullnameOverride: ""
 
 
-# Global configuration.
 global:
-  # -- Map of environment variables to inject into backend and frontend containers.
+  # -- Map of environment variables to inject into all containers.
   # @section -- Global
   env: {}
-  # -- Map of environment variables to inject into backend and frontend containers.
+  # -- Map of environment variables to inject into all containers.
   # @section -- Global
   secrets: {}
 
 
-# App configuration.
 servicename:
   # -- Should the app run as a StatefulSet instead of a Deployment.
-  # @section -- App
+  # @section -- Servicename
   statefulset: false
   # -- The number of application controller pods to run.
-  # @section -- App
+  # @section -- Servicename
   replicaCount: 1
-  ## App image.
   image:
     # -- Repository to use for the app.
-    # @section -- App
+    # @section -- Servicename
     repository: "docker.io/debian"
     # -- Image pull policy for the app.
-    # @section -- App
+    # @section -- Servicename
     pullPolicy: "IfNotPresent"
     # -- Tag to use for the app.
-    # @section -- App
+    # @section -- Servicename
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-  ## Ingress configuration.
   ingress:
     # -- Whether or not ingress should be enabled.
-    # @section -- App
+    # @section -- Servicename
     enabled: true
     # -- Defines which ingress controller will implement the resource.
-    # @section -- App
+    # @section -- Servicename
     className: ""
     # -- Additional ingress annotations.
-    # @section -- App
+    # @section -- Servicename
     annotations: {}
     # -- Additional ingress labels.
-    # @section -- App
+    # @section -- Servicename
     labels: {}
     hosts:
     - backend:
         # -- Name of the backend service linked to the host record.
-        # @section -- App
+        # @section -- Servicename
         serviceName: ""
         # -- Port used by the backend service linked to the host record.
-        # @section -- App
+        # @section -- Servicename
         portNumber: null
       # -- Name of the host record.
-      # @section -- App
+      # @section -- Servicename
       name: "domain.local"
       # -- Path type of the host record.
-      # @section -- App
+      # @section -- Servicename
       pathType: "Prefix"
       # -- Path of the host record to manage routing.
-      # @section -- App
+      # @section -- Servicename
       path: "/"
     # -- Enable TLS configuration.
-    # @section -- App
+    # @section -- Servicename
     tls: []
     # - secretName: domain.local-tls
     #   hosts:
     #   - domain.local
   # -- Annotations for the app deployed pods.
-  # @section -- App
+  # @section -- Servicename
   podAnnotations: {}
   # -- Labels for the app deployed pods.
-  # @section -- App
+  # @section -- Servicename
   podLabels: {}
   # -- Toggle and define pod-level security context.
-  # @section -- App
+  # @section -- Servicename
   podSecurityContext: {}
     # fsGroup: 2000
   # -- Init containers to add to the app pod.
-  # @section -- App
+  # @section -- Servicename
   initContainers: []
   # - name: wait-for-keycloak
   #   image: docker.io/curlimages/curl:latest
@@ -95,17 +93,17 @@ servicename:
   #   - mountPath: /custom-volume
   #     name: custom-volume
   container:
-    # -- app container port.
-    # @section -- App
+    # -- Servicename container port.
+    # @section -- Servicename
     port: 8080
-    # -- app container command.
-    # @section -- App
+    # -- Servicename container command.
+    # @section -- Servicename
     command: []
-    # -- app container command args.
-    # @section -- App
+    # -- Servicename container command args.
+    # @section -- Servicename
     args: []
     # -- Toggle and define container-level security context.
-    # @section -- App
+    # @section -- Servicename
     securityContext: {}
       # capabilities:
       #   drop:
@@ -114,36 +112,35 @@ servicename:
       # runAsNonRoot: true
       # runAsUser: 1000
   # -- Extra containers to add to the app pod as sidecars.
-  # @section -- App
+  # @section -- Servicename
   extraContainers: []
   # - name: fluentd
   #   image: "fluentd"
   #   volumeMounts:
   #     - mountPath: /my-volume/config
   #       name: config
-  # -- app container env variables loaded from configmap or secret reference.
-  # @section -- App
+  # -- Servicename container env variables loaded from configmap or secret reference.
+  # @section -- Servicename
   envFrom: []
   # - configMapRef:
   #     name: my-config
   # - secretRef:
   #     name: my-secret
-  # -- app container env variables, it will be injected into a configmap and loaded into the container.
-  # @section -- App
+  # -- Servicename container env variables, it will be injected into a configmap and loaded into the container.
+  # @section -- Servicename
   env: {}
-  # -- app container env secrets, it will be injected into a secret and loaded into the container.
-  # @section -- App
+  # -- Servicename container env secrets, it will be injected into a secret and loaded into the container.
+  # @section -- Servicename
   secrets: {}
-  # -- app container healthcheck endpoint.
-  # @section -- App
+  # -- Servicename container healthcheck endpoint.
+  # @section -- Servicename
   healthcheckPath: "/"
-  ## Deployment strategy for app deployment.
   strategy:
-    # -- Strategy type used to replace old Pods by new ones, can be "Recreate" or "RollingUpdate".
-    # @section -- App
+    # -- Strategy type used to replace old Pods by new ones, can be `Recreate` or `RollingUpdate`.
+    # @section -- Servicename
     type: "RollingUpdate"
   # -- Image credentials configuration.
-  # @section -- App
+  # @section -- Servicename
   imagePullSecrets: []
   # - name: "pullsecret-name-1"
   #   create: false
@@ -153,68 +150,65 @@ servicename:
   #   username: ""
   #   password: ""
   #   email: ""
-  ## Startup probe for app.
   startupProbe:
     # -- Whether or not enable the probe.
-    # @section -- App
+    # @section -- Servicename
     enabled: true
     # -- Number of seconds after the container has started before probe is initiated.
-    # @section -- App
+    # @section -- Servicename
     initialDelaySeconds: 0
     # -- Minimum consecutive successes for the probe to be considered successful after having failed.
-    # @section -- App
+    # @section -- Servicename
     successThreshold: 1
     # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
-    # @section -- App
+    # @section -- Servicename
     failureThreshold: 10
     # -- How often (in seconds) to perform the probe.
-    # @section -- App
+    # @section -- Servicename
     periodSeconds: 10
     # -- Number of seconds after which the probe times out.
-    # @section -- App
+    # @section -- Servicename
     timeoutSeconds: 5
-  ## Readiness probe for app.
   readinessProbe:
     # -- Whether or not enable the probe.
-    # @section -- App
+    # @section -- Servicename
     enabled: true
     # -- Number of seconds after the container has started before probe is initiated.
-    # @section -- App
+    # @section -- Servicename
     initialDelaySeconds: 10
     # -- Minimum consecutive successes for the probe to be considered successful after having failed.
-    # @section -- App
+    # @section -- Servicename
     successThreshold: 2
     # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
-    # @section -- App
+    # @section -- Servicename
     failureThreshold: 2
     # -- How often (in seconds) to perform the probe.
-    # @section -- App
+    # @section -- Servicename
     periodSeconds: 10
     # -- Number of seconds after which the probe times out.
-    # @section -- App
+    # @section -- Servicename
     timeoutSeconds: 5
-  ## Liveness probe for app.
   livenessProbe:
     # -- Whether or not enable the probe.
-    # @section -- App
+    # @section -- Servicename
     enabled: true
     # -- Number of seconds after the container has started before probe is initiated.
-    # @section -- App
+    # @section -- Servicename
     initialDelaySeconds: 30
     # -- Minimum consecutive successes for the probe to be considered successful after having failed.
-    # @section -- App
+    # @section -- Servicename
     successThreshold: 1
     # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
-    # @section -- App
+    # @section -- Servicename
     failureThreshold: 3
     # -- How often (in seconds) to perform the probe.
-    # @section -- App
+    # @section -- Servicename
     periodSeconds: 30
     # -- Number of seconds after which the probe times out.
-    # @section -- App
+    # @section -- Servicename
     timeoutSeconds: 5
   # -- Host aliases that will be injected at pod-level into /etc/hosts.
-  # @section -- App
+  # @section -- Servicename
   hostAliases: []
   # - ip: "127.0.0.1"
   #   hostnames:
@@ -225,7 +219,7 @@ servicename:
   #   - "foo.remote"
   #   - "bar.remote"
   # -- List of volumes to add.
-  # @section -- App
+  # @section -- Servicename
   volumes: []
   # - name: config-volume
   #   configMap:
@@ -241,7 +235,7 @@ servicename:
   #     reference: quay.io/crio/artifact:v2
   #     pullPolicy: IfNotPresent
   # -- List of volumeClaims to add.
-  # @section -- App
+  # @section -- Servicename
   volumeClaims: []
   # - metadata:
   #     name: app-volume
@@ -252,7 +246,7 @@ servicename:
   #       requests:
   #         storage: 1Gi
   # -- List of mounts to add (normally used with `volumes` or `volumeClaims`).
-  # @section -- App
+  # @section -- Servicename
   volumeMounts: []
   # - name: config-volume
   #   mountPath: /app/config
@@ -267,51 +261,51 @@ servicename:
   # - name: storage-volume
   #   mountPath: /app/storage
   service:
-    # -- app service type.
-    # @section -- App
+    # -- Servicename service type.
+    # @section -- Servicename
     type: "ClusterIP"
-    # -- app service port.
-    # @section -- App
+    # -- Servicename service port.
+    # @section -- Servicename
     port: 80
   resources:
     requests:
       # -- Memory request for the app.
-      # @section -- App
+      # @section -- Servicename
       memory: "256Mi"
       # -- CPU request for the app.
-      # @section -- App
+      # @section -- Servicename
       cpu: "100m"
     limits:
       # -- Memory limit for the app.
-      # @section -- App
+      # @section -- Servicename
       memory: "2Gi"
       # -- CPU limit for the app.
-      # @section -- App
+      # @section -- Servicename
       cpu: "500m"
   autoscaling:
     # -- Enable Horizontal Pod Autoscaler ([HPA]) for the app.
-    # @section -- App
+    # @section -- Servicename
     enabled: false
     # -- Minimum number of replicas for the app [HPA].
-    # @section -- App
+    # @section -- Servicename
     minReplicas: 1
     # -- Maximum number of replicas for the app [HPA].
-    # @section -- App
+    # @section -- Servicename
     maxReplicas: 3
     # -- Average CPU utilization percentage for the app [HPA].
-    # @section -- App
+    # @section -- Servicename
     targetCPUUtilizationPercentage: 80
     # -- Average memory utilization percentage for the app [HPA].
-    # @section -- App
+    # @section -- Servicename
     targetMemoryUtilizationPercentage: 80
   # -- Default node selector for app.
-  # @section -- App
+  # @section -- Servicename
   nodeSelector: {}
     # kubernetes.io/os: "linux"
     # kubernetes.io/arch: "amd64"
     # kubernetes.io/hostname: "node1"
   # -- Default tolerations for app.
-  # @section -- App
+  # @section -- Servicename
   tolerations: []
   # - key: "key1"
   #   operator: "Equal"
@@ -328,7 +322,7 @@ servicename:
   #   effect: "PreferNoSchedule"
   #   tolerationSeconds: 3600
   # -- Affinity used for app pod.
-  # @section -- App
+  # @section -- Servicename
   affinity: {}
     # podAntiAffinity:
     #   requiredDuringSchedulingIgnoredDuringExecution:
@@ -341,26 +335,26 @@ servicename:
     #     topologyKey: "kubernetes.io/hostname"
   serviceAccount:
     # -- Enable the service account.
-    # @section -- App
+    # @section -- Servicename
     enabled: false
     # -- Create a service account.
-    # @section -- App
+    # @section -- Servicename
     create: false
     # -- Annotations applied to created service account.
-    # @section -- App
+    # @section -- Servicename
     annotations: {}
     # -- Service account name.
-    # @section -- App
+    # @section -- Servicename
     name: ""
     # -- Should the service account access token be automount in the pod.
-    # @section -- App
+    # @section -- Servicename
     automountServiceAccountToken: false
     role:
       # -- Should the role be created.
-      # @section -- App
+      # @section -- Servicename
       create: false
       # -- Role rules associated with the service account.
-      # @section -- App
+      # @section -- Servicename
       rules: []
       # - apiGroups:
       #   - argoproj.io
@@ -378,10 +372,10 @@ servicename:
       #   - patch
     clusterRole:
       # -- Should the clusterRole be created.
-      # @section -- App
+      # @section -- Servicename
       create: false
       # -- ClusterRole rules associated with the service account.
-      # @section -- App
+      # @section -- Servicename
       rules: []
       # - apiGroups:
       #   - argoproj.io
@@ -400,32 +394,31 @@ servicename:
   ## Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
   pdb:
     # -- Deploy a PodDisruptionBudget for the app
-    # @section -- App
+    # @section -- Servicename
     enabled: false
     # -- Labels to be added to app pdb.
-    # @section -- App
+    # @section -- Servicename
     labels: {}
     # -- Annotations to be added to app pdb.
-    # @section -- App
+    # @section -- Servicename
     annotations: {}
     # -- Number of pods that are available after eviction as number or percentage (eg.: 50%).
-    # @section -- App
+    # @section -- Servicename
     # @default -- `""` (defaults to 0 if not specified)
     minAvailable: ""
-    # -- Number of pods that are unavailable after eviction as number or percentage (eg.: 50%).
-    # @section -- App
-    ## Has higher precedence over `server.pdb.minAvailable`
+    # -- Number of pods that are unavailable after eviction as number or percentage (eg.: 50%). Has higher precedence over `servicename.pdb.minAvailable`.
+    # @section -- Servicename
     maxUnavailable: ""
   networkPolicy:
     # -- Create NetworkPolicy object for the app.
-    # @section -- App
+    # @section -- Servicename
     create: false
     # -- Policy types used in the NetworkPolicy object.
-    # @section -- App
+    # @section -- Servicename
     policyTypes:
     - Ingress
     # -- Ingress rules for the NetworkPolicy object.
-    # @section -- App
+    # @section -- Servicename
     ingress: []
     # - from:
     #   - ipBlock:
@@ -442,7 +435,7 @@ servicename:
     #   - protocol: TCP
     #     port: 6379
     # -- Egress rules for the NetworkPolicy object.
-    # @section -- App
+    # @section -- Servicename
     egress: []
     # - to:
     #   - ipBlock:
@@ -453,78 +446,78 @@ servicename:
     #     endPort: 32768
   metrics:
     # -- Deploy metrics service.
-    # @section -- App
+    # @section -- Servicename
     enabled: false
     service:
       # -- Metrics service annotations.
-      # @section -- App
+      # @section -- Servicename
       annotations: {}
       # -- Metrics service labels.
-      # @section -- App
+      # @section -- Servicename
       labels: {}
       # -- Metrics service port.
-      # @section -- App
+      # @section -- Servicename
       port: 8080
       # -- Metrics service target port.
-      # @section -- App
+      # @section -- Servicename
       targetPort: 8080
     serviceMonitor:
       # -- Enable a prometheus ServiceMonitor.
-      # @section -- App
+      # @section -- Servicename
       enabled: false
       # -- Prometheus ServiceMonitor labels.
-      # @section -- App
+      # @section -- Servicename
       labels: {}
       # -- Prometheus ServiceMonitor annotations.
-      # @section -- App
+      # @section -- Servicename
       annotations: {}
       endpoints:
       - basicAuth:
           # -- The secret in the service monitor namespace that contains the username for authentication.
-          # @section -- App
+          # @section -- Servicename
           username: ""
           # -- The secret in the service monitor namespace that contains the password for authentication.
-          # @section -- App
+          # @section -- Servicename
           password: ""
         bearerTokenSecret:
           # -- Secret name to mount to read bearer token for scraping targets. The secret needs to be in the same namespace as the service monitor and accessible by the Prometheus Operator.
-          # @section -- App
+          # @section -- Servicename
           name: ""
           # -- Secret key to mount to read bearer token for scraping targets. The secret needs to be in the same namespace as the service monitor and accessible by the Prometheus Operator.
-          # @section -- App
+          # @section -- Servicename
           key: ""
         # -- Prometheus ServiceMonitor interval.
-        # @section -- App
+        # @section -- Servicename
         interval: "30s"
         # -- Prometheus ServiceMonitor scrapeTimeout. If empty, Prometheus uses the global scrape timeout unless it is less than the target's scrape interval value in which the latter is used.
-          # @section -- App
+          # @section -- Servicename
         scrapeTimeout: "10s"
         # -- Path used by the Prometheus ServiceMonitor to scrape metrics.
-        # @section -- App
+        # @section -- Servicename
         path: "/metrics"
         # -- When true, honorLabels preserves the metric’s labels when they collide with the target’s labels.
-        # @section -- App
+        # @section -- Servicename
         honorLabels: false
         # -- Prometheus RelabelConfigs to apply to samples before scraping.
-        # @section -- App
+        # @section -- Servicename
         relabelings: []
         # -- Prometheus MetricRelabelConfigs to apply to samples before ingestion.
-        # @section -- App
+        # @section -- Servicename
         metricRelabelings: []
         # -- Prometheus ServiceMonitor selector.
-        # @section -- App
+        # @section -- Servicename
         selector: {}
           # prometheus: kube-prometheus
         # -- Prometheus ServiceMonitor scheme.
-        # @section -- App
+        # @section -- Servicename
         scheme: ""
         # -- Prometheus ServiceMonitor tlsConfig.
-        # @section -- App
+        # @section -- Servicename
         tlsConfig: {}
 
 
 # -- Add extra specs dynamically to this chart.
-# @section -- Extras
+# @section -- General
 extraObjects: []
 # - apiVersion: v1
 #   kind: ConfigMap
@@ -570,7 +563,6 @@ extraObjects: []
 #       type: "Opaque"
 
 
-# Keycloak configuration.
 ## Ref: https://artifacthub.io/packages/helm/bitnami/keycloak
 # keycloak:
 #   enabled: false
