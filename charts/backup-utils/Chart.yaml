@@ -1,7 +1,7 @@
 apiVersion: v2
 name: backup-utils
 type: application
-version: 1.2.6
+version: 1.2.7
 appVersion: "0.1.0"
 description: A Helm chart for effortless deployment of backup utilities.
 deprecated: false
