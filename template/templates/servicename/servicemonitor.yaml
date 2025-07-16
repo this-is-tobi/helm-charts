@@ -18,10 +18,10 @@ spec:
     path: {{ .path }}
     honorLabels: {{ .honorLabels }}
     {{- if and .basicAuth .basicAuth.username .basicAuth.password }}
-    basicAuth: {{- toYaml .basicAuth | nindent 6}}
+    basicAuth: {{- toYaml .basicAuth | nindent 6 }}
     {{- end }}
     {{- if and .bearerTokenSecret .bearerTokenSecret.name .bearerTokenSecret.key }}
-    bearerTokenSecret: {{- toYaml .bearerTokenSecret | nindent 6}}
+    bearerTokenSecret: {{- toYaml .bearerTokenSecret | nindent 6 }}
     {{- end }}
     {{- if .interval }}
     interval: {{ .interval }}

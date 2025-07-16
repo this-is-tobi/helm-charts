@@ -36,8 +36,14 @@ spec:
         pathType: {{ .pathType }}
         backend:
           service:
+          {{- if .backend }}
             name: {{ .backend.serviceName | default $fullNameApp }}
             port:
               number: {{ .backend.portNumber | default $svcPortApp }}
+          {{- else }}
+            name: {{ $fullNameApp }}
+            port:
+              number: 80
+          {{- end }}
   {{- end }}
 {{- end }}
