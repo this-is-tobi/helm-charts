@@ -111,15 +111,15 @@ spec:
           periodSeconds: {{ .Values.servicename.livenessProbe.periodSeconds }}
           timeoutSeconds: {{ .Values.servicename.livenessProbe.timeoutSeconds }}
         {{- end }}
-        {{- if .Values.servicename.hostAliases }}
-        hostAliases: {{- toYaml .Values.servicename.hostAliases | nindent 8 }}
-        {{- end }}
         resources: {{- toYaml .Values.servicename.resources | nindent 10 }}
         {{- if .Values.servicename.volumeMounts }}
         volumeMounts: {{- toYaml .Values.servicename.volumeMounts | nindent 8 }}
         {{- end }}
       {{- if .Values.servicename.extraContainers }}
         {{- tpl (toYaml .Values.servicename.extraContainers) . | nindent 6 }}
+      {{- end }}
+      {{- if .Values.servicename.hostAliases }}
+      hostAliases: {{- toYaml .Values.servicename.hostAliases | nindent 6 }}
       {{- end }}
       {{- if .Values.servicename.nodeSelector }}
       nodeSelector: {{- toYaml .Values.servicename.nodeSelector | nindent 8 }}
