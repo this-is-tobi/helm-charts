@@ -73,7 +73,7 @@ Define a file checksum to trigger rollout on configmap of secret change
 {{- $path := index . 1 }}
 {{- $resourceType := include (print $.Template.BasePath $path) $ | fromYaml -}}
 {{- if $resourceType -}}
-checksum/{{ $resourceType.metadata.name }}: {{ $resourceType.data | toYaml | sha256sum }}
+checksum/{{ $resourceType.kind | lower }}/{{ $resourceType.metadata.name }}: {{ $resourceType.data | toYaml | sha256sum }}
 {{- end -}}
 {{- end -}}
 

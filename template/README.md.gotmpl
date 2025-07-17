@@ -8,53 +8,119 @@
 
 {{ template "chart.requirementsSection" . }}
 
-## Installing the Chart
+## Values
 
-### CLI
+{{- $allValues := .Values }}
+{{- $topLevelKeys := list }}
+{{- $global := list }}
+{{- $general := list }}
+{{- range $allValues }}
+  {{- $keyParts := splitList "." .Key }}
+  {{- $top := index $keyParts 0 }}
+  {{- if eq $top "global" }}
+    {{- if eq (len $keyParts) 2 }}
+      {{- $global = append $global . }}
+    {{- end }}
+  {{- else if eq (len $keyParts) 1 }}
+    {{- $general = append $general . }}
+  {{- else }}
+    {{- $found := false }}
+    {{- range $topLevelKeys }}
+      {{- if eq . $top }}
+        {{- $found = true }}
+      {{- end }}
+    {{- end }}
+    {{- if not $found }}
+      {{- $topLevelKeys = append $topLevelKeys $top }}
+    {{- end }}
+  {{- end }}
+{{- end }}
 
-```sh
-helm repo add tobi https://this-is-tobi.github.io/helm-charts
-helm install <release_name> tobi/{{ template "chart.name" . }}
-```
+{{- if gt (len $general) 0 }}
 
-### ArgoCD
+### General
 
-`application.yaml` :
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range $general }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
 
-```yaml
-[...]
-sources:
-- repoURL: https://this-is-tobi.github.io/helm-charts
-  chart: {{ template "chart.name" . }}
-  targetRevision: {{ template "chart.version" . }}
-  helm:
-    releaseName: <release_name>
-    parameters: []
-    values: ""
-```
+{{- if gt (len $global) 0 }}
 
-### Helm dependency
+### Global
 
-`Chart.yaml`:
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+{{- range $global }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+{{- end }}
+{{- end }}
 
-```yaml
-[...]
-dependencies:
-- name: {{ template "chart.name" . }}
-  version: {{ template "chart.version" . }}
-  repository: https://this-is-tobi.github.io/helm-charts
-  condition: {{ template "chart.name" . }}.enabled
-```
+{{- range $i, $top := $topLevelKeys }}
+  {{- $hasContent := false }}
+  {{- range $allValues }}
+    {{- $keyParts := splitList "." .Key }}
+    {{- if and (gt (len $keyParts) 1) (eq (index $keyParts 0) $top) (ne $top "global") }}
+      {{- $hasContent = true }}
+    {{- end }}
+  {{- end }}
+  {{- if $hasContent }}
 
-`values.yaml`:
+### {{ $top | camelcase }}
 
-```yaml
-[...]
-{{ template "chart.name" . }}:
-  enabled: true
-```
+    {{- $general := list }}
+    {{- $subs := list }}
+    {{- range $allValues }}
+      {{- $keyParts := splitList "." .Key }}
+      {{- if and (eq (index $keyParts 0) $top) (ne $top "global") }}
+        {{- if eq (len $keyParts) 2 }}
+          {{- $general = append $general . }}
+        {{- else if gt (len $keyParts) 2 }}
+          {{- $subs = append $subs . }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+    {{- if gt (len $general) 0 }}
 
-{{ template "chart.valuesSection" . }}
+#### General
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+      {{- range $general }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+      {{- end }}
+    {{- end }}
+    {{- $subSecondaries := list }}
+    {{- range $subs }}
+      {{- $keyParts := splitList "." .Key }}
+      {{- $second := index $keyParts 1 }}
+      {{- $found := false }}
+      {{- range $subSecondaries }}
+        {{- if eq . $second }}
+          {{- $found = true }}
+        {{- end }}
+      {{- end }}
+      {{- if not $found }}
+        {{- $subSecondaries = append $subSecondaries $second }}
+      {{- end }}
+    {{- end }}
+    {{- range $j, $second := $subSecondaries }}
+
+#### {{ $second | camelcase }}
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+        {{- range $subs }}
+          {{- $keyParts := splitList "." .Key }}
+          {{- if eq (index $keyParts 1) $second }}
+| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
+          {{- end }}
+        {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
 
 {{ template "chart.maintainersSection" . }}
 

@@ -4,52 +4,6 @@
 
 A Helm chart to deploy chartname.
 
-## Installing the Chart
-
-### CLI
-
-```sh
-helm repo add tobi https://this-is-tobi.github.io/helm-charts
-helm install <release_name> tobi/chartname
-```
-
-### ArgoCD
-
-`application.yaml` :
-
-```yaml
-[...]
-sources:
-- repoURL: https://this-is-tobi.github.io/helm-charts
-  chart: chartname
-  targetRevision: 0.1.0
-  helm:
-    releaseName: <release_name>
-    parameters: []
-    values: ""
-```
-
-### Helm dependency
-
-`Chart.yaml`:
-
-```yaml
-[...]
-dependencies:
-- name: chartname
-  version: 0.1.0
-  repository: https://this-is-tobi.github.io/helm-charts
-  condition: chartname.enabled
-```
-
-`values.yaml`:
-
-```yaml
-[...]
-chartname:
-  enabled: true
-```
-
 ## Values
 
 ### General
@@ -69,44 +23,71 @@ chartname:
 
 ### Servicename
 
+#### General
+
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | servicename.affinity | object | `{}` | Affinity used for app pod. |
-| servicename.autoscaling.enabled | bool | `false` | Enable Horizontal Pod Autoscaler ([HPA]) for the app. |
-| servicename.autoscaling.maxReplicas | int | `3` | Maximum number of replicas for the app [HPA]. |
-| servicename.autoscaling.minReplicas | int | `1` | Minimum number of replicas for the app [HPA]. |
-| servicename.autoscaling.targetCPUUtilizationPercentage | int | `80` | Average CPU utilization percentage for the app [HPA]. |
-| servicename.autoscaling.targetMemoryUtilizationPercentage | int | `80` | Average memory utilization percentage for the app [HPA]. |
-| servicename.container.args | list | `[]` | Servicename container command args. |
-| servicename.container.command | list | `[]` | Servicename container command. |
-| servicename.container.port | int | `8080` | Servicename container port. |
-| servicename.container.securityContext | object | `{}` | Toggle and define container-level security context. |
+| servicename.args | list | `[]` | Servicename container command args. |
+| servicename.command | list | `[]` | Servicename container command. |
+| servicename.containerPort | int | `8080` | Servicename container port. |
 | servicename.env | object | `{}` | Servicename container env variables, it will be injected into a configmap and loaded into the container. |
 | servicename.envFrom | list | `[]` | Servicename container env variables loaded from configmap or secret reference. |
 | servicename.extraContainers | list | `[]` | Extra containers to add to the app pod as sidecars. |
-| servicename.healthcheckPath | string | `"/"` | Servicename container healthcheck endpoint. |
+| servicename.extraPorts | list | `[]` | Servicename extra container ports. |
 | servicename.hostAliases | list | `[]` | Host aliases that will be injected at pod-level into /etc/hosts. |
+| servicename.imagePullSecrets | list | `[]` | Image credentials configuration. |
+| servicename.initContainers | list | `[]` | Init containers to add to the app pod. |
+| servicename.nodeSelector | object | `{}` | Default node selector for app. |
+| servicename.podAnnotations | object | `{}` | Annotations for the app deployed pods. |
+| servicename.podLabels | object | `{}` | Labels for the app deployed pods. |
+| servicename.podSecurityContext | object | `{}` | Toggle and define pod-level security context. |
+| servicename.replicaCount | int | `1` | The number of application controller pods to run. |
+| servicename.secrets | object | `{}` | Servicename container env secrets, it will be injected into a secret and loaded into the container. |
+| servicename.securityContext | object | `{}` | Toggle and define container-level security context. |
+| servicename.statefulset | bool | `false` | Should the app run as a StatefulSet instead of a Deployment. |
+| servicename.tolerations | list | `[]` | Default tolerations for app. |
+| servicename.volumeClaims | list | `[]` | List of volumeClaims to add. |
+| servicename.volumeMounts | list | `[]` | List of mounts to add (normally used with `volumes` or `volumeClaims`). |
+| servicename.volumes | list | `[]` | List of volumes to add. |
+
+#### Autoscaling
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| servicename.autoscaling.enabled | bool | `false` | Enable Horizontal Pod Autoscaler for the app. |
+| servicename.autoscaling.maxReplicas | int | `3` | Maximum number of replicas for the app. |
+| servicename.autoscaling.minReplicas | int | `1` | Minimum number of replicas for the app. |
+| servicename.autoscaling.targetCPUUtilizationPercentage | int | `80` | Average CPU utilization percentage for the app. |
+| servicename.autoscaling.targetMemoryUtilizationPercentage | int | `80` | Average memory utilization percentage for the app. |
+
+#### Image
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
 | servicename.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the app. |
 | servicename.image.repository | string | `"docker.io/debian"` | Repository to use for the app. |
 | servicename.image.tag | string | `""` | Tag to use for the app. Overrides the image tag whose default is the chart appVersion. |
-| servicename.imagePullSecrets | list | `[]` | Image credentials configuration. |
+
+#### Ingress
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
 | servicename.ingress.annotations | object | `{}` | Additional ingress annotations. |
 | servicename.ingress.className | string | `""` | Defines which ingress controller will implement the resource. |
 | servicename.ingress.enabled | bool | `true` | Whether or not ingress should be enabled. |
-| servicename.ingress.hosts[0].backend.portNumber | string | `nil` | Port used by the backend service linked to the host record. |
-| servicename.ingress.hosts[0].backend.serviceName | string | `""` | Name of the backend service linked to the host record. |
+| servicename.ingress.hosts[0].backend.portNumber | string | `nil` | Port used by the backend service linked to the host record (leave null to use the app service port). |
+| servicename.ingress.hosts[0].backend.serviceName | string | `""` | Name of the backend service linked to the host record (leave empty to use the app service). |
 | servicename.ingress.hosts[0].name | string | `"domain.local"` | Name of the host record. |
 | servicename.ingress.hosts[0].path | string | `"/"` | Path of the host record to manage routing. |
 | servicename.ingress.hosts[0].pathType | string | `"Prefix"` | Path type of the host record. |
 | servicename.ingress.labels | object | `{}` | Additional ingress labels. |
 | servicename.ingress.tls | list | `[]` | Enable TLS configuration. |
-| servicename.initContainers | list | `[]` | Init containers to add to the app pod. |
-| servicename.livenessProbe.enabled | bool | `true` | Whether or not enable the probe. |
-| servicename.livenessProbe.failureThreshold | int | `3` | Minimum consecutive failures for the probe to be considered failed after having succeeded. |
-| servicename.livenessProbe.initialDelaySeconds | int | `30` | Number of seconds after the container has started before probe is initiated. |
-| servicename.livenessProbe.periodSeconds | int | `30` | How often (in seconds) to perform the probe. |
-| servicename.livenessProbe.successThreshold | int | `1` | Minimum consecutive successes for the probe to be considered successful after having failed. |
-| servicename.livenessProbe.timeoutSeconds | int | `5` | Number of seconds after which the probe times out. |
+
+#### Metrics
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
 | servicename.metrics.enabled | bool | `false` | Deploy metrics service. |
 | servicename.metrics.service.annotations | object | `{}` | Metrics service annotations. |
 | servicename.metrics.service.labels | object | `{}` | Metrics service labels. |
@@ -128,33 +109,75 @@ chartname:
 | servicename.metrics.serviceMonitor.endpoints[0].selector | object | `{}` | Prometheus ServiceMonitor selector. |
 | servicename.metrics.serviceMonitor.endpoints[0].tlsConfig | object | `{}` | Prometheus ServiceMonitor tlsConfig. |
 | servicename.metrics.serviceMonitor.labels | object | `{}` | Prometheus ServiceMonitor labels. |
+
+#### NetworkPolicy
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
 | servicename.networkPolicy.create | bool | `false` | Create NetworkPolicy object for the app. |
 | servicename.networkPolicy.egress | list | `[]` | Egress rules for the NetworkPolicy object. |
 | servicename.networkPolicy.ingress | list | `[]` | Ingress rules for the NetworkPolicy object. |
 | servicename.networkPolicy.policyTypes | list | `["Ingress"]` | Policy types used in the NetworkPolicy object. |
-| servicename.nodeSelector | object | `{}` | Default node selector for app. |
+
+#### Pdb
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
 | servicename.pdb.annotations | object | `{}` | Annotations to be added to app pdb. |
 | servicename.pdb.enabled | bool | `false` | Deploy a PodDisruptionBudget for the app |
 | servicename.pdb.labels | object | `{}` | Labels to be added to app pdb. |
 | servicename.pdb.maxUnavailable | string | `""` | Number of pods that are unavailable after eviction as number or percentage (eg.: 50%). Has higher precedence over `servicename.pdb.minAvailable`. |
 | servicename.pdb.minAvailable | string | `""` (defaults to 0 if not specified) | Number of pods that are available after eviction as number or percentage (eg.: 50%). |
-| servicename.podAnnotations | object | `{}` | Annotations for the app deployed pods. |
-| servicename.podLabels | object | `{}` | Labels for the app deployed pods. |
-| servicename.podSecurityContext | object | `{}` | Toggle and define pod-level security context. |
-| servicename.readinessProbe.enabled | bool | `true` | Whether or not enable the probe. |
-| servicename.readinessProbe.failureThreshold | int | `2` | Minimum consecutive failures for the probe to be considered failed after having succeeded. |
-| servicename.readinessProbe.initialDelaySeconds | int | `10` | Number of seconds after the container has started before probe is initiated. |
-| servicename.readinessProbe.periodSeconds | int | `10` | How often (in seconds) to perform the probe. |
-| servicename.readinessProbe.successThreshold | int | `2` | Minimum consecutive successes for the probe to be considered successful after having failed. |
-| servicename.readinessProbe.timeoutSeconds | int | `5` | Number of seconds after which the probe times out. |
-| servicename.replicaCount | int | `1` | The number of application controller pods to run. |
+
+#### Probes
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| servicename.probes.healthcheck.path | string | `"/"` | Servicename container healthcheck endpoint. |
+| servicename.probes.healthcheck.port | int | `8080` | Port to use for healthcheck (defaults to container port if not set) |
+| servicename.probes.livenessProbe.enabled | bool | `true` | Whether or not enable the probe. |
+| servicename.probes.livenessProbe.failureThreshold | int | `3` | Minimum consecutive failures for the probe to be considered failed after having succeeded. |
+| servicename.probes.livenessProbe.initialDelaySeconds | int | `30` | Number of seconds after the container has started before probe is initiated. |
+| servicename.probes.livenessProbe.periodSeconds | int | `30` | How often (in seconds) to perform the probe. |
+| servicename.probes.livenessProbe.successThreshold | int | `1` | Minimum consecutive successes for the probe to be considered successful after having failed. |
+| servicename.probes.livenessProbe.timeoutSeconds | int | `5` | Number of seconds after which the probe times out. |
+| servicename.probes.readinessProbe.enabled | bool | `true` | Whether or not enable the probe. |
+| servicename.probes.readinessProbe.failureThreshold | int | `2` | Minimum consecutive failures for the probe to be considered failed after having succeeded. |
+| servicename.probes.readinessProbe.initialDelaySeconds | int | `10` | Number of seconds after the container has started before probe is initiated. |
+| servicename.probes.readinessProbe.periodSeconds | int | `10` | How often (in seconds) to perform the probe. |
+| servicename.probes.readinessProbe.successThreshold | int | `2` | Minimum consecutive successes for the probe to be considered successful after having failed. |
+| servicename.probes.readinessProbe.timeoutSeconds | int | `5` | Number of seconds after which the probe times out. |
+| servicename.probes.startupProbe.enabled | bool | `true` | Whether or not enable the probe. |
+| servicename.probes.startupProbe.failureThreshold | int | `10` | Minimum consecutive failures for the probe to be considered failed after having succeeded. |
+| servicename.probes.startupProbe.initialDelaySeconds | int | `0` | Number of seconds after the container has started before probe is initiated. |
+| servicename.probes.startupProbe.periodSeconds | int | `10` | How often (in seconds) to perform the probe. |
+| servicename.probes.startupProbe.successThreshold | int | `1` | Minimum consecutive successes for the probe to be considered successful after having failed. |
+| servicename.probes.startupProbe.timeoutSeconds | int | `5` | Number of seconds after which the probe times out. |
+
+#### Resources
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
 | servicename.resources.limits.cpu | string | `"500m"` | CPU limit for the app. |
 | servicename.resources.limits.memory | string | `"2Gi"` | Memory limit for the app. |
 | servicename.resources.requests.cpu | string | `"100m"` | CPU request for the app. |
 | servicename.resources.requests.memory | string | `"256Mi"` | Memory request for the app. |
-| servicename.secrets | object | `{}` | Servicename container env secrets, it will be injected into a secret and loaded into the container. |
-| servicename.service.port | int | `80` | Servicename service port. |
-| servicename.service.type | string | `"ClusterIP"` | Servicename service type. |
+
+#### Service
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| servicename.service.extraPorts | list | `[]` | Extra service ports. |
+| servicename.service.nodePort | int | `31000` | Port used when type is `NodePort`` to expose the service on the given node port. |
+| servicename.service.port | int | `80` | Port used by the service. |
+| servicename.service.portName | string | `"http"` | Port name used by the service. |
+| servicename.service.protocol | string | `"TCP"` | Protocol used by the service. |
+| servicename.service.type | string | `"ClusterIP"` | Type of service to create for the app. |
+
+#### ServiceAccount
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
 | servicename.serviceAccount.annotations | object | `{}` | Annotations applied to created service account. |
 | servicename.serviceAccount.automountServiceAccountToken | bool | `false` | Should the service account access token be automount in the pod. |
 | servicename.serviceAccount.clusterRole.create | bool | `false` | Should the clusterRole be created. |
@@ -164,18 +187,14 @@ chartname:
 | servicename.serviceAccount.name | string | `""` | Service account name. |
 | servicename.serviceAccount.role.create | bool | `false` | Should the role be created. |
 | servicename.serviceAccount.role.rules | list | `[]` | Role rules associated with the service account. |
-| servicename.startupProbe.enabled | bool | `true` | Whether or not enable the probe. |
-| servicename.startupProbe.failureThreshold | int | `10` | Minimum consecutive failures for the probe to be considered failed after having succeeded. |
-| servicename.startupProbe.initialDelaySeconds | int | `0` | Number of seconds after the container has started before probe is initiated. |
-| servicename.startupProbe.periodSeconds | int | `10` | How often (in seconds) to perform the probe. |
-| servicename.startupProbe.successThreshold | int | `1` | Minimum consecutive successes for the probe to be considered successful after having failed. |
-| servicename.startupProbe.timeoutSeconds | int | `5` | Number of seconds after which the probe times out. |
-| servicename.statefulset | bool | `false` | Should the app run as a StatefulSet instead of a Deployment. |
+
+#### Strategy
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| servicename.strategy.rollingUpdate.maxSurge | int | `1` | The maximum number of pods that can be scheduled above the desired number of pods. |
+| servicename.strategy.rollingUpdate.maxUnavailable | int | `1` | The maximum number of pods that can be unavailable during the update process. |
 | servicename.strategy.type | string | `"RollingUpdate"` | Strategy type used to replace old Pods by new ones, can be `Recreate` or `RollingUpdate`. |
-| servicename.tolerations | list | `[]` | Default tolerations for app. |
-| servicename.volumeClaims | list | `[]` | List of volumeClaims to add. |
-| servicename.volumeMounts | list | `[]` | List of mounts to add (normally used with `volumes` or `volumeClaims`). |
-| servicename.volumes | list | `[]` | List of volumes to add. |
 
 ## Sources
 

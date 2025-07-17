@@ -7,6 +7,13 @@ spec:
   type: {{ .Values.servicename.service.type }}
   ports:
   - port: {{ .Values.servicename.service.port }}
-    targetPort: {{ .Values.servicename.container.port }}
-    protocol: TCP
+    targetPort: {{ .Values.servicename.containerPort }}
+    protocol: {{ .Values.servicename.service.protocol | default "TCP" }}
+    {{- if eq .Values.servicename.service.type "NodePort" }}
+    nodePort: {{ .Values.servicename.service.nodePort }}
+    {{- end }}
+    name: {{ .Values.servicename.service.portName | default "http" }}
+  {{- if .Values.servicename.service.extraPorts -}}
+  {{- toYaml .Values.servicename.service.extraPorts | nindent 2 -}}
+  {{- end }}
   selector: {{- include "helper.selectorLabels" . | nindent 4 }}

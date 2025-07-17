@@ -1,4 +1,3 @@
-
 nameOverride: ""
 fullnameOverride: "chart-test"
 
@@ -60,17 +59,19 @@ servicename:
     volumeMounts:
     - mountPath: /custom-volume
       name: custom-volume
-  container:
-    port: 8080
-    command: []
-    args: []
-    securityContext:
-      capabilities:
-        drop:
-        - ALL
-      readOnlyRootFilesystem: true
-      runAsNonRoot: true
-      runAsUser: 1000
+  containerPort: 8080
+  extraPorts:
+  - containerPort: 8081
+    protocol: "UDP"
+  command: []
+  args: []
+  securityContext:
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
   extraContainers:
   - name: fluentd
     image: "fluentd"
@@ -86,9 +87,36 @@ servicename:
     FOO: "FOO"
   secrets:
     BAR: "BAR"
-  healthcheckPath: "/"
+  probes:
+    healthcheck:
+      path: "/healthz"
+      port: 8081
+    startupProbe:
+      enabled: true
+      initialDelaySeconds: 0
+      successThreshold: 1
+      failureThreshold: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+    readinessProbe:
+      enabled: true
+      initialDelaySeconds: 15
+      successThreshold: 2
+      failureThreshold: 2
+      periodSeconds: 10
+      timeoutSeconds: 5
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: 30
+      successThreshold: 1
+      failureThreshold: 3
+      periodSeconds: 30
+      timeoutSeconds: 5
   strategy:
-    type: "Recreate"
+    type: "RollingUpdate"
+    rollingUpdate:
+      maxUnavailable: 3
+      maxSurge: 2
   imagePullSecrets:
   - name: "pullsecret-name-1"
     create: false
@@ -98,27 +126,6 @@ servicename:
     username: "foo"
     password: "bar"
     email: "foo@bar.com"
-  startupProbe:
-    enabled: true
-    initialDelaySeconds: 0
-    successThreshold: 1
-    failureThreshold: 10
-    periodSeconds: 10
-    timeoutSeconds: 5
-  readinessProbe:
-    enabled: true
-    initialDelaySeconds: 15
-    successThreshold: 2
-    failureThreshold: 2
-    periodSeconds: 10
-    timeoutSeconds: 5
-  livenessProbe:
-    enabled: true
-    initialDelaySeconds: 30
-    successThreshold: 1
-    failureThreshold: 3
-    periodSeconds: 30
-    timeoutSeconds: 5
   hostAliases:
   - ip: "127.0.0.1"
     hostnames:
@@ -167,13 +174,24 @@ servicename:
   service:
     type: "ClusterIP"
     port: 80
+    protocol: "UDP"
+    portName: "udp-port"
+    extraPorts:
+    - port: 8080
+      targetPort: 8080
+      protocol: "TCP"
+    - port: 9090
+      targetPort: 9090
+      protocol: "HTTP"
   resources:
     requests:
       memory: "256Mi"
       cpu: "100m"
+      nvidia.com/gpu: "1"
     limits:
       memory: "2Gi"
       cpu: "500m"
+      nvidia.com/gpu: "1"
   autoscaling:
     enabled: true
     minReplicas: 1

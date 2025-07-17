@@ -43,26 +43,29 @@ spec:
       {{- end }}
       containers:
       - name: servicename
-        {{- if .Values.servicename.container.securityContext }}
-        securityContext: {{- toYaml .Values.servicename.container.securityContext | nindent 10 }}
+        {{- if .Values.servicename.securityContext }}
+        securityContext: {{- toYaml .Values.servicename.securityContext | nindent 10 }}
         {{- end }}
         image: "{{ .Values.servicename.image.repository }}:{{ .Values.servicename.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.servicename.image.pullPolicy }}
-        {{- if .Values.servicename.container.command }}
+        {{- if .Values.servicename.command }}
         command:
-        {{- range .Values.servicename.container.command }}
+        {{- range .Values.servicename.command }}
         - {{ . | quote }}
         {{- end }}
         {{- end }}
-        {{- if .Values.servicename.container.args }}
+        {{- if .Values.servicename.args }}
         args:
-        {{- range .Values.servicename.container.args }}
+        {{- range .Values.servicename.args }}
         - {{ . | quote }}
         {{- end }}
         {{- end }}
         ports:
-        - containerPort: {{ .Values.servicename.container.port }}
+        - containerPort: {{ .Values.servicename.contrainerPort }}
           protocol: TCP
+        {{- if .Values.servicename.extraPorts }}
+          {{- toYaml .Values.servicename.extraPorts | nindent 8 }}
+        {{- end }}
         {{- if or .Values.servicename.env .Values.global.env .Values.global.secrets .Values.servicename.envFrom }}
         envFrom:
         {{- if or .Values.servicename.env .Values.global.env }}
@@ -77,38 +80,38 @@ spec:
           {{- toYaml .Values.servicename.envFrom | nindent 8 }}
         {{- end }}
         {{- end }}
-        {{- if .Values.servicename.startupProbe.enabled }}
+        {{- if .Values.servicename.probes.startupProbe.enabled }}
         startupProbe:
           httpGet:
-            path: {{ .Values.servicename.healthcheckPath }}
-            port: {{ .Values.servicename.container.port }}
-          initialDelaySeconds: {{ .Values.servicename.startupProbe.initialDelaySeconds }}
-          successThreshold: {{ .Values.servicename.startupProbe.successThreshold }}
-          failureThreshold: {{ .Values.servicename.startupProbe.failureThreshold }}
-          periodSeconds: {{ .Values.servicename.startupProbe.periodSeconds }}
-          timeoutSeconds: {{ .Values.servicename.startupProbe.timeoutSeconds }}
+            path: {{ .Values.servicename.probes.healthcheck.path }}
+            port: {{ .Values.servicename.probes.healthcheck.port | default .Values.servicename.contrainerPort }}
+          initialDelaySeconds: {{ .Values.servicename.probes.startupProbe.initialDelaySeconds }}
+          successThreshold: {{ .Values.servicename.probes.startupProbe.successThreshold }}
+          failureThreshold: {{ .Values.servicename.probes.startupProbe.failureThreshold }}
+          periodSeconds: {{ .Values.servicename.probes.startupProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.servicename.probes.startupProbe.timeoutSeconds }}
         {{- end }}
-        {{- if .Values.servicename.readinessProbe.enabled }}
+        {{- if .Values.servicename.probes.readinessProbe.enabled }}
         readinessProbe:
           httpGet:
-            path: {{ .Values.servicename.healthcheckPath }}
-            port: {{ .Values.servicename.container.port }}
-          initialDelaySeconds: {{ .Values.servicename.readinessProbe.initialDelaySeconds }}
-          successThreshold: {{ .Values.servicename.readinessProbe.successThreshold }}
-          failureThreshold: {{ .Values.servicename.readinessProbe.failureThreshold }}
-          periodSeconds: {{ .Values.servicename.readinessProbe.periodSeconds }}
-          timeoutSeconds: {{ .Values.servicename.readinessProbe.timeoutSeconds }}
+            path: {{ .Values.servicename.probes.healthcheck.path }}
+            port: {{ .Values.servicename.probes.healthcheck.port | default .Values.servicename.contrainerPort }}
+          initialDelaySeconds: {{ .Values.servicename.probes.readinessProbe.initialDelaySeconds }}
+          successThreshold: {{ .Values.servicename.probes.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.servicename.probes.readinessProbe.failureThreshold }}
+          periodSeconds: {{ .Values.servicename.probes.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.servicename.probes.readinessProbe.timeoutSeconds }}
         {{- end }}
-        {{- if .Values.servicename.livenessProbe.enabled }}
+        {{- if .Values.servicename.probes.livenessProbe.enabled }}
         livenessProbe:
           httpGet:
-            path: {{ .Values.servicename.healthcheckPath }}
-            port: {{ .Values.servicename.container.port }}
-          initialDelaySeconds: {{ .Values.servicename.livenessProbe.initialDelaySeconds }}
-          successThreshold: {{ .Values.servicename.livenessProbe.successThreshold }}
-          failureThreshold: {{ .Values.servicename.livenessProbe.failureThreshold }}
-          periodSeconds: {{ .Values.servicename.livenessProbe.periodSeconds }}
-          timeoutSeconds: {{ .Values.servicename.livenessProbe.timeoutSeconds }}
+            path: {{ .Values.servicename.probes.healthcheck.path }}
+            port: {{ .Values.servicename.probes.healthcheck.port | default .Values.servicename.contrainerPort }}
+          initialDelaySeconds: {{ .Values.servicename.probes.livenessProbe.initialDelaySeconds }}
+          successThreshold: {{ .Values.servicename.probes.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.servicename.probes.livenessProbe.failureThreshold }}
+          periodSeconds: {{ .Values.servicename.probes.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.servicename.probes.livenessProbe.timeoutSeconds }}
         {{- end }}
         resources: {{- toYaml .Values.servicename.resources | nindent 10 }}
         {{- if .Values.servicename.volumeMounts }}
