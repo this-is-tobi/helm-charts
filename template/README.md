@@ -43,6 +43,7 @@ A Helm chart to deploy chartname.
 | servicename.podLabels | object | `{}` | Labels for the app deployed pods. |
 | servicename.podSecurityContext | object | `{}` | Toggle and define pod-level security context. |
 | servicename.replicaCount | int | `1` | The number of application controller pods to run. |
+| servicename.revisionHistoryLimit | int | `10` | Revision history limit for the app. |
 | servicename.secrets | object | `{}` | Servicename container env secrets, it will be injected into a secret and loaded into the container. |
 | servicename.securityContext | object | `{}` | Toggle and define container-level security context. |
 | servicename.statefulset | bool | `false` | Should the app run as a StatefulSet instead of a Deployment. |
@@ -168,7 +169,7 @@ A Helm chart to deploy chartname.
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | servicename.service.extraPorts | list | `[]` | Extra service ports. |
-| servicename.service.nodePort | int | `31000` | Port used when type is `NodePort`` to expose the service on the given node port. |
+| servicename.service.nodePort | int | `31000` | Port used when type is `NodePort` to expose the service on the given node port. |
 | servicename.service.port | int | `80` | Port used by the service. |
 | servicename.service.portName | string | `"http"` | Port name used by the service. |
 | servicename.service.protocol | string | `"TCP"` | Protocol used by the service. |

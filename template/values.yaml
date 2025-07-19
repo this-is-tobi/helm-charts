@@ -334,6 +334,9 @@ servicename:
     # -- Average memory utilization percentage for the app.
     # @section -- Servicename
     targetMemoryUtilizationPercentage: 80
+  # -- Revision history limit for the app.
+  # @section -- Servicename
+  revisionHistoryLimit: 10
   # -- Default node selector for app.
   # @section -- Servicename
   nodeSelector: {}

@@ -8,6 +8,7 @@ spec:
   {{- if not .Values.servicename.autoscaling.enabled }}
   replicas: {{ .Values.servicename.replicaCount }}
   {{- end }}
+  revisionHistoryLimit: {{ .Values.servicename.revisionHistoryLimit | default 10 }}
   selector:
     matchLabels: {{- include "helper.selectorLabels" (dict "root" . "componentName" "servicename") | nindent 6 }}
   strategy:
