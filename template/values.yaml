@@ -283,7 +283,7 @@ servicename:
     # -- Port used by the service.
     # @section -- Servicename
     port: 80
-    # -- Port used when type is `NodePort`` to expose the service on the given node port.
+    # -- Port used when type is `NodePort` to expose the service on the given node port.
     # @section -- Servicename
     nodePort: 31000
     # -- Port name used by the service.

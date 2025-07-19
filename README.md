@@ -53,7 +53,7 @@ A [template folder](./template/) is available for easy integration of new chart,
 
 1. Copy the template directory:
     ```sh
-    # Clone the template chart
+    # Copy the template chart
     cp -R ./template ./charts/<chart_name>
 
     # Rename the chart
@@ -93,6 +93,20 @@ A [template folder](./template/) is available for easy integration of new chart,
     ```
 
 > Do not forget to change `<chart_name>`, `<service_name>` and `<other_service_name>` placeholders.
+
+> [!TIP]
+> A shell script is also available to generate a new Helm chart:
+>   ```sh
+>   curl -s https://raw.githubusercontent.com/this-is-tobi/tools/main/shell/helm-template.sh \                      
+>       | bash -s -- -c '<chart_name>' -s '<service_name>' -a '<additional_service_name>'
+>   ```
+>
+> Notes:
+>    - `-c` flags set the chart name *(ex: `my-app`)*.
+> 
+>    - `-s` flags set the service name *(ex: `api`)*.
+> 
+>    - `-a` (optional) flags set the additional service name *(ex: `front`)*.
 
 ## Contributions
 
