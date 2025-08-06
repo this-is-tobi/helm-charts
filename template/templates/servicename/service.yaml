@@ -4,10 +4,10 @@ metadata:
   name: {{ printf "%s-%s" (include "helper.fullname" .) "servicename" }}
   labels: {{- (include "helper.labels" (dict "root" . "componentName" "servicename")) | nindent 4 }}
 spec:
-  type: {{ .Values.servicename.service.type }}
+  type: {{ .Values.servicename.service.type | default "ClusterIP" }}
   ports:
-  - port: {{ .Values.servicename.service.port }}
-    targetPort: {{ .Values.servicename.containerPort }}
+  - port: {{ .Values.servicename.service.port | default 80 }}
+    targetPort: {{ .Values.servicename.containerPort | default 8080 }}
     protocol: {{ .Values.servicename.service.protocol | default "TCP" }}
     {{- if eq .Values.servicename.service.type "NodePort" }}
     nodePort: {{ .Values.servicename.service.nodePort }}
