@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 1.0.3](https://img.shields.io/badge/Version-1.0.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -28,7 +28,7 @@ helm install <release_name> tobi/cnpg-cluster
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 1.0.3
+  targetRevision: 1.1.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -43,7 +43,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 1.0.3
+  version: 1.1.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -141,6 +141,7 @@ cnpg-cluster:
 | resources.limits.memory | string | `"1Gi"` | Memory limit for the database instance. |
 | resources.requests.cpu | string | `"250m"` | CPU request for the database instance. |
 | resources.requests.memory | string | `"512Mi"` | Memory request for the database instance. |
+| storageClass | string | `""` | Storage class used for data and WAL PVCs. Leave empty to use the default storage class of the cluster. |
 
 ### Recovery mode
 
