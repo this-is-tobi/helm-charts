@@ -63,6 +63,9 @@ pgHba: []
 # `supervised` for manual supervision to perform the switchover of the primary.
 # @section -- Database
 primaryUpdateStrategy: "unsupervised"
+# -- Storage class used for data and WAL PVCs. Leave empty to use the default storage class of the cluster.
+# @section -- Resources
+storageClass: ""
 pvcSize: 
   # -- Size of the data PVC used by each cnpg instance.
   # @section -- Resources
