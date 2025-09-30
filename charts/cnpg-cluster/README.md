@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
+![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -28,7 +28,7 @@ helm install <release_name> tobi/cnpg-cluster
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 1.1.0
+  targetRevision: 1.2.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -43,7 +43,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 1.1.0
+  version: 1.2.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -57,6 +57,13 @@ cnpg-cluster:
 ```
 
 ## Values
+
+### Affinity
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| affinity | object | `{"topologyKey":"topology.kubernetes.io/zone"}` | Affinity rules for the database pods. |
+| topologySpreadConstraints | list | `[]` | Topology spread constraints for the database pods. |
 
 ### Backup
 
@@ -95,6 +102,7 @@ cnpg-cluster:
 | enableSuperuserAccess | bool | `true` | Enable superuser access. |
 | exposed | bool | `false` | Whether or not a NodePort service should be created to exposed the database. |
 | imageName | string | `""` | Name of the image used for database.  By default (empty string), the operator will install the latest available minor version of the latest major version of PostgreSQL when the operator was released |
+| imagePullPolicy | string | `"IfNotPresent"` | Pull policy for the database image. |
 | initDb.extraArgs | object | `{}` | Extra configuration of the initDb bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB). |
 | instances | int | `3` | Number of instances to spawn in the cluster. |
 | mode | string | `"primary"` | Mode used to deploy the cnpg cluster, it should be `primary`, `replica` or `recovery`. |
@@ -199,6 +207,7 @@ cnpg-cluster:
 | cnpg-operator.enabled | bool | `false` | Whether or not cnpg operator should be deployed (See. https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg?modal=values). |
 | fullnameOverride | string | `""` | String to fully override the default application name. |
 | labels | object | `{}` | Additional cnpg cluster labels. |
+| logLevel | string | `"info"` | Log level used by the operator (one of `error`, `warning`, `info` (default), `debug`, `trace`). |
 | nameOverride | string | `""` | Provide a name in place of the default application name. |
 
 ## Maintainers
