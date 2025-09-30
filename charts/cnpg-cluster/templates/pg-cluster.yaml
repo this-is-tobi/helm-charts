@@ -11,6 +11,7 @@ spec:
   {{- if .Values.imageName }}
   imageName: {{ .Values.imageName }}
   {{- end }}
+  imagePullPolicy: {{ .Values.imagePullPolicy }}
   {{- if and .Values.imageCredentials.username .Values.imageCredentials.password }}
   imagePullSecrets:
   - name: {{ printf "%s-%s" (include "template.fullname" .) "pullsecret" }}
@@ -169,3 +170,10 @@ spec:
   {{- end }}
   monitoring:
     enablePodMonitor: {{ .Values.monitoring.enabled }} 
+  logLevel: {{ .Values.logLevel }}
+  {{- if .Values.affinity }}
+  affinity: {{- toYaml .Values.affinity | nindent 4 }}
+  {{- end }}
+  {{- if .Values.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- toYaml .Values.topologySpreadConstraints | nindent 4 }}
+  {{- end }}

@@ -26,6 +26,9 @@ instances: 3
 # By default (empty string), the operator will install the latest available minor version of the latest major version of PostgreSQL when the operator was released
 # @section -- Database
 imageName: ""
+# -- Pull policy for the database image.
+# @section -- Database
+imagePullPolicy: "IfNotPresent"
 credentials:
   # -- Username of the database user (it is used for the database owner - needed also if `credentials.existingSecrets.enabled` is set to `true`).
   # @section -- Database
@@ -335,6 +338,15 @@ resources:
     # -- CPU limit for the database instance.
     # @section -- Resources
     cpu: "500m"
+# -- Affinity rules for the database pods.
+# @section -- Affinity
+affinity:
+  topologyKey: topology.kubernetes.io/zone
+# -- Topology spread constraints for the database pods.
+# @section -- Affinity
+topologySpreadConstraints: []
+# -- Log level used by the operator (one of `error`, `warning`, `info` (default), `debug`, `trace`).
+logLevel: "info"
 pooler:
   # -- Whether or not Pgbouncer should be enabled.
   # @section -- Pooler
