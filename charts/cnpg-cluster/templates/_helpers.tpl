@@ -109,3 +109,39 @@ Labels
 {{- end }}
 {{- end }}
 {{- end }}
+
+{{/*
+DEPRECATED: Legacy backup configuration using in-tree barmanObjectStore.
+This template will be removed in a future version when CloudNativePG drops support for the in-tree method.
+Only use this when backup.legacyMode is explicitly set to true.
+*/}}
+{{- define "template.legacy.backup" -}}
+{{- if and .Values.backup.enabled .Values.backup.legacyMode }}
+backup:
+  barmanObjectStore:
+    destinationPath: {{ .Values.backup.destinationPath }}
+    endpointURL: {{ .Values.backup.endpointURL }}
+    {{- if or .Values.backup.endpointCA.create .Values.backup.endpointCA.secretName }}
+    endpointCA:
+      name: {{ .Values.backup.endpointCA.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-ca") }}
+      key: {{ .Values.backup.endpointCA.key }}
+    {{- end }}
+    s3Credentials:
+      accessKeyId:
+        name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
+        key: {{ .Values.backup.s3Credentials.accessKeyId.key }}
+      secretAccessKey:
+        name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
+        key: {{ .Values.backup.s3Credentials.secretAccessKey.key }}
+      region:
+        name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
+        key: {{ .Values.backup.s3Credentials.region.key }}
+    {{- if .Values.backup.compression }}
+    data:
+      compression: {{ .Values.backup.compression }}
+    wal:
+      compression: {{ .Values.backup.compression }}
+    {{- end }}
+  retentionPolicy: {{ .Values.backup.retentionPolicy }}
+{{- end }}
+{{- end }}

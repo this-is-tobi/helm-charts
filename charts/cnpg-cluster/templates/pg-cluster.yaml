@@ -44,6 +44,8 @@ spec:
     {{- end }}
   {{- end }}
   resources: {{- toYaml .Values.resources | nindent 4 }}
+  {{/* DEPRECATED: Legacy in-tree backup (defined in _helpers.tpl). Remove when CNPG drops support. */}}
+  {{- include "template.legacy.backup" . | nindent 2 }}
   {{- if eq .Values.mode "primary" }}
   bootstrap:
     initdb:
@@ -75,102 +77,50 @@ spec:
       {{- end }}
   externalClusters:
   - name: {{ .Values.recovery.clusterName | default (include "template.fullname" .) }}
-    barmanObjectStore:
-      wal:
-        maxParallel: {{ .Values.recovery.maxParallelWal }}
-      destinationPath: {{ .Values.recovery.destinationPath }}
-      endpointURL: {{ .Values.recovery.endpointURL }}
-      {{- if .Values.recovery.endpointCA.secretName }}
-      endpointCA:
-        name: {{ .Values.recovery.endpointCA.secretName | default (printf "%s-%s" (include "template.fullname" .) "recovery-ca") }}
-        key: {{ .Values.recovery.endpointCA.key }}
-      {{- end }}
-      s3Credentials:
-        accessKeyId:
-          name: {{ .Values.recovery.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "recovery-creds") }}
-          key: {{ .Values.recovery.s3Credentials.accessKeyId.key }}
-        secretAccessKey:
-          name: {{ .Values.recovery.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "recovery-creds") }}
-          key: {{ .Values.recovery.s3Credentials.secretAccessKey.key }}
-        region:
-          name: {{ .Values.recovery.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "recovery-creds") }}
-          key: {{ .Values.recovery.s3Credentials.region.key }}
+    plugin:
+      name: barman-cloud.cloudnative-pg.io
+      parameters:
+        barmanObjectName: {{ printf "%s-%s" (include "template.fullname" .) "backup-store" }}
+        serverName: {{ .Values.recovery.clusterName | default (include "template.fullname" .) }}
   {{- else if eq .Values.mode "replica" }}
   bootstrap:
     recovery:
       source: {{ .Values.replica.clusterName | default (include "template.fullname" .) }}
-      database: {{ .Values.dbName | default (include "template.fullname" .) }}
-      owner: {{ .Values.credentials.username | default (include "template.fullname" .) }}
       {{- if .Values.replica.extraArgs }}
       {{- toYaml .Values.replica.extraArgs | nindent 6 }}
       {{- end }}
-  externalClusters:
-  - name: {{ .Values.replica.clusterName | default (include "template.fullname" .) }}
-    barmanObjectStore:
-      wal:
-        maxParallel: {{ .Values.replica.maxParallelWal }}
-      destinationPath: {{ .Values.replica.destinationPath }}
-      endpointURL: {{ .Values.replica.endpointURL }}
-      {{- if .Values.replica.endpointCA.secretName }}
-      endpointCA:
-        name: {{ .Values.replica.endpointCA.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-ca") }}
-        key: {{ .Values.replica.endpointCA.key }}
-      {{- end }}
-      s3Credentials:
-        accessKeyId:
-          name: {{ .Values.replica.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-creds") }}
-          key: {{ .Values.replica.s3Credentials.accessKeyId.key }}
-        secretAccessKey:
-          name: {{ .Values.replica.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-creds") }}
-          key: {{ .Values.replica.s3Credentials.secretAccessKey.key }}
-        region:
-          name: {{ .Values.replica.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-creds") }}
-          key: {{ .Values.replica.s3Credentials.region.key }}
-    connectionParameters:
-      host: {{ .Values.replica.host }}
-      port: {{ .Values.replica.port }}
-      dbname: {{ .Values.replica.dbName }}
-      sslmode: {{ .Values.replica.sslMode }}
-    sslKey:
-      name: {{ printf "%s-%s" (include "template.fullname" .) "replica" }}
-      key: tls.key
-    sslCert:
-      name: {{ printf "%s-%s" (include "template.fullname" .) "replica" }}
-      key: tls.crt
-    sslRootCert:
-      name: {{ printf "%s-%s" (include "template.fullname" .) "ca" }}
-      key: ca.crt
   replica:
     enabled: true
     source: {{ .Values.replica.clusterName | default (include "template.fullname" .) }}
+  externalClusters:
+  - name: {{ .Values.replica.clusterName | default (include "template.fullname" .) }}
+    plugin:
+      name: barman-cloud.cloudnative-pg.io
+      parameters:
+        barmanObjectName: {{ printf "%s-%s" (include "template.fullname" .) "replica-store" }}
+        serverName: {{ .Values.replica.clusterName | default (include "template.fullname" .) }}
+    {{- if .Values.replica.host }}
+    connectionParameters:
+      host: {{ .Values.replica.host }}
+      port: {{ .Values.replica.port | default 5432 | quote }}
+      dbname: {{ .Values.replica.dbName }}
+      sslmode: {{ .Values.replica.sslMode }}
+    {{- end }}
   {{- end }}
-  {{- if and .Values.backup.enabled (eq .Values.mode "primary") }}
-  backup:
-    barmanObjectStore:
-      destinationPath: {{ .Values.backup.destinationPath }}
-      endpointURL: {{ .Values.backup.endpointURL }}
-      {{- if .Values.backup.endpointCA.secretName }}
-      endpointCA:
-        name: {{ .Values.backup.endpointCA.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-ca") }}
-        key: {{ .Values.backup.endpointCA.key }}
-      {{- end }}
-      s3Credentials:
-        accessKeyId:
-          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
-          key: {{ .Values.backup.s3Credentials.accessKeyId.key }}
-        secretAccessKey:
-          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
-          key: {{ .Values.backup.s3Credentials.secretAccessKey.key }}
-        region:
-          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
-          key: {{ .Values.backup.s3Credentials.region.key }}
-      {{- if .Values.backup.compression }}
-      data:
-        compression: {{ .Values.backup.compression }}
-      wal:
-        compression: {{ .Values.backup.compression }}
-      {{- end }}
-    retentionPolicy: {{ .Values.backup.retentionPolicy }}
+  {{/* Plugin-based backup and replica configuration (official barman-cloud plugin method) */}}
+  {{- if or (and .Values.backup.enabled (not .Values.backup.legacyMode)) (eq .Values.mode "replica") }}
+  plugins:
+  {{- if and .Values.backup.enabled (not .Values.backup.legacyMode) }}
+  - name: barman-cloud.cloudnative-pg.io
+    isWALArchiver: true
+    parameters:
+      barmanObjectName: {{ printf "%s-%s" (include "template.fullname" .) "backup-store" }}
+  {{- end }}
+  {{- if eq .Values.mode "replica" }}
+  - name: barman-cloud.cloudnative-pg.io
+    parameters:
+      barmanObjectName: {{ printf "%s-%s" (include "template.fullname" .) "replica-store" }}
+  {{- end }}
   {{- end }}
   monitoring:
     enablePodMonitor: {{ .Values.monitoring.enabled }} 

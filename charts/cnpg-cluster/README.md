@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 1.2.2](https://img.shields.io/badge/Version-1.2.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.27.1](https://img.shields.io/badge/AppVersion-1.27.1-informational?style=flat-square)
+![Version: 1.3.0](https://img.shields.io/badge/Version-1.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.27.1](https://img.shields.io/badge/AppVersion-1.27.1-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -28,7 +28,7 @@ helm install <release_name> tobi/cnpg-cluster
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 1.2.2
+  targetRevision: 1.3.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -43,7 +43,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 1.2.2
+  version: 1.3.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -72,12 +72,13 @@ cnpg-cluster:
 | backup.compression | string | `""` | Which compression algorithm should be used for cnpg backups (should be one of "gzip", "bzip2" or "snappy"), leave blank to disable compression. |
 | backup.cron | string | `"0 0 */6 * * *"` | The cron rule used for cnpg backups. By default it runs every 6 hours. |
 | backup.destinationPath | string | `""` | S3 destination path for cnpg backups (it should be set like `s3://<bucket_name>/<path>`). |
-| backup.enabled | bool | `false` | Whether or not cnpg cluster deployment should be enabled. |
+| backup.enabled | bool | `false` | Whether or not cnpg cluster backup should be enabled. |
 | backup.endpointCA.create | bool | `false` | Whether or not to create S3 CA kubernetes secret used for cnpg backups. It will use `secretName`, `endpointCA.key` and `endpointCA.value` to create the secret. |
 | backup.endpointCA.key | string | `"ca.crt"` | The secret key containing S3 CA for cnpg backups. |
 | backup.endpointCA.secretName | string | `""` | The secret name containing S3 CA for cnpg backups, leave it empty to auto-generate the secret name. |
 | backup.endpointCA.value | string | `""` | The S3 certificate used for cnpg backups. Only needed if `backup.endpointCA.create` is set to `true`. |
 | backup.endpointURL | string | `""` | S3 endpoint for cnpg backups. |
+| backup.legacyMode | bool | `true` | Use legacy in-tree backup method instead of barman-cloud plugin (deprecated, will be removed in future CNPG versions). When `false` (recommended), uses the official barman-cloud plugin with ObjectStore CRD. When `true`, falls back to the deprecated in-tree barmanObjectStore configuration. |
 | backup.retentionPolicy | string | `"14d"` | Retention policy for cnpg backups recurrences. |
 | backup.s3Credentials.accessKeyId.key | string | `"accessKeyId"` | S3 accessKeyId kubernetes secret key used for cnpg backups. |
 | backup.s3Credentials.accessKeyId.value | string | `""` | S3 accessKeyId value used for cnpg backups. Only needed if `backup.s3Credentials.create` is set to `true`. |
