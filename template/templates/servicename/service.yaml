@@ -16,4 +16,4 @@ spec:
   {{- if .Values.servicename.service.extraPorts -}}
   {{- toYaml .Values.servicename.service.extraPorts | nindent 2 -}}
   {{- end }}
-  selector: {{- include "helper.selectorLabels" . | nindent 4 }}
+  selector: {{- include "helper.selectorLabels" (dict "root" . "componentName" "servicename") | nindent 4 }}
