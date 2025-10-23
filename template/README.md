@@ -19,6 +19,7 @@ A Helm chart to deploy chartname.
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | global.env | object | `{}` | Map of environment variables to inject into all containers. |
+| global.ingress | object | `{}` | Whether or not ingress should be enabled globally, it could be shared by all components that support ingress. |
 | global.secrets | object | `{}` | Map of environment variables to inject into all containers. |
 
 ### Servicename
@@ -30,7 +31,8 @@ A Helm chart to deploy chartname.
 | servicename.affinity | object | `{}` | Affinity used for app pod. |
 | servicename.args | list | `[]` | Servicename container command args. |
 | servicename.command | list | `[]` | Servicename container command. |
-| servicename.containerPort | int | `8080` | Servicename container port. |
+| servicename.containerPort | int | `8080` | Servicename container port number. |
+| servicename.containerPortName | string | `"http"` | Servicename container port name. |
 | servicename.env | object | `{}` | Servicename container env variables, it will be injected into a configmap and loaded into the container. |
 | servicename.envFrom | list | `[]` | Servicename container env variables loaded from configmap or secret reference. |
 | servicename.extraContainers | list | `[]` | Extra containers to add to the app pod as sidecars. |
@@ -76,7 +78,7 @@ A Helm chart to deploy chartname.
 |-----|------|---------|-------------|
 | servicename.ingress.annotations | object | `{}` | Additional ingress annotations. |
 | servicename.ingress.className | string | `""` | Defines which ingress controller will implement the resource. |
-| servicename.ingress.enabled | bool | `true` | Whether or not ingress should be enabled. |
+| servicename.ingress.enabled | bool | `false` | Whether or not ingress should be enabled. |
 | servicename.ingress.hosts[0].backend.portNumber | string | `nil` | Port used by the backend service linked to the host record (leave null to use the app service port). |
 | servicename.ingress.hosts[0].backend.serviceName | string | `""` | Name of the backend service linked to the host record (leave empty to use the app service). |
 | servicename.ingress.hosts[0].name | string | `"domain.local"` | Name of the host record. |

@@ -13,6 +13,24 @@ global:
   # -- Map of environment variables to inject into all containers.
   # @section -- Global
   secrets: {}
+  # -- Whether or not ingress should be enabled globally, it could be shared by all components that support ingress.
+  # @section -- Global
+  ingress: {}
+    # enabled: false
+    # className: ""
+    # annotations: {}
+    # labels: {}
+    # hosts:
+    # - backend:
+    #     serviceName: ""
+    #     portNumber: null
+    #   name: "domain.local"
+    #   pathType: "Prefix"
+    #   path: "/"
+    # tls:
+    # - secretName: domain.local-tls
+    #   hosts:
+    #   - domain.local
 
 
 servicename:
@@ -36,7 +54,7 @@ servicename:
   ingress:
     # -- Whether or not ingress should be enabled.
     # @section -- Servicename
-    enabled: true
+    enabled: false
     # -- Defines which ingress controller will implement the resource.
     # @section -- Servicename
     className: ""
@@ -100,9 +118,12 @@ servicename:
   #   volumeMounts:
   #     - mountPath: /my-volume/config
   #       name: config
-  # -- Servicename container port.
+  # -- Servicename container port number.
   # @section -- Servicename
   containerPort: 8080
+  # -- Servicename container port name.
+  # @section -- Servicename
+  containerPortName: "http"
   # -- Servicename extra container ports.
   # @section -- Servicename
   extraPorts: []
