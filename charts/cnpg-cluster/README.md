@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
+![Version: 1.2.1](https://img.shields.io/badge/Version-1.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -28,7 +28,7 @@ helm install <release_name> tobi/cnpg-cluster
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 1.2.0
+  targetRevision: 1.2.1
   helm:
     releaseName: <release_name>
     parameters: []
@@ -43,7 +43,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 1.2.0
+  version: 1.2.1
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```

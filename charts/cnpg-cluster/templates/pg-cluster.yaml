@@ -33,11 +33,15 @@ spec:
   primaryUpdateStrategy: {{ .Values.primaryUpdateStrategy }}
   storage:
     size: {{ .Values.pvcSize.data }}
+    {{- if .Values.storageClass }}
     storageClass: {{ .Values.storageClass | quote }}
+    {{- end }}
   {{- if .Values.pvcSize.wal }}
   walStorage:
     size: {{ .Values.pvcSize.wal }}
+    {{- if .Values.storageClass }}
     storageClass: {{ .Values.storageClass | quote }}
+    {{- end }}
   {{- end }}
   resources: {{- toYaml .Values.resources | nindent 4 }}
   {{- if eq .Values.mode "primary" }}
