@@ -367,15 +367,19 @@ monitoring:
   # -- Specifies whether the monitoring should be enabled. Requires Prometheus Operator CRDs.
   # @section -- Monitoring
   enabled: false
-  # -- Metrics relabel configurations to apply to samples before ingestion.
-  # @section -- Monitoring
-  podMonitorMetricRelabelings: []
-  # -- Relabel configurations to apply to samples before scraping.
-  # @section -- Monitoring
-  podMonitorRelabelings: []
-  # -- Additional labels for the podMonitor
-  # @section -- Monitoring
-  podMonitorAdditionalLabels: {}
+  podMonitor:
+    # -- Metrics relabel configurations to apply to samples before ingestion.
+    # @section -- Monitoring
+    metricRelabelings: []
+    # -- Relabel configurations to apply to samples before scraping.
+    # @section -- Monitoring
+    relabelings: []
+    # -- Additional labels for the podMonitor
+    # @section -- Monitoring
+    additionalLabels: {}
+    # -- Additional match labels for the podMonitor
+    # @section -- Monitoring
+    extraMatchLabels: {}
 
 
 # CNPG operator configuration
