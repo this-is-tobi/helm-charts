@@ -3,21 +3,28 @@ apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
   name: {{ include "template.fullname" . }}
-  labels: {{- include "template.labels" . | nindent 4 }}
+  labels: 
+    {{- include "template.labels" . | nindent 4 }}
+    {{- with .Values.monitoring.podMonitor.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   {{- if .Values.annotations }}
   annotations: {{- toYaml .Values.annotations | nindent 4 }}
   {{- end }}
 spec:
   selector:
     matchLabels:
-      {{- include "template.selectorLabels" . | nindent 6 }}
+      cnpg.io/cluster: {{ include "template.fullname" . }}
+      {{- with .Values.monitoring.podMonitor.extraMatchLabels }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
   podMetricsEndpoints:
   - port: metrics
-    {{- with .Values.monitoring.podMonitorMetricRelabelings }}
+    {{- with .Values.monitoring.podMonitor.metricRelabelings }}
     metricRelabelings:
       {{- toYaml . | nindent 4 }}
     {{- end }}
-    {{- with .Values.monitoring.podMonitorRelabelings }}
+    {{- with .Values.monitoring.podMonitor.relabelings }}
     relabelings:
       {{- toYaml . | nindent 4 }}
     {{- end }}
