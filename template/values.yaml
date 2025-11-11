@@ -120,7 +120,7 @@ servicename:
   #       name: config
   # -- Servicename container port number.
   # @section -- Servicename
-  containerPort: 8080
+  containerPort: &servicenameContainerPort 8080
   # -- Servicename container port name.
   # @section -- Servicename
   containerPortName: "http"
@@ -158,17 +158,14 @@ servicename:
   # @section -- Servicename
   secrets: {}
   probes:
-    healthcheck:
-      # -- Servicename container healthcheck endpoint.
-      # @section -- Servicename
-      path: "/"
-      # -- Port to use for healthcheck (defaults to container port if not set)
-      # @section -- Servicename
-      port: 8080
     startupProbe:
-      # -- Whether or not enable the probe.
-      # @section -- Servicename
-      enabled: true
+      httpGet:
+        # -- Servicename container healthcheck endpoint (startupProbe is defined using `toYaml` so it is possible to override it completely).
+        # @section -- Servicename
+        path: "/"
+        # -- Port to use for healthcheck (defaults to container port).
+        # @section -- Servicename
+        port: *servicenameContainerPort
       # -- Number of seconds after the container has started before probe is initiated.
       # @section -- Servicename
       initialDelaySeconds: 0
@@ -185,9 +182,13 @@ servicename:
       # @section -- Servicename
       timeoutSeconds: 5
     readinessProbe:
-      # -- Whether or not enable the probe.
-      # @section -- Servicename
-      enabled: true
+      httpGet:
+        # -- Servicename container healthcheck endpoint (readinessProbe is defined using `toYaml` so it is possible to override it completely).
+        # @section -- Servicename
+        path: "/"
+        # -- Port to use for healthcheck (defaults to container port).
+        # @section -- Servicename
+        port: *servicenameContainerPort
       # -- Number of seconds after the container has started before probe is initiated.
       # @section -- Servicename
       initialDelaySeconds: 10
@@ -204,9 +205,13 @@ servicename:
       # @section -- Servicename
       timeoutSeconds: 5
     livenessProbe:
-      # -- Whether or not enable the probe.
-      # @section -- Servicename
-      enabled: true
+      httpGet:
+        # -- Servicename container healthcheck endpoint (livenessProbe is defined using `toYaml` so it is possible to override it completely).
+        # @section -- Servicename
+        path: "/"
+        # -- Port to use for healthcheck (defaults to container port).
+        # @section -- Servicename
+        port: *servicenameContainerPort
       # -- Number of seconds after the container has started before probe is initiated.
       # @section -- Servicename
       initialDelaySeconds: 30
@@ -517,10 +522,10 @@ servicename:
       labels: {}
       # -- Metrics service port.
       # @section -- Servicename
-      port: 8080
+      port: 9000
       # -- Metrics service target port.
       # @section -- Servicename
-      targetPort: 8080
+      targetPort: 9000
     serviceMonitor:
       # -- Enable a prometheus ServiceMonitor.
       # @section -- Servicename

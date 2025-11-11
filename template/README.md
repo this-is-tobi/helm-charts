@@ -94,8 +94,8 @@ A Helm chart to deploy chartname.
 | servicename.metrics.enabled | bool | `false` | Deploy metrics service. |
 | servicename.metrics.service.annotations | object | `{}` | Metrics service annotations. |
 | servicename.metrics.service.labels | object | `{}` | Metrics service labels. |
-| servicename.metrics.service.port | int | `8080` | Metrics service port. |
-| servicename.metrics.service.targetPort | int | `8080` | Metrics service target port. |
+| servicename.metrics.service.port | int | `9000` | Metrics service port. |
+| servicename.metrics.service.targetPort | int | `9000` | Metrics service target port. |
 | servicename.metrics.serviceMonitor.annotations | object | `{}` | Prometheus ServiceMonitor annotations. |
 | servicename.metrics.serviceMonitor.enabled | bool | `false` | Enable a prometheus ServiceMonitor. |
 | servicename.metrics.serviceMonitor.endpoints[0].basicAuth.password | string | `""` | The secret in the service monitor namespace that contains the password for authentication. |
@@ -136,22 +136,23 @@ A Helm chart to deploy chartname.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| servicename.probes.healthcheck.path | string | `"/"` | Servicename container healthcheck endpoint. |
-| servicename.probes.healthcheck.port | int | `8080` | Port to use for healthcheck (defaults to container port if not set) |
-| servicename.probes.livenessProbe.enabled | bool | `true` | Whether or not enable the probe. |
 | servicename.probes.livenessProbe.failureThreshold | int | `3` | Minimum consecutive failures for the probe to be considered failed after having succeeded. |
+| servicename.probes.livenessProbe.httpGet.path | string | `"/"` | Servicename container healthcheck endpoint (livenessProbe is defined using `toYaml` so it is possible to override it completely). |
+| servicename.probes.livenessProbe.httpGet.port | int | `8080` | Port to use for healthcheck (defaults to container port). |
 | servicename.probes.livenessProbe.initialDelaySeconds | int | `30` | Number of seconds after the container has started before probe is initiated. |
 | servicename.probes.livenessProbe.periodSeconds | int | `30` | How often (in seconds) to perform the probe. |
 | servicename.probes.livenessProbe.successThreshold | int | `1` | Minimum consecutive successes for the probe to be considered successful after having failed. |
 | servicename.probes.livenessProbe.timeoutSeconds | int | `5` | Number of seconds after which the probe times out. |
-| servicename.probes.readinessProbe.enabled | bool | `true` | Whether or not enable the probe. |
 | servicename.probes.readinessProbe.failureThreshold | int | `2` | Minimum consecutive failures for the probe to be considered failed after having succeeded. |
+| servicename.probes.readinessProbe.httpGet.path | string | `"/"` | Servicename container healthcheck endpoint (readinessProbe is defined using `toYaml` so it is possible to override it completely). |
+| servicename.probes.readinessProbe.httpGet.port | int | `8080` | Port to use for healthcheck (defaults to container port). |
 | servicename.probes.readinessProbe.initialDelaySeconds | int | `10` | Number of seconds after the container has started before probe is initiated. |
 | servicename.probes.readinessProbe.periodSeconds | int | `10` | How often (in seconds) to perform the probe. |
 | servicename.probes.readinessProbe.successThreshold | int | `2` | Minimum consecutive successes for the probe to be considered successful after having failed. |
 | servicename.probes.readinessProbe.timeoutSeconds | int | `5` | Number of seconds after which the probe times out. |
-| servicename.probes.startupProbe.enabled | bool | `true` | Whether or not enable the probe. |
 | servicename.probes.startupProbe.failureThreshold | int | `10` | Minimum consecutive failures for the probe to be considered failed after having succeeded. |
+| servicename.probes.startupProbe.httpGet.path | string | `"/"` | Servicename container healthcheck endpoint (startupProbe is defined using `toYaml` so it is possible to override it completely). |
+| servicename.probes.startupProbe.httpGet.port | int | `8080` | Port to use for healthcheck (defaults to container port). |
 | servicename.probes.startupProbe.initialDelaySeconds | int | `0` | Number of seconds after the container has started before probe is initiated. |
 | servicename.probes.startupProbe.periodSeconds | int | `10` | How often (in seconds) to perform the probe. |
 | servicename.probes.startupProbe.successThreshold | int | `1` | Minimum consecutive successes for the probe to be considered successful after having failed. |
