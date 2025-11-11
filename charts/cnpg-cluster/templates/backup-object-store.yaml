@@ -1,0 +1,41 @@
+{{/*
+Plugin-based backup ObjectStore resource.
+Only created when backup is enabled and NOT in legacy mode.
+This uses the official barman-cloud plugin architecture.
+*/}}
+{{- if and .Values.backup.enabled (not .Values.backup.legacyMode) }}
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: {{ printf "%s-%s" (include "template.fullname" .) "backup-store" }}
+  labels: {{- include "template.labels" . | nindent 4 }}
+  {{- if .Values.annotations }}
+  annotations: {{- toYaml .Values.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  configuration:
+    destinationPath: {{ .Values.backup.destinationPath }}
+    endpointURL: {{ .Values.backup.endpointURL }}
+    {{- if or .Values.backup.endpointCA.create .Values.backup.endpointCA.secretName }}
+    endpointCA:
+      name: {{ .Values.backup.endpointCA.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-ca") }}
+      key: {{ .Values.backup.endpointCA.key }}
+    {{- end }}
+    s3Credentials:
+      accessKeyId:
+        name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
+        key: {{ .Values.backup.s3Credentials.accessKeyId.key }}
+      secretAccessKey:
+        name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
+        key: {{ .Values.backup.s3Credentials.secretAccessKey.key }}
+      region:
+        name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
+        key: {{ .Values.backup.s3Credentials.region.key }}
+    {{- if .Values.backup.compression }}
+    data:
+      compression: {{ .Values.backup.compression }}
+    wal:
+      compression: {{ .Values.backup.compression }}
+    {{- end }}
+  retentionPolicy: {{ .Values.backup.retentionPolicy }}
+{{- end }}
