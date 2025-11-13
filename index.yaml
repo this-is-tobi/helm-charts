@@ -2,6 +2,24 @@ apiVersion: v1
 entries:
   backup-utils:
   - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-11-13T22:33:36.567938417Z"
+    description: A Helm chart for effortless deployment of backup utilities (postgresql,
+      s3, vault, and qdrant).
+    digest: e64f44f4e993a7e3dd126d1d46ee5a12386ae7c8e90bc6fd94d7496a1d28c04c
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: backup-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/this-is-tobi/tools
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-2.0.0/backup-utils-2.0.0.tgz
+    version: 2.0.0
+  - apiVersion: v2
     appVersion: 0.1.0
     created: "2025-07-07T01:12:29.598463068Z"
     description: A Helm chart for effortless deployment of backup utilities.
@@ -1621,4 +1639,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2025-11-11T23:57:50.668076201Z"
+generated: "2025-11-13T22:33:36.568169376Z"
