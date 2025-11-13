@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "template.name" -}}
+{{- define "helper.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -9,7 +9,7 @@ Expand the name of the chart.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "template.chart" -}}
+{{- define "helper.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -17,7 +17,7 @@ Create chart name and version as used by the chart label.
 {{/*
 Create image pull secret
 */}}
-{{- define "template.imagePullSecret" }}
+{{- define "helper.imagePullSecret" }}
 {{- with .Values.imageCredentials }}
 {{- printf "{\"auths\":{\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\",\"auth\":\"%s\"}}}" .registry .username .password .email (printf "%s:%s" .username .password | b64enc) | b64enc }}
 {{- end }}
@@ -27,20 +27,28 @@ Create image pull secret
 {{/*
 Create container environment variables from configmap
 */}}
-{{- define "template.env" -}}
-{{ range $key, $val := .env }}
+{{- define "helper.env" -}}
+{{- range $key, $val := .env }}
 {{ $key }}: {{ $val | quote }}
-{{- end }}
+{{- end -}}
 {{- end }}
 
 
 {{/*
 Create container environment variables from secret
 */}}
-{{- define "template.secret" -}}
-{{ range $key, $val := .secrets }}
+{{- define "helper.secret" -}}
+{{- range $key, $val := .secrets }}
 {{ $key }}: {{ $val | b64enc | quote }}
 {{- end }}
+{{- end }}
+
+
+{{/*
+Convert a string to kebab-case (lowercase with hyphens)
+*/}}
+{{- define "helper.toKebabCase" -}}
+{{- . | kebabcase }}
 {{- end }}
 
 
@@ -62,7 +70,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "template.fullname" -}}
+{{- define "helper.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -79,8 +87,8 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Common labels
 */}}
-{{- define "template.common.labels" -}}
-helm.sh/chart: {{ include "template.chart" . }}
+{{- define "helper.common.labels" -}}
+helm.sh/chart: {{ include "helper.chart" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -91,36 +99,21 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "template.postgresql.selectorLabels" -}}
-app.kubernetes.io/name: {{ printf "%s-%s" (include "template.name" .) "postgresql" }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{- define "template.s3.selectorLabels" -}}
-app.kubernetes.io/name: {{ printf "%s-%s" (include "template.name" .) "s3" }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{- define "template.vault.selectorLabels" -}}
-app.kubernetes.io/name: {{ printf "%s-%s" (include "template.name" .) "vault" }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{- define "helper.selectorLabels" -}}
+{{- $root := index . 0 }}
+{{- $app := index . 1 -}}
+app.kubernetes.io/name: {{ printf "%s-%s" (include "helper.name" $root) (include "helper.toKebabCase" $app) }}
+app.kubernetes.io/name: {{ printf "%s-%s" (include "helper.name" $root) $app }}
+app.kubernetes.io/instance: {{ $root.Release.Name }}
 {{- end }}
 
 
 {{/*
 App labels
 */}}
-{{- define "template.postgresql.labels" -}}
-{{ include "template.common.labels" . }}
-{{ include "template.postgresql.selectorLabels" . }}
-{{- end }}
-
-{{- define "template.s3.labels" -}}
-{{ include "template.common.labels" . }}
-{{ include "template.s3.selectorLabels" . }}
-{{- end }}
-
-{{- define "template.vault.labels" -}}
-{{ include "template.common.labels" . }}
-{{ include "template.vault.selectorLabels" . }}
+{{- define "helper.labels" -}}
+{{- $root := index . 0 }}
+{{- $app := index . 1 -}}
+{{ include "helper.common.labels" $root }}
+{{ include "helper.selectorLabels" (list $root $app) }}
 {{- end }}

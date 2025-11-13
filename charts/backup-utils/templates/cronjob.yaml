@@ -1,0 +1,96 @@
+{{- range $backupName, $backup := $.Values.backups }}
+{{- if $backup.enabled }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ printf "%s-%s" (include "helper.fullname" $) (include "helper.toKebabCase" $backupName) }}
+  labels:
+    {{- include "helper.labels" (list $ $backupName) | nindent 4 }}
+spec:
+  schedule: {{ $backup.job.schedule }}
+  successfulJobsHistoryLimit: {{ $backup.job.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ $backup.job.failedJobsHistoryLimit }}
+  concurrencyPolicy: {{ $backup.job.concurrencyPolicy }}
+  timeZone: {{ $backup.job.timeZone | default "UTC" }}
+  jobTemplate:
+    metadata:
+      {{- if $backup.jobAnnotations }}
+      annotations:
+        {{- with $backup.jobAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      labels:
+        {{- include "helper.selectorLabels" (list $ $backupName) | nindent 8 }}
+        {{- with $backup.jobLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      backoffLimit: {{ $backup.job.backoffLimit }}
+      template:
+        metadata:
+          {{- if $backup.podAnnotations }}
+          annotations:
+            {{- with $backup.podAnnotations }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          labels:
+            {{- include "helper.selectorLabels" (list $ $backupName) | nindent 12 }}
+            {{- with $backup.podLabels }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        spec:
+          {{- if and $.Values.imageCredentials.username $.Values.imageCredentials.password }}
+          imagePullSecrets:
+          - name: {{ include "helper.name" $ }}-pullsecret
+          {{- end }}
+          restartPolicy: {{ $backup.restartPolicy }}
+          {{- if $backup.podSecurityContext }}
+          securityContext:
+            {{- toYaml $backup.podSecurityContext | nindent 12 }}
+          {{- end }}
+          containers:
+          - name: backup
+            {{- if $backup.container.securityContext }}
+            securityContext:
+              {{- toYaml $backup.container.securityContext | nindent 14 }}
+            {{- end }}
+            image: {{ printf "%s:%s" $backup.image.repository ($backup.image.tag | default "latest") }}
+            imagePullPolicy: {{ $backup.image.pullPolicy }}
+            {{- if $backup.container.command }}
+            command:
+            {{- range $backup.container.command }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- else }}
+            command:
+            - "/bin/bash"
+            - {{ printf "./scripts/%s-backup.sh" $backup.type | quote }}
+            {{- end }}
+            {{- if $backup.container.args }}
+            args:
+            {{- range $backup.container.args }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            ports:
+            - containerPort: {{ $backup.container.port }}
+              protocol: TCP
+            envFrom:
+            {{- if or $backup.env $.Values.global.env }}
+            - configMapRef:
+                name: {{ printf "%s-%s" (include "helper.fullname" $) (include "helper.toKebabCase" $backupName) }}
+            {{- end }}
+            {{- if or $backup.secrets $.Values.global.secrets }}
+            - secretRef:
+                name: {{ printf "%s-%s" (include "helper.fullname" $) (include "helper.toKebabCase" $backupName) }}
+            {{- end }}
+            {{- if $backup.envFrom }}
+              {{- toYaml $backup.envFrom | nindent 12 }}
+            {{- end }}
+            resources:
+              {{- toYaml $backup.resources | nindent 14 }}
+{{- end }}
+{{- end }}

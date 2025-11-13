@@ -1,433 +1,210 @@
-# -- Provide a name in place of the default application name.
+# -- Override the chart name (used in resource naming).
 nameOverride: ""
-# -- String to fully override the default application name.
+# -- Override the full resource name (release-name + chart-name).
 fullnameOverride: ""
 
-# Image credentials configuration.
+# Container image pull credentials (optional).
+# Only needed if pulling from a private registry.
 imageCredentials:
-  # -- Registry to pull images from.
+  # -- Container registry URL (e.g., "docker.io", "ghcr.io").
   # @section -- Image pull secret
   registry: ""
-  # -- Username to pull images.
+  # -- Registry username for authentication.
   # @section -- Image pull secret
   username: ""
-  # -- Password to pull images.
+  # -- Registry password for authentication.
   # @section -- Image pull secret
   password: ""
-  # -- Email to pull images.
+  # -- Email address associated with the registry account.
   # @section -- Image pull secret
   email: ""
 
-# Global configuration.
+# Global configuration shared across all backup jobs.
+# These values are merged with individual backup configurations.
 global:
-  # -- Map of environment variables to inject into backend and frontend containers.
+  # -- Environment variables (non-sensitive) injected into all backup containers.
   # @section -- Global
   env: {}
-  # -- Map of environment variables to inject into backend and frontend containers.
+  # -- Secret environment variables (sensitive) injected into all backup containers.
   # @section -- Global
   secrets: {}
 
-# Postgresql backup configuration.
-postgresql:
-  # -- Whether or not postgresql backup should be enabled.
-  # @section -- Postgresql
-  enabled: false
-  ## Postgresql backup image.
-  image:
-    # -- Repository to use for the postgresql backup.
-    # @section -- Postgresql
-    repository: "ghcr.io/this-is-tobi/tools/pg-backup"
-    # -- Image pull policy for the postgresql backup.
-    # @section -- Postgresql
-    pullPolicy: "IfNotPresent"
-    # -- Tag to use for the postgresql backup.
-    # Overrides the image tag whose default is the chart appVersion.
-    # @section -- Postgresql
-    tag: "3.4.0"
-  job:
-    # -- The cron rule used for backups. By default it runs everyday at 00:00.
-    # @section -- Postgresql
-    schedule: "0 0 * * *"
-    # -- The number of successful finished jobs to retain. Value must be non-negative integer.
-    # @section -- Postgresql
-    successfulJobsHistoryLimit: 3
-    # -- The number of failed finished jobs to retain. Value must be non-negative integer.
-    # @section -- Postgresql
-    failedJobsHistoryLimit: 3
-    # -- Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace".
-    # @section -- Postgresql
-    concurrencyPolicy: "Forbid"
-    # -- The time zone name for the given schedule, see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
-    # @section -- Postgresql
-    timeZone: ""
-    # -- Specifies the number of retries before marking this job failed.
-    # @section -- Postgresql
-    backoffLimit: 3
-  # -- Annotations for the postgresql backup deployed jobs.
-  # @section -- Postgresql
-  jobAnnotations: {}
-  # -- Labels for the postgresql backup deployed jobs.
-  # @section -- Postgresql
-  jobLabels: {}
-  # -- Annotations for the postgresql backup deployed pods.
-  # @section -- Postgresql
-  podAnnotations: {}
-  # -- Labels for the postgresql backup deployed pods.
-  # @section -- Postgresql
-  podLabels: {}
-  # -- Restart policy for all containers within the pod.
-  # @section -- Postgresql
-  restartPolicy: Never
-  # -- Toggle and define pod-level security context.
-  # @section -- Postgresql
-  podSecurityContext: {}
-    # fsGroup: 2000
-  container:
-    # -- Postgresql backup container port.
-    # @section -- Postgresql
-    port: 8080
-    # -- Postgresql backup container command.
-    # @section -- Postgresql
-    command: []
-    # -- Postgresql backup container command args.
-    # @section -- Postgresql
-    args: []
-    # -- Toggle and define container-level security context.
-    # @section -- Postgresql
-    securityContext: {}
-      # capabilities:
-      #   drop:
-      #   - ALL
-      # readOnlyRootFilesystem: true
-      # runAsNonRoot: true
-      # runAsUser: 1000
-  # -- Postgresql backup container env variables loaded from configmap or secret reference.
-  # @section -- Postgresql
-  envFrom: []
-  # - configMapRef:
-  #     name: my-config
-  # - secretRef:
-  #     name: my-secret
-  env:
-    # -- Backup rentention to apply on the bucket, it should follow the pattern `#d#hh#mm#ss` (https://min.io/docs/minio/linux/reference/minio-mc/mc-rm.html#mc.rm.-older-than).
-    # @section -- Postgresql
-    RETENTION: "7d"
-    # -- Minio extra cli args used for backup.
-    # @section -- Postgresql
-    MC_EXTRA_ARGS: ""
-    # -- Whether or not S3 path style is used (if the bucket name is included in the S3_ENDPOINT variable, the value should be set to "false").
-    # @section -- Postgresql
-    S3_PATH_STYLE: "true"
-  secrets:
-    # -- Host of the postgresql database to backup.
-    # @section -- Postgresql
-    DB_HOST: ""
-    # -- Port of the postgresql database to backup.
-    # @section -- Postgresql
-    DB_PORT: ""
-    # -- Name of the postgresql database to backup.
-    # @section -- Postgresql
-    DB_NAME: ""
-    # -- User of the postgresql database used for backup.
-    # @section -- Postgresql
-    DB_USER: ""
-    # -- Password of the postgresql database used for backup.
-    # @section -- Postgresql
-    DB_PASS: ""
-    # -- S3 endpoint used as target destination.
-    # @section -- Postgresql
-    S3_ENDPOINT: ""
-    # -- S3 access key.
-    # @section -- Postgresql
-    S3_ACCESS_KEY: ""
-    # -- S3 secret key.
-    # @section -- Postgresql
-    S3_SECRET_KEY: ""
-    # -- S3 bucket name used as target destination.
-    # @section -- Postgresql
-    S3_BUCKET_NAME: ""
-    # -- S3 bucket prefix used as target destination (the folder prefix used in the bucket).
-    # @section -- Postgresql
-    S3_BUCKET_PREFIX: ""
-  resources:
-    requests:
-      # -- Memory request for the postgresql backup.
-      # @section -- Postgresql
-      memory: "128Mi"
-      # -- CPU request for the postgresql backup.
-      # @section -- Postgresql
-      cpu: "100m"
-    limits:
-      # -- Memory limit for the postgresql backup.
-      # @section -- Postgresql
-      memory: "512Mi"
-      # -- CPU limit for the postgresql backup.
-      # @section -- Postgresql
-      cpu: "250m"
-
-# S3 backup configuration.
-s3:
-  # -- Whether or not s3 backup should be enabled.
-  # @section -- S3
-  enabled: false
-  ## S3 backup image.
-  image:
-    # -- Repository to use for the s3 backup.
-    # @section -- S3
-    repository: "ghcr.io/this-is-tobi/tools/s3-backup"
-    # -- Image pull policy for the s3 backup.
-    # @section -- S3
-    pullPolicy: "IfNotPresent"
-    # -- Tag to use for the s3 backup.
-    # Overrides the image tag whose default is the chart appVersion.
-    # @section -- S3
-    tag: "1.2.0"
-  job:
-    # -- The cron rule used for backups. By default it runs everyday at 00:00.
-    # @section -- S3
-    schedule: "0 0 * * *"
-    # -- The number of successful finished jobs to retain. Value must be non-negative integer.
-    # @section -- S3
-    successfulJobsHistoryLimit: 3
-    # -- The number of failed finished jobs to retain. Value must be non-negative integer.
-    # @section -- S3
-    failedJobsHistoryLimit: 3
-    # -- Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace".
-    # @section -- S3
-    concurrencyPolicy: "Forbid"
-    # -- The time zone name for the given schedule, see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
-    # @section -- S3
-    timeZone: ""
-    # -- Specifies the number of retries before marking this job failed.
-    # @section -- S3
-    backoffLimit: 3
-  # -- Annotations for the s3 backup deployed jobs.
-  # @section -- S3
-  jobAnnotations: {}
-  # -- Labels for the s3 backup deployed jobs.
-  # @section -- S3
-  jobLabels: {}
-  # -- Annotations for the s3 backup deployed pods.
-  # @section -- S3
-  podAnnotations: {}
-  # -- Labels for the s3 backup deployed pods.
-  # @section -- S3
-  podLabels: {}
-  # -- Restart policy for all containers within the pod.
-  # @section -- S3
-  restartPolicy: Never
-  # -- Toggle and define pod-level security context.
-  # @section -- S3
-  podSecurityContext: {}
-    # fsGroup: 2000
-  container:
-    # -- S3 backup container port.
-    # @section -- S3
-    port: 8080
-    # -- S3 backup container command.
-    # @section -- S3
-    command: []
-    # -- S3 backup container command args.
-    # @section -- S3
-    args: []
-    # -- Toggle and define container-level security context.
-    # @section -- S3
-    securityContext: {}
-      # capabilities:
-      #   drop:
-      #   - ALL
-      # readOnlyRootFilesystem: true
-      # runAsNonRoot: true
-      # runAsUser: 1000
-  # -- S3 backup container env variables loaded from configmap or secret reference.
-  # @section -- S3
-  envFrom: []
-  # - configMapRef:
-  #     name: my-config
-  # - secretRef:
-  #     name: my-secret
-  env:
-    # -- Minio extra cli args used for backup.
-    # @section -- S3
-    MC_EXTRA_ARGS: ""
-    # -- Whether or not S3 path style is used (if the bucket name is included in the S3_ENDPOINT variable, the value should be set to "false").
-    # @section -- S3
-    S3_PATH_STYLE: "true"
-  secrets:
-    # -- S3 source endpoint used as target destination.
-    # @section -- S3
-    SOURCE_S3_ENDPOINT: ""
-    # -- S3 source access key.
-    # @section -- S3
-    SOURCE_S3_ACCESS_KEY: ""
-    # -- S3 source secret key.
-    # @section -- S3
-    SOURCE_S3_SECRET_KEY: ""
-    # -- S3 source bucket name used as target destination.
-    # @section -- S3
-    SOURCE_S3_BUCKET_NAME: ""
-    # -- S3 source bucket prefix used as target destination (the folder prefix used in the bucket).
-    # @section -- S3
-    SOURCE_S3_BUCKET_PREFIX: ""
-    # -- S3 target endpoint used as target destination.
-    # @section -- S3
-    TARGET_S3_ENDPOINT: ""
-    # -- S3 target access key.
-    # @section -- S3
-    TARGET_S3_ACCESS_KEY: ""
-    # -- S3 target secret key.
-    # @section -- S3
-    TARGET_S3_SECRET_KEY: ""
-    # -- S3 target bucket name used as target destination.
-    # @section -- S3
-    TARGET_S3_BUCKET_NAME: ""
-    # -- S3 target bucket prefix used as target destination (the folder prefix used in the bucket).
-    # @section -- S3
-    TARGET_S3_BUCKET_PREFIX: ""
-  resources:
-    requests:
-      # -- Memory request for the s3 backup.
-      # @section -- S3
-      memory: "128Mi"
-      # -- CPU request for the s3 backup.
-      # @section -- S3
-      cpu: "100m"
-    limits:
-      # -- Memory limit for the s3 backup.
-      # @section -- S3
-      memory: "512Mi"
-      # -- CPU limit for the s3 backup.
-      # @section -- S3
-      cpu: "250m"
-
-# Vault backup configuration.
-vault:
-  # -- Whether or not vault backup should be enabled.
-  # @section -- Vault
-  enabled: false
-  ## Vault backup image.
-  image:
-    # -- Repository to use for the vault backup.
-    # @section -- Vault
-    repository: "ghcr.io/this-is-tobi/tools/vault-backup"
-    # -- Image pull policy for the vault backup.
-    # @section -- Vault
-    pullPolicy: "IfNotPresent"
-    # -- Tag to use for the vault backup.
-    # Overrides the image tag whose default is the chart appVersion.
-    # @section -- Vault
-    tag: "1.6.0"
-  job:
-    # -- The cron rule used for backups. By default it runs everyday at 00:00.
-    # @section -- Vault
-    schedule: "0 0 * * *"
-    # -- The number of successful finished jobs to retain. Value must be non-negative integer.
-    # @section -- Vault
-    successfulJobsHistoryLimit: 3
-    # -- The number of failed finished jobs to retain. Value must be non-negative integer.
-    # @section -- Vault
-    failedJobsHistoryLimit: 3
-    # -- Specifies how to treat concurrent executions of a Job. Valid values are "Allow", "Forbid" and "Replace".
-    # @section -- Vault
-    concurrencyPolicy: "Forbid"
-    # -- The time zone name for the given schedule, see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
-    # @section -- Vault
-    timeZone: ""
-    # -- Specifies the number of retries before marking this job failed.
-    # @section -- Vault
-    backoffLimit: 3
-  # -- Annotations for the vault backup deployed jobs.
-  # @section -- Vault
-  jobAnnotations: {}
-  # -- Labels for the vault backup deployed jobs.
-  # @section -- Vault
-  jobLabels: {}
-  # -- Annotations for the vault backup deployed pods.
-  # @section -- Vault
-  podAnnotations: {}
-  # -- Labels for the vault backup deployed pods.
-  # @section -- Vault
-  podLabels: {}
-  # -- Restart policy for all containers within the pod.
-  # @section -- Vault
-  restartPolicy: Never
-  # -- Toggle and define pod-level security context.
-  # @section -- Vault
-  podSecurityContext: {}
-    # fsGroup: 2000
-  container:
-    # -- Vault backup container port.
-    # @section -- Vault
-    port: 8080
-    # -- Vault backup container command.
-    # @section -- Vault
-    command: []
-    # -- Vault backup container command args.
-    # @section -- Vault
-    args: []
-    # -- Toggle and define container-level security context.
-    # @section -- Vault
-    securityContext: {}
-      # capabilities:
-      #   drop:
-      #   - ALL
-      # readOnlyRootFilesystem: true
-      # runAsNonRoot: true
-      # runAsUser: 1000
-  # -- Vault backup container env variables loaded from configmap or secret reference.
-  # @section -- Vault
-  envFrom: []
-  # - configMapRef:
-  #     name: my-config
-  # - secretRef:
-  #     name: my-secret
-  env:
-    # -- Backup rentention to apply on the bucket, it should follow the pattern `#d#hh#mm#ss` (https://min.io/docs/minio/linux/reference/minio-mc/mc-rm.html#mc.rm.-older-than).
-    # @section -- Vault
-    RETENTION: "7d"
-    # -- Minio extra cli args used for backup.
-    # @section -- Vault
-    MC_EXTRA_ARGS: ""
-    # -- Whether or not S3 path style is used (if the bucket name is included in the S3_ENDPOINT variable, the value should be set to "false").
-    # @section -- Vault
-    S3_PATH_STYLE: "true"
-  secrets:
-    # -- Host of the vault server to backup.
-    # @section -- Vault
-    VAULT_ADDR: ""
-    # -- Token of the vault server used for backup.
-    # @section -- Vault
-    VAULT_TOKEN: ""
-    # -- Vault extra cli args used for backup.
-    # @section -- Vault
-    VAULT_EXTRA_ARGS: ""
-    # -- S3 endpoint used as target destination.
-    # @section -- Vault
-    S3_ENDPOINT: ""
-    # -- S3 access key.
-    # @section -- Vault
-    S3_ACCESS_KEY: ""
-    # -- S3 secret key.
-    # @section -- Vault
-    S3_SECRET_KEY: ""
-    # -- S3 bucket name used as target destination.
-    # @section -- Vault
-    S3_BUCKET_NAME: ""
-    # -- S3 bucket prefix used as target destination (the folder prefix used in the bucket).
-    # @section -- Vault
-    S3_BUCKET_PREFIX: ""
-  resources:
-    requests:
-      # -- Memory request for the vault backup.
-      # @section -- Vault
-      memory: "128Mi"
-      # -- CPU request for the vault backup.
-      # @section -- Vault
-      cpu: "100m"
-    limits:
-      # -- Memory limit for the vault backup.
-      # @section -- Vault
-      memory: "512Mi"
-      # -- CPU limit for the vault backup.
-      # @section -- Vault
-      cpu: "250m"
+# Backup jobs configuration.
+# Define multiple backup jobs by adding entries under this section.
+# Each key represents a unique backup name that will be used in resource naming.
+backups:
+  myBackup:
+    # -- Enable or disable this specific backup job.
+    # @section -- Backups
+    enabled: true
+    # -- Backup type determining which script to run. Valid values: `postgres`, `s3`, `qdrant`, `vault`.
+    # @section -- Backups
+    type: "postgres"
+    image:
+      # -- Container image repository containing the backup scripts.
+      # @section -- Backups
+      repository: "ghcr.io/this-is-tobi/tools/backup"
+      # -- Image pull policy. Options: `Always`, `IfNotPresent`, `Never`.
+      # @section -- Backups
+      pullPolicy: "IfNotPresent"
+      # -- Container image tag (version). Defaults to chart appVersion if not specified.
+      # @section -- Backups
+      tag: "0.1.0"
+    job:
+      # -- Cron schedule expression (e.g., "0 0 * * *" = daily at midnight UTC).
+      # @section -- Backups
+      schedule: "0 0 * * *"
+      # -- Number of successful job executions to keep in history (for troubleshooting).
+      # @section -- Backups
+      successfulJobsHistoryLimit: 3
+      # -- Number of failed job executions to keep in history (for troubleshooting).
+      # @section -- Backups
+      failedJobsHistoryLimit: 3
+      # -- How to handle overlapping job runs. Options: `Forbid` (skip if running), `Allow` (run in parallel), `Replace` (kill and restart).
+      # @section -- Backups
+      concurrencyPolicy: "Forbid"
+      # -- IANA timezone for schedule (e.g., "Europe/Paris", "America/New_York"). Empty = UTC.
+      # @section -- Backups
+      timeZone: ""
+      # -- Maximum number of retry attempts before marking the job as failed.
+      # @section -- Backups
+      backoffLimit: 3
+    # -- Custom annotations added to the CronJob resource (optional).
+    # @section -- Backups
+    jobAnnotations: {}
+    # -- Custom labels added to the CronJob resource (optional).
+    # @section -- Backups
+    jobLabels: {}
+    # -- Custom annotations added to the backup pod (optional).
+    # @section -- Backups
+    podAnnotations: {}
+    # -- Custom labels added to the backup pod (optional).
+    # @section -- Backups
+    podLabels: {}
+    # -- Pod restart policy. Options: `Never` (recommended), `OnFailure`, `Always`.
+    # @section -- Backups
+    restartPolicy: Never
+    # -- Pod security context settings (user/group IDs, fsGroup, etc.).
+    # @section -- Backups
+    podSecurityContext: {}
+      # fsGroup: 2000
+    container:
+      # -- Container port (used for health checks or communication, typically 8080).
+      # @section -- Backups
+      port: 8080
+      # -- Override default container command. Leave empty to use image default (recommended).
+      # @section -- Backups
+      command: []
+      # -- Override default container arguments. Leave empty to use image default (recommended).
+      # @section -- Backups
+      args: []
+      # -- Container security context (capabilities, read-only filesystem, user/group IDs).
+      # @section -- Backups
+      securityContext: {}
+        # capabilities:
+        #   drop:
+        #   - ALL
+        # readOnlyRootFilesystem: true
+        # runAsNonRoot: true
+        # runAsUser: 1000
+    # -- Additional environment variables from existing ConfigMaps or Secrets.
+    # @section -- Backups
+    envFrom: []
+    # - configMapRef:
+    #     name: my-config
+    # - secretRef:
+    #     name: my-secret
+    env:
+      # -- Backup retention period in rclone duration format. Examples: "7d" (7 days), "168h" (1 week), "2w" (2 weeks).
+      # @section -- Config - Common
+      RETENTION: "7d"
+      # -- Use S3 path-style URLs. Set to "true" for most providers. Set to "false" if bucket is in endpoint (e.g., "https://bucket.s3.amazonaws.com").
+      # @section -- Config - Common
+      S3_PATH_STYLE: "true"
+      # -- Additional rclone CLI arguments (e.g., "--transfers=4" or "--checkers=8" for performance tuning).
+      # @section -- Config - Common
+      RCLONE_EXTRA_ARGS: ""
+    secrets:
+      ## Common - S3-compatible storage configuration (required for all backup types)
+      # -- S3 endpoint URL (e.g., "https://s3.amazonaws.com", "https://minio.example.com:9000").
+      # @section -- Config - Common
+      S3_ENDPOINT: ""
+      # -- S3 access key ID for authentication.
+      # @section -- Config - Common
+      S3_ACCESS_KEY: ""
+      # -- S3 secret access key for authentication.
+      # @section -- Config - Common
+      S3_SECRET_KEY: ""
+      # -- S3 bucket name where backups will be stored.
+      # @section -- Config - Common
+      S3_BUCKET_NAME: ""
+      # -- S3 bucket path prefix (folder path within bucket, e.g., "prod/postgres" or "backups/").
+      # @section -- Config - Common
+      S3_BUCKET_PREFIX: ""
+      ## PostgreSQL - Required only when type="postgres"
+      # -- PostgreSQL server hostname or IP address (e.g., "postgres.default.svc.cluster.local").
+      # @section -- Config - Postgres
+      DB_HOST: ""
+      # -- PostgreSQL server port (default: "5432").
+      # @section -- Config - Postgres
+      DB_PORT: ""
+      # -- PostgreSQL database name to backup.
+      # @section -- Config - Postgres
+      DB_NAME: ""
+      # -- PostgreSQL username with backup/read permissions.
+      # @section -- Config - Postgres
+      DB_USER: ""
+      # -- PostgreSQL user password.
+      # @section -- Config - Postgres
+      DB_PASS: ""
+      ## Vault - Required only when type="vault"
+      # -- Vault server address (e.g., "https://vault.example.com:8200").
+      # @section -- Config - Vault
+      VAULT_ADDR: ""
+      # -- Vault authentication token with backup/snapshot permissions.
+      # @section -- Config - Vault
+      VAULT_TOKEN: ""
+      # -- Additional Vault CLI arguments (e.g., "-namespace=admin" for enterprise features).
+      # @section -- Config - Vault
+      VAULT_EXTRA_ARGS: ""
+      ## Qdrant - Required only when type="qdrant"
+      # -- Qdrant server URL (e.g., "https://qdrant.example.com").
+      # @section -- Config - Qdrant
+      QDRANT_URL: ""
+      # -- Qdrant API key for authentication.
+      # @section -- Config - Qdrant
+      QDRANT_API_KEY: ""
+      # -- Qdrant collection name to backup (leave empty to backup all collections).
+      # @section -- Config - Qdrant
+      QDRANT_COLLECTION: ""
+      ## S3-to-S3 - Required only when type="s3" (backup from one S3 bucket to another)
+      # -- Source S3 endpoint URL to backup from (e.g., "https://s3.us-west-2.amazonaws.com").
+      # @section -- Config - S3
+      SOURCE_S3_ENDPOINT: ""
+      # -- Source S3 access key ID for authentication.
+      # @section -- Config - S3
+      SOURCE_S3_ACCESS_KEY: ""
+      # -- Source S3 secret access key for authentication.
+      # @section -- Config - S3
+      SOURCE_S3_SECRET_KEY: ""
+      # -- Source S3 bucket name to backup from.
+      # @section -- Config - S3
+      SOURCE_S3_BUCKET_NAME: ""
+      # -- Source S3 bucket path prefix to backup (e.g., "data/" to backup only specific folder).
+      # @section -- Config - S3
+      SOURCE_S3_BUCKET_PREFIX: ""
+    resources:
+      requests:
+        # -- Minimum memory guaranteed for the backup container. Adjust based on backup size.
+        # @section -- Backups
+        memory: "128Mi"
+        # -- Minimum CPU guaranteed for the backup container (1000m = 1 CPU core).
+        # @section -- Backups
+        cpu: "100m"
+      limits:
+        # -- Maximum memory allowed for the backup container. Container will be killed if exceeded.
+        # @section -- Backups
+        memory: "512Mi"
+        # -- Maximum CPU allowed for the backup container (throttled if exceeded).
+        # @section -- Backups
+        cpu: "250m"
