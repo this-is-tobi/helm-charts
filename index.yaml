@@ -1,6 +1,52 @@
 apiVersion: v1
 entries:
   backup-utils:
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/changes: |
+        - kind: changed
+          description: Restructured values.yaml with empty defaults and comprehensive inline documentation
+        - kind: added
+          description: Created test-values.yaml with 7 example backup configurations covering all backup types
+        - kind: changed
+          description: Renamed template helpers from 'helper.*' to 'backup-utils.*' for chart-specific naming
+        - kind: fixed
+          description: Fixed template helper references in pullsecret.yml
+        - kind: changed
+          description: Enhanced cronjob template to handle optional container configuration fields safely
+        - kind: added
+          description: Added .helmignore for proper file exclusions during packaging
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-11-20T18:53:31.755234651Z"
+    description: Production-ready Helm chart for automated backups of PostgreSQL,
+      Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules
+      and retention policies.
+    digest: 698a8d6a40279589a995b6f947d896a12a9d83df46bb733cc0af31635eb1b300
+    keywords:
+    - backup
+    - postgresql
+    - vault
+    - qdrant
+    - s3
+    - rclone
+    - cronjob
+    - kubernetes
+    - database
+    - snapshots
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: backup-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/this-is-tobi/tools
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-2.1.0/backup-utils-2.1.0.tgz
+    version: 2.1.0
   - apiVersion: v2
     appVersion: 1.0.0
     created: "2025-11-13T22:33:36.567938417Z"
@@ -1692,4 +1738,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2025-11-20T10:00:30.129728506Z"
+generated: "2025-11-20T18:53:31.755592621Z"
