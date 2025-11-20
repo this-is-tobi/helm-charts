@@ -10,20 +10,37 @@
 
 ## Overview
 
-This Helm chart deploys scheduled backup jobs for various data sources (PostgreSQL, Vault, S3, Qdrant) to S3-compatible storage using rclone. Each backup job runs as a Kubernetes CronJob with configurable schedules and retention policies.
+This Helm chart provides a **production-ready solution** for deploying automated backup jobs to S3-compatible storage. It supports multiple data sources and creates dedicated Kubernetes CronJobs with configurable schedules, retention policies, and resource limits.
+
+### Key Features
+
+- 🔄 **Automated Backups**: Schedule backups using cron expressions
+- 🗄️ **Multiple Data Sources**: PostgreSQL, Vault, Qdrant, S3-to-S3
+- ☁️ **S3-Compatible Storage**: Works with AWS S3, MinIO, Wasabi, etc.
+- 🔐 **Secure**: Credentials stored in Kubernetes Secrets
+- 📦 **Resource Efficient**: Configurable CPU/memory limits per job
+- 🔁 **Retention Management**: Automatic cleanup of old backups
+- 🌐 **Global Configuration**: Share common settings across multiple backups
 
 ### Supported Backup Types
 
 | Type | Description | Required Environment Variables |
 |------|-------------|-------------------------------|
-| **postgres** | PostgreSQL database dumps | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS` |
-| **vault** | HashiCorp Vault snapshots | `VAULT_ADDR`, `VAULT_TOKEN` |
-| **s3** | S3-to-S3 bucket sync | `SOURCE_S3_ENDPOINT`, `SOURCE_S3_ACCESS_KEY`, `SOURCE_S3_SECRET_KEY`, `SOURCE_S3_BUCKET_NAME` |
-| **qdrant** | Qdrant vector database snapshots | `QDRANT_URL`, `QDRANT_API_KEY` (optional: `QDRANT_COLLECTION`) |
+| **postgres** | PostgreSQL database dumps using `pg_dump` | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS` |
+| **vault** | HashiCorp Vault snapshots (raft storage) | `VAULT_ADDR`, `VAULT_TOKEN` |
+| **s3** | S3-to-S3 bucket synchronization | `SOURCE_S3_ENDPOINT`, `SOURCE_S3_ACCESS_KEY`, `SOURCE_S3_SECRET_KEY`, `SOURCE_S3_BUCKET_NAME` |
+| **qdrant** | Qdrant vector database snapshots | `QDRANT_URL`, `QDRANT_API_KEY`, `QDRANT_COLLECTION` (optional) |
 
-All backup types require S3 destination configuration: `S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET_NAME`.
+**Common Requirements**: All types require S3 destination configuration: `S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET_NAME`.
 
 ## Installing the Chart
+
+### Prerequisites
+
+- Kubernetes 1.19+
+- Helm 3.0+
+- S3-compatible storage (AWS S3, MinIO, etc.)
+- Access credentials for data sources to backup
 
 ### CLI
 
@@ -34,26 +51,41 @@ helm install <release_name> tobi/{{ template "chart.name" . }}
 
 ### ArgoCD
 
-`application.yaml` :
+`application.yaml`:
 
 ```yaml
-[...]
-sources:
-- repoURL: https://this-is-tobi.github.io/helm-charts
-  chart: {{ template "chart.name" . }}
-  targetRevision: {{ template "chart.version" . }}
-  helm:
-    releaseName: <release_name>
-    parameters: []
-    values: ""
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: backup-utils
+spec:
+  project: default
+  sources:
+  - repoURL: https://this-is-tobi.github.io/helm-charts
+    chart: {{ template "chart.name" . }}
+    targetRevision: {{ template "chart.version" . }}
+    helm:
+      releaseName: <release_name>
+      values: |
+        backups:
+          postgres-prod:
+            enabled: true
+            type: postgres
+            job:
+              schedule: "0 2 * * *"
+            secrets:
+              DB_HOST: "postgres.default.svc"
+              # ... other config
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
 ```
 
-### Helm dependency
+### Helm Dependency
 
 `Chart.yaml`:
 
 ```yaml
-[...]
 dependencies:
 - name: {{ template "chart.name" . }}
   version: {{ template "chart.version" . }}
@@ -64,26 +96,25 @@ dependencies:
 `values.yaml`:
 
 ```yaml
-[...]
 {{ template "chart.name" . }}:
   enabled: true
+  backups:
+    myBackup:
+      enabled: true
+      type: postgres
+      # ... configuration
 ```
 
-## Configuration Structure
+## Configuration
 
-### Backups Map
+### Configuration Structure
 
-The chart uses a `backups` map where each key represents a unique backup job. Each backup job will create its own CronJob, ConfigMap, and Secret resources.
+The chart uses a **map-based configuration** where each key under `backups` represents one backup job:
 
-**Key Features:**
-- **Map Keys**: Each key in the `backups` map becomes a backup job identifier (e.g., `postgres-prod`, `vault-backup`)
-- **Naming**: Backup names are automatically converted to kebab-case for Kubernetes compliance (e.g., `myBackup` → `my-backup`)
-- **Resources**: Each backup creates:
-  - 1 CronJob named `<release-name>-<backup-key>`
-  - 1 ConfigMap (if `env` or `global.env` is defined)
-  - 1 Secret (if `secrets` or `global.secrets` is defined)
-- **Independent Configuration**: Each backup can have its own schedule, type, environment variables, and resources
-- **Global Values**: Use `global.env` and `global.secrets` to define common configuration shared across all backups (e.g., S3 credentials)
+- **Map Keys**: Each key becomes a backup job identifier (converted to kebab-case)
+- **Kubernetes Resources**: Each backup creates 1 CronJob + 1 ConfigMap + 1 Secret
+- **Independent Config**: Each backup has its own schedule, type, env vars, and resources
+- **Global Values**: Use `global.env` and `global.secrets` for shared configuration
 
 **Example Structure:**
 
@@ -91,57 +122,110 @@ The chart uses a `backups` map where each key represents a unique backup job. Ea
 global:
   env:
     S3_PATH_STYLE: "true"
+    RETENTION: "30d"
   secrets:
+    # Shared S3 credentials
     S3_ENDPOINT: "https://s3.amazonaws.com"
-    S3_ACCESS_KEY: "shared-key"
-    S3_SECRET_KEY: "shared-secret"
-    S3_BUCKET_NAME: "backups"
+    S3_ACCESS_KEY: "AKIAIOSFODNN7EXAMPLE"
+    S3_SECRET_KEY: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    S3_BUCKET_NAME: "my-backups"
 
 backups:
-  first-backup:      # Creates: release-name-first-backup
+  postgresProduction:    # Creates: <release>-postgres-production
     enabled: true
     type: postgres
-    # ... configuration ...
+    job:
+      schedule: "0 2 * * *"
+    secrets:
+      DB_HOST: "postgres"
+      DB_PORT: "5432"
+      DB_NAME: "myapp"
+      DB_USER: "backup_user"
+      DB_PASS: "password"
+      S3_BUCKET_PREFIX: "postgres/prod/"
   
-  second-backup:     # Creates: release-name-second-backup
+  vaultBackup:          # Creates: <release>-vault-backup
     enabled: true
     type: vault
-    # ... configuration ...
+    job:
+      schedule: "0 3 * * *"
+    secrets:
+      VAULT_ADDR: "https://vault:8200"
+      VAULT_TOKEN: "hvs.xxx"
+      S3_BUCKET_PREFIX: "vault/"
 ```
 
 ## Usage Examples
 
-### Example 1: PostgreSQL Backup
+### Example 1: Basic PostgreSQL Backup
+
+Daily PostgreSQL backup at 2 AM with 30-day retention:
 
 ```yaml
 backups:
-  postgres-prod:
+  postgresProduction:
     enabled: true
     type: postgres
     job:
-      schedule: "0 2 * * *"  # Daily at 2 AM
+      schedule: "0 2 * * *"  # Daily at 2 AM UTC
+      timeZone: "Europe/Paris"
     env:
       RETENTION: "30d"
     secrets:
       # PostgreSQL connection
       DB_HOST: "postgres.default.svc.cluster.local"
       DB_PORT: "5432"
-      DB_NAME: "myapp"
+      DB_NAME: "production"
       DB_USER: "backup_user"
       DB_PASS: "secure_password"
       # S3 destination
       S3_ENDPOINT: "https://s3.amazonaws.com"
       S3_ACCESS_KEY: "AKIAIOSFODNN7EXAMPLE"
       S3_SECRET_KEY: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-      S3_BUCKET_NAME: "my-backups"
-      S3_BUCKET_PREFIX: "postgres/prod/"
+      S3_BUCKET_NAME: "company-backups"
+      S3_BUCKET_PREFIX: "postgres/production/"
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "200m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
 ```
 
-### Example 2: Qdrant Vector Database Backup
+### Example 2: Vault Snapshot Backup
+
+Hourly Vault snapshots with 7-day retention:
 
 ```yaml
 backups:
-  qdrant-prod:
+  vaultSnapshots:
+    enabled: true
+    type: vault
+    job:
+      schedule: "0 * * * *"  # Every hour
+      successfulJobsHistoryLimit: 5
+    env:
+      RETENTION: "7d"
+    secrets:
+      VAULT_ADDR: "https://vault.default.svc.cluster.local:8200"
+      VAULT_TOKEN: "hvs.CAESIxxxxxxxxxxxxxx"
+      VAULT_EXTRA_ARGS: "-namespace=admin"
+      # S3 destination
+      S3_ENDPOINT: "https://minio.storage.svc.cluster.local:9000"
+      S3_ACCESS_KEY: "minio-admin"
+      S3_SECRET_KEY: "minio-secret"
+      S3_BUCKET_NAME: "vault-backups"
+      S3_BUCKET_PREFIX: "snapshots/"
+```
+
+### Example 3: Qdrant Vector Database Backup
+
+Backup specific Qdrant collection daily:
+
+```yaml
+backups:
+  qdrantVectors:
     enabled: true
     type: qdrant
     job:
@@ -149,104 +233,450 @@ backups:
     env:
       RETENTION: "14d"
     secrets:
-      # Qdrant connection
       QDRANT_URL: "https://qdrant.default.svc.cluster.local:6333"
-      QDRANT_API_KEY: "your-api-key"
-      QDRANT_COLLECTION: "my-collection"  # Leave empty to backup all collections
+      QDRANT_API_KEY: "your-api-key-here"
+      QDRANT_COLLECTION: "embeddings"  # Specific collection or empty for all
       # S3 destination
       S3_ENDPOINT: "https://s3.amazonaws.com"
       S3_ACCESS_KEY: "AKIAIOSFODNN7EXAMPLE"
       S3_SECRET_KEY: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-      S3_BUCKET_NAME: "my-backups"
-      S3_BUCKET_PREFIX: "qdrant/prod/"
+      S3_BUCKET_NAME: "ai-backups"
+      S3_BUCKET_PREFIX: "qdrant/vectors/"
 ```
 
-### Example 3: Multiple Backup Jobs
+### Example 4: S3-to-S3 Bucket Sync
+
+Sync data from one S3 bucket to another (cross-region backup):
 
 ```yaml
 backups:
-  postgres-prod:
+  s3CrossRegion:
+    enabled: true
+    type: s3
+    job:
+      schedule: "0 4 * * *"  # Daily at 4 AM
+    env:
+      RETENTION: "90d"
+      RCLONE_EXTRA_ARGS: "--transfers=8 --checkers=16"
+    secrets:
+      # Source S3 bucket
+      SOURCE_S3_ENDPOINT: "https://s3.us-west-2.amazonaws.com"
+      SOURCE_S3_ACCESS_KEY: "AKIAIOSFODNN7SOURCE"
+      SOURCE_S3_SECRET_KEY: "source-secret-key"
+      SOURCE_S3_BUCKET_NAME: "production-data"
+      SOURCE_S3_BUCKET_PREFIX: "uploads/"
+      # Destination S3 bucket (different region for DR)
+      S3_ENDPOINT: "https://s3.eu-central-1.amazonaws.com"
+      S3_ACCESS_KEY: "AKIAIOSFODNN7DEST"
+      S3_SECRET_KEY: "destination-secret-key"
+      S3_BUCKET_NAME: "dr-backups"
+      S3_BUCKET_PREFIX: "production-uploads/"
+```
+
+### Example 5: Multiple Backups with Global Configuration
+
+Share S3 credentials across multiple backup jobs:
+
+```yaml
+# Global configuration (shared by all backups)
+global:
+  env:
+    S3_PATH_STYLE: "true"
+    RETENTION: "30d"
+  secrets:
+    # Common S3 destination
+    S3_ENDPOINT: "https://s3.amazonaws.com"
+    S3_ACCESS_KEY: "AKIAIOSFODNN7EXAMPLE"
+    S3_SECRET_KEY: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    S3_BUCKET_NAME: "company-backups"
+
+# Individual backup jobs
+backups:
+  postgresProduction:
     enabled: true
     type: postgres
     job:
       schedule: "0 2 * * *"
     secrets:
-      DB_HOST: "postgres.prod.svc.cluster.local"
-      # ... other postgres config
-      S3_BUCKET_PREFIX: "postgres/prod/"
+      DB_HOST: "postgres.prod.svc"
+      DB_PORT: "5432"
+      DB_NAME: "production"
+      DB_USER: "backup_user"
+      DB_PASS: "pg-password"
+      S3_BUCKET_PREFIX: "postgres/production/"
   
-  qdrant-prod:
+  postgresStaging:
     enabled: true
-    type: qdrant
+    type: postgres
     job:
       schedule: "0 3 * * *"
+    env:
+      RETENTION: "7d"  # Override global retention
     secrets:
-      QDRANT_URL: "https://qdrant.default.svc.cluster.local:6333"
-      QDRANT_API_KEY: "your-api-key"
-      # ... S3 config
-      S3_BUCKET_PREFIX: "qdrant/"
+      DB_HOST: "postgres.staging.svc"
+      DB_PORT: "5432"
+      DB_NAME: "staging"
+      DB_USER: "backup_user"
+      DB_PASS: "pg-password"
+      S3_BUCKET_PREFIX: "postgres/staging/"
   
-  vault-backup:
+  vaultCluster:
     enabled: true
     type: vault
     job:
+      schedule: "0 */6 * * *"  # Every 6 hours
+    secrets:
+      VAULT_ADDR: "https://vault:8200"
+      VAULT_TOKEN: "hvs.xxx"
+      S3_BUCKET_PREFIX: "vault/snapshots/"
+  
+  qdrantEmbeddings:
+    enabled: true
+    type: qdrant
+    job:
       schedule: "0 4 * * *"
     secrets:
-      VAULT_ADDR: "https://vault.default.svc.cluster.local:8200"
-      VAULT_TOKEN: "hvs.xxx"
-      # ... S3 config
-      S3_BUCKET_PREFIX: "vault/"
+      QDRANT_URL: "https://qdrant:6333"
+      QDRANT_API_KEY: "api-key"
+      S3_BUCKET_PREFIX: "qdrant/"
 ```
 
-### Example 4: Using Global Configuration
+## Advanced Features
 
-Share common S3 credentials across all backups:
+### Custom Resource Limits
+
+Adjust CPU and memory based on backup size:
 
 ```yaml
-global:
-  secrets:
-    S3_ENDPOINT: "https://s3.amazonaws.com"
-    S3_ACCESS_KEY: "AKIAIOSFODNN7EXAMPLE"
-    S3_SECRET_KEY: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-    S3_BUCKET_NAME: "my-backups"
-
 backups:
-  postgres-prod:
+  largeDatabase:
     enabled: true
     type: postgres
-    secrets:
-      DB_HOST: "postgres"
-      DB_PORT: "5432"
-      DB_NAME: "myapp"
-      DB_USER: "backup_user"
-      DB_PASS: "password"
-      S3_BUCKET_PREFIX: "postgres/"  # Only specify unique values
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "2Gi"
+        cpu: "1000m"
 ```
 
-## Configuration Notes
+### Timezone Support
 
-### Retention Policy
-- Uses rclone duration format: `7d`, `168h`, `10080m`, `2w`
-- Older backups are automatically deleted based on this setting
-- Consider backup size and storage costs when setting retention
+Run backups in specific timezone:
 
-### Cron Schedule
-- Uses standard cron format: `minute hour day month weekday`
-- Examples:
-  - `"0 2 * * *"` - Daily at 2 AM
-  - `"0 */6 * * *"` - Every 6 hours
-  - `"0 2 * * 0"` - Weekly on Sunday at 2 AM
+```yaml
+backups:
+  europeBackup:
+    enabled: true
+    type: postgres
+    job:
+      schedule: "0 2 * * *"  # 2 AM in specified timezone
+      timeZone: "Europe/Paris"
+```
 
-### Resource Allocation
-- Default: 128Mi memory request, 512Mi limit
-- Increase for large databases (e.g., 1Gi/2Gi for multi-GB dumps)
-- Monitor actual usage and adjust accordingly
+### Performance Tuning
 
-### Security Best Practices
-- Use Kubernetes Secrets for sensitive values (recommended)
-- Enable `podSecurityContext` for non-root execution
-- Consider network policies to restrict backup pod access
-- Rotate S3 credentials regularly
+Optimize rclone for large transfers:
+
+```yaml
+backups:
+  largeFiles:
+    enabled: true
+    type: s3
+    env:
+      RCLONE_EXTRA_ARGS: "--transfers=16 --checkers=32 --buffer-size=256M"
+```
+
+### Job History and Retry
+
+Configure job execution history and retries:
+
+```yaml
+backups:
+  criticalBackup:
+    enabled: true
+    type: postgres
+    job:
+      schedule: "0 2 * * *"
+      successfulJobsHistoryLimit: 5  # Keep last 5 successful runs
+      failedJobsHistoryLimit: 10      # Keep last 10 failed runs
+      backoffLimit: 5                 # Retry 5 times on failure
+      concurrencyPolicy: "Forbid"     # Don't run if previous job still running
+```
+
+### Security Context
+
+Run backup pods with specific user/group:
+
+```yaml
+backups:
+  secureBackup:
+    enabled: true
+    type: postgres
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
+    container:
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+        readOnlyRootFilesystem: true
+```
+
+### Environment Variables from External Sources
+
+Load configuration from existing ConfigMaps or Secrets:
+
+```yaml
+backups:
+  externalConfig:
+    enabled: true
+    type: postgres
+    envFrom:
+    - configMapRef:
+        name: backup-common-config
+    - secretRef:
+        name: postgres-credentials
+```
+
+## Best Practices
+
+### 1. Security
+
+**Use Kubernetes Secrets:**
+```yaml
+# Create external secret
+kubectl create secret generic postgres-backup-creds \
+  --from-literal=DB_HOST=postgres.svc \
+  --from-literal=DB_PASS=secure-password
+
+# Reference in values
+backups:
+  myBackup:
+    envFrom:
+    - secretRef:
+        name: postgres-backup-creds
+```
+
+**Enable Pod Security Context:**
+```yaml
+backups:
+  secureBackup:
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      fsGroup: 1000
+    container:
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]
+```
+
+### 2. Retention Strategy
+
+**Consider backup frequency and storage costs:**
+- **Critical data**: 30-90 days retention
+- **Development**: 7-14 days retention  
+- **Logs/metrics**: 1-7 days retention
+
+**Example retention policies:**
+```yaml
+global:
+  env:
+    RETENTION: "30d"  # Default for all
+
+backups:
+  productionDB:
+    env:
+      RETENTION: "90d"  # Override for critical data
+  
+  stagingDB:
+    env:
+      RETENTION: "7d"   # Shorter for non-prod
+```
+
+### 3. Scheduling
+
+**Avoid overlap and resource contention:**
+```yaml
+backups:
+  backup1:
+    job:
+      schedule: "0 2 * * *"   # 2 AM
+  backup2:
+    job:
+      schedule: "0 3 * * *"   # 3 AM (staggered)
+  backup3:
+    job:
+      schedule: "0 4 * * *"   # 4 AM
+```
+
+**Use timezone for predictable execution:**
+```yaml
+backups:
+  myBackup:
+    job:
+      schedule: "0 2 * * *"
+      timeZone: "Europe/Paris"  # 2 AM Paris time
+```
+
+### 4. Resource Allocation
+
+**Size based on data volume:**
+- **Small databases (<1GB)**: 128Mi memory, 100m CPU
+- **Medium databases (1-10GB)**: 512Mi memory, 250m CPU
+- **Large databases (>10GB)**: 1Gi+ memory, 500m+ CPU
+
+**Monitor and adjust:**
+```bash
+# Check actual usage
+kubectl top pod -l app.kubernetes.io/name=backup-utils
+```
+
+### 5. Monitoring and Alerting
+
+**Check job status:**
+```bash
+# List all cronjobs
+kubectl get cronjobs -l app.kubernetes.io/name=backup-utils
+
+# Check job history
+kubectl get jobs -l app.kubernetes.io/name=backup-utils
+
+# View logs
+kubectl logs -l job-name=<job-name>
+```
+
+**Add custom labels for monitoring:**
+```yaml
+backups:
+  critical:
+    jobLabels:
+      backup-priority: critical
+      alert-on-failure: "true"
+```
+
+### 6. Disaster Recovery Testing
+
+**Regularly test restores:**
+1. Download backup from S3
+2. Restore to test environment
+3. Verify data integrity
+4. Document restore procedure
+
+**Example restore commands:**
+```bash
+# PostgreSQL
+pg_restore -h localhost -U postgres -d testdb backup.dump
+
+# S3 sync
+rclone sync s3:backups/postgres/ ./restore/
+
+# Vault
+vault operator raft snapshot restore backup.snap
+```
+
+## Configuration Reference
+
+### Retention Format
+
+Uses rclone duration format:
+- `7d` - 7 days
+- `168h` - 168 hours (1 week)
+- `2w` - 2 weeks (if supported by rclone)
+- `10080m` - 10,080 minutes (1 week)
+
+### Cron Schedule Format
+
+Standard cron expression: `minute hour day month weekday`
+
+**Common patterns:**
+- `"0 2 * * *"` - Daily at 2 AM
+- `"0 */6 * * *"` - Every 6 hours
+- `"0 2 * * 0"` - Weekly on Sunday at 2 AM
+- `"0 2 1 * *"` - Monthly on 1st at 2 AM
+- `"*/30 * * * *"` - Every 30 minutes
+
+### S3 Provider Examples
+
+**AWS S3:**
+```yaml
+S3_ENDPOINT: "https://s3.amazonaws.com"
+S3_PATH_STYLE: "false"  # Use virtual-hosted style
+```
+
+**MinIO:**
+```yaml
+S3_ENDPOINT: "https://minio.example.com:9000"
+S3_PATH_STYLE: "true"
+```
+
+**Wasabi:**
+```yaml
+S3_ENDPOINT: "https://s3.wasabisys.com"
+S3_PATH_STYLE: "true"
+```
+
+**Backblaze B2:**
+```yaml
+S3_ENDPOINT: "https://s3.us-west-002.backblazeb2.com"
+S3_PATH_STYLE: "true"
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Backup Job Not Running:**
+```bash
+# Check CronJob status
+kubectl describe cronjob <cronjob-name>
+
+# Check for suspended jobs
+kubectl get cronjobs -o json | jq '.items[] | select(.spec.suspend==true)'
+
+# Verify schedule syntax
+kubectl get cronjob <name> -o jsonpath='{.spec.schedule}'
+```
+
+**Pod Crashes or OOM:**
+```bash
+# Check pod events
+kubectl describe pod <pod-name>
+
+# Check resource usage
+kubectl top pod <pod-name>
+
+# Increase memory limits
+```
+
+**S3 Connection Failures:**
+- Verify S3 endpoint URL is correct and accessible
+- Check credentials have write permissions
+- Test S3 connectivity from within cluster:
+```bash
+kubectl run -it --rm debug --image=amazon/aws-cli --restart=Never -- \
+  s3 ls --endpoint-url=https://s3.example.com
+```
+
+**PostgreSQL Connection Issues:**
+- Verify database host is resolvable from backup pod
+- Check firewall/network policies allow connection
+- Test connection:
+```bash
+kubectl run -it --rm psql --image=postgres:latest --restart=Never -- \
+  psql -h postgres.default.svc -U backup_user -d myapp
+```
+
+**Retention Not Working:**
+- Verify RETENTION format is correct (e.g., `7d`, `168h`)
+- Check rclone logs for cleanup operations
+- Ensure S3 credentials have delete permissions
 
 {{ template "chart.valuesSection" . }}
 
