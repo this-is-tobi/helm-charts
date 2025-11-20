@@ -1,12 +1,37 @@
 apiVersion: v2
 name: backup-utils
 type: application
-version: 2.0.0
+version: 2.1.0
 appVersion: "1.0.0"
-description: A Helm chart for effortless deployment of backup utilities (postgresql, s3, vault, and qdrant).
+description: Production-ready Helm chart for automated backups of PostgreSQL, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules and retention policies.
 deprecated: false
-annotations: {}
-keywords: []
+annotations:
+  artifacthub.io/category: storage
+  artifacthub.io/license: MIT
+  artifacthub.io/changes: |
+    - kind: changed
+      description: Restructured values.yaml with empty defaults and comprehensive inline documentation
+    - kind: added
+      description: Created test-values.yaml with 7 example backup configurations covering all backup types
+    - kind: changed
+      description: Renamed template helpers from 'helper.*' to 'backup-utils.*' for chart-specific naming
+    - kind: fixed
+      description: Fixed template helper references in pullsecret.yml
+    - kind: changed
+      description: Enhanced cronjob template to handle optional container configuration fields safely
+    - kind: added
+      description: Added .helmignore for proper file exclusions during packaging
+keywords:
+- backup
+- postgresql
+- vault
+- qdrant
+- s3
+- rclone
+- cronjob
+- kubernetes
+- database
+- snapshots
 dependencies: []
 sources:
 - https://github.com/this-is-tobi/helm-charts

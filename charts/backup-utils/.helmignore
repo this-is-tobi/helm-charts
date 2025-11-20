@@ -1,0 +1,17 @@
+# Ignore test files
+test-*.yaml
+
+# Ignore CI/CD files
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Ignore development files
+*.bak
+*.tmp
+*.swp
+*~
+.DS_Store
+
+# Ignore README template (keep only generated README.md)
+README.md.gotmpl

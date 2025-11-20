@@ -4,14 +4,14 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ printf "%s-%s" (include "helper.fullname" $) (include "helper.toKebabCase" $backupName) }}
-  labels: {{- include "helper.labels" (list $ $backupName) | nindent 4 }}
+  name: {{ printf "%s-%s" (include "backup-utils.fullname" $) (include "backup-utils.toKebabCase" $backupName) }}
+  labels: {{- include "backup-utils.labels" (list $ $backupName) | nindent 4 }}
 data:
 {{- if $.Values.global.env }}
-{{- include "helper.env" $.Values.global | indent 2 }}
+{{- include "backup-utils.env" $.Values.global | indent 2 }}
 {{- end }}
 {{- if $backup.env }}
-{{- include "helper.env" $backup | indent 2 }}
+{{- include "backup-utils.env" $backup | indent 2 }}
 {{- end }}
 {{- end }}
 {{- end }}

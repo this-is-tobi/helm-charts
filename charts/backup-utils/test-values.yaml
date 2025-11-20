@@ -1,0 +1,257 @@
+# Test configuration for backup-utils chart
+# This file demonstrates all backup types and advanced features
+
+nameOverride: "test-backup"
+
+# Example: Using private container registry
+imageCredentials:
+  registry: "ghcr.io"
+  username: "testuser"
+  email: "test@example.com"
+  password: "ghp_test_token_example"
+
+# Global configuration shared across all backups
+global:
+  env:
+    S3_PATH_STYLE: "true"
+    RETENTION: "30d"
+    RCLONE_EXTRA_ARGS: "--transfers=8 --checkers=16"
+  secrets:
+    # Common S3 credentials used by all backups
+    S3_ENDPOINT: "https://s3.amazonaws.com"
+    S3_ACCESS_KEY: "AKIAIOSFODNN7EXAMPLE"
+    S3_SECRET_KEY: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    S3_BUCKET_NAME: "company-backups"
+
+# Multiple backup jobs demonstrating all backup types
+backups:
+  # PostgreSQL production database backup
+  postgresProduction:
+    enabled: true
+    type: "postgres"
+    image:
+      repository: "ghcr.io/this-is-tobi/tools/backup"
+      pullPolicy: "IfNotPresent"
+      tag: "1.0.0"
+    job:
+      schedule: "0 2 * * *"  # Daily at 2 AM
+      successfulJobsHistoryLimit: 5
+      failedJobsHistoryLimit: 5
+      concurrencyPolicy: "Forbid"
+      timeZone: "Europe/Paris"
+      backoffLimit: 3
+    jobAnnotations:
+      description: "Production database backup"
+    podLabels:
+      backup-type: "database"
+      environment: "production"
+    restartPolicy: Never
+    podSecurityContext:
+      fsGroup: 2000
+      runAsNonRoot: true
+      runAsUser: 1000
+    container:
+      port: 8080
+      securityContext:
+        capabilities:
+          drop:
+          - ALL
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 1000
+    env:
+      RETENTION: "90d"  # Override global retention for production
+    secrets:
+      S3_BUCKET_PREFIX: "prod/postgres"
+      DB_HOST: "postgres.database.svc.cluster.local"
+      DB_PORT: "5432"
+      DB_NAME: "production"
+      DB_USER: "backup_user"
+      DB_PASS: "secure_password_123"
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "200m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+
+  # PostgreSQL staging database backup
+  postgresStaging:
+    enabled: true
+    type: "postgres"
+    image:
+      repository: "ghcr.io/this-is-tobi/tools/backup"
+      pullPolicy: "IfNotPresent"
+      tag: "1.0.0"
+    job:
+      schedule: "0 3 * * *"  # Daily at 3 AM
+      timeZone: "Europe/Paris"
+    podLabels:
+      backup-type: "database"
+      environment: "staging"
+    env:
+      RETENTION: "14d"  # Shorter retention for staging
+    secrets:
+      S3_BUCKET_PREFIX: "staging/postgres"
+      DB_HOST: "postgres-staging.database.svc.cluster.local"
+      DB_PORT: "5432"
+      DB_NAME: "staging"
+      DB_USER: "backup_user"
+      DB_PASS: "staging_password"
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "250m"
+
+  # Vault snapshots backup
+  vaultSnapshots:
+    enabled: true
+    type: "vault"
+    image:
+      repository: "ghcr.io/this-is-tobi/tools/backup"
+      pullPolicy: "IfNotPresent"
+      tag: "1.0.0"
+    job:
+      schedule: "0 */6 * * *"  # Every 6 hours
+      timeZone: "Europe/Paris"
+    podLabels:
+      backup-type: "vault"
+      environment: "production"
+    env:
+      RETENTION: "60d"
+    secrets:
+      S3_BUCKET_PREFIX: "prod/vault"
+      VAULT_ADDR: "https://vault.vault.svc.cluster.local:8200"
+      VAULT_TOKEN: "hvs.CAESIExample_Vault_Token_Here"
+      VAULT_EXTRA_ARGS: "-namespace=admin"
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "250m"
+
+  # Qdrant vector database backup (all collections)
+  qdrantVectors:
+    enabled: true
+    type: "qdrant"
+    image:
+      repository: "ghcr.io/this-is-tobi/tools/backup"
+      pullPolicy: "IfNotPresent"
+      tag: "1.0.0"
+    job:
+      schedule: "0 4 * * *"  # Daily at 4 AM
+      timeZone: "Europe/Paris"
+    podLabels:
+      backup-type: "qdrant"
+      environment: "production"
+    env:
+      RETENTION: "30d"
+    secrets:
+      S3_BUCKET_PREFIX: "prod/qdrant"
+      QDRANT_URL: "https://qdrant.ai-platform.svc.cluster.local"
+      QDRANT_API_KEY: "qdrant_api_key_example_abc123"
+      QDRANT_COLLECTION: ""  # Empty = backup all collections
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "200m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+
+  # Qdrant specific collection backup
+  qdrantDocuments:
+    enabled: true
+    type: "qdrant"
+    image:
+      repository: "ghcr.io/this-is-tobi/tools/backup"
+      pullPolicy: "IfNotPresent"
+      tag: "1.0.0"
+    job:
+      schedule: "0 */12 * * *"  # Every 12 hours
+      timeZone: "Europe/Paris"
+    podLabels:
+      backup-type: "qdrant"
+      collection: "documents"
+    env:
+      RETENTION: "14d"
+    secrets:
+      S3_BUCKET_PREFIX: "prod/qdrant-documents"
+      QDRANT_URL: "https://qdrant.ai-platform.svc.cluster.local"
+      QDRANT_API_KEY: "qdrant_api_key_example_abc123"
+      QDRANT_COLLECTION: "documents"  # Specific collection
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "250m"
+
+  # S3-to-S3 backup (cross-region replication)
+  s3Replication:
+    enabled: true
+    type: "s3"
+    image:
+      repository: "ghcr.io/this-is-tobi/tools/backup"
+      pullPolicy: "IfNotPresent"
+      tag: "1.0.0"
+    job:
+      schedule: "0 1 * * *"  # Daily at 1 AM
+      timeZone: "Europe/Paris"
+    podLabels:
+      backup-type: "s3-replication"
+      environment: "production"
+    env:
+      RETENTION: "180d"  # 6 months retention
+    secrets:
+      # Destination S3 (inherits from global.secrets)
+      S3_BUCKET_PREFIX: "replicated/user-data"
+      # Source S3 (different bucket/region)
+      SOURCE_S3_ENDPOINT: "https://s3.us-west-2.amazonaws.com"
+      SOURCE_S3_ACCESS_KEY: "AKIAIOSFODNN7EXAMPLE2"
+      SOURCE_S3_SECRET_KEY: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY2"
+      SOURCE_S3_BUCKET_NAME: "user-data-us-west-2"
+      SOURCE_S3_BUCKET_PREFIX: "uploads/"
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "200m"
+      limits:
+        memory: "2Gi"
+        cpu: "1000m"
+
+  # Example with external secrets integration
+  postgresWithExternalSecrets:
+    enabled: false  # Disabled by default, enable when using external-secrets
+    type: "postgres"
+    image:
+      repository: "ghcr.io/this-is-tobi/tools/backup"
+      pullPolicy: "IfNotPresent"
+      tag: "1.0.0"
+    job:
+      schedule: "0 5 * * *"
+      timeZone: "Europe/Paris"
+    # Use envFrom to inject secrets from external sources
+    envFrom:
+      - secretRef:
+          name: postgres-backup-credentials  # Created by external-secrets-operator
+      - configMapRef:
+          name: postgres-backup-config
+    env:
+      RETENTION: "30d"
+    # No inline secrets needed when using envFrom
+    secrets: {}
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "250m"
