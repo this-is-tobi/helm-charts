@@ -1,0 +1,35 @@
+{{- range $authName, $auth := .Values.vaultAuth }}
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuth
+metadata:
+  name: {{ printf "%s-%s" (include "template.fullname" $) (include "template.toKebabCase" $authName) }}
+  labels: {{- include "template.labels" (list $ $authName) | nindent 4 }}
+    {{- with $auth.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with $auth.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with $auth.namespace }}
+  namespace: {{ . }}
+  {{- end }}
+  method: {{ $auth.method | required (printf "method is required for VaultAuth %s" $authName) }}
+  mount: {{ $auth.mount | required (printf "mount is required for VaultAuth %s" $authName) }}
+  {{- with $auth.params }}
+  params:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $auth.headers }}
+  headers:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $auth.vaultConnectionRef }}
+  vaultConnectionRef: {{ . }}
+  {{- end }}
+  {{- with $auth.storageEncryption }}
+  storageEncryption:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

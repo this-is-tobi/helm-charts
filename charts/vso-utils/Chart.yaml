@@ -1,12 +1,36 @@
 apiVersion: v2
 name: vso-utils
 type: application
-version: 0.0.1
-appVersion: "0.1.0"
-description: A Helm chart for effortless deployment of Vault Secret Operator utilities.
+version: 1.0.0
+appVersion: "0.10.0"
+description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator resources - sync static secrets, generate dynamic credentials, issue PKI certificates, and configure Vault authentication.
 deprecated: false
-annotations: {}
-keywords: []
+annotations:
+  artifacthub.io/category: security
+  artifacthub.io/license: MIT
+  artifacthub.io/changes: |
+    - kind: added
+      description: Support for VaultDynamicSecret resources
+    - kind: added
+      description: Support for VaultPKISecret resources
+    - kind: added
+      description: Support for VaultAuth and VaultConnection resources
+    - kind: changed
+      description: Improved values.yaml structure with comprehensive documentation
+    - kind: changed
+      description: Enhanced template helpers with kebab-case conversion
+    - kind: fixed
+      description: Fixed conditional checks in VaultStaticSecret template
+keywords:
+- vault
+- secrets
+- hashicorp
+- vso
+- vault-secrets-operator
+- kubernetes
+- security
+- pki
+- dynamic-secrets
 dependencies:
 - name: vault-secrets-operator
   alias: vso
@@ -16,8 +40,10 @@ dependencies:
 sources:
 - https://github.com/this-is-tobi/helm-charts
 - https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator
-- https://developer.hashicorp.com/vault/docs/deploy/kubernetes/vso
+- https://developer.hashicorp.com/vault/docs/platform/k8s/vso
+- https://github.com/hashicorp/vault-secrets-operator
 maintainers:
 - name: this-is-tobi
   email: this-is-tobi@proton.me
   url: https://this-is-tobi.com
+

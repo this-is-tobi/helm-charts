@@ -1,0 +1,213 @@
+# Test configuration for vso-utils chart demonstrating all supported VSO resource types
+# This file can be used for testing: helm template test ./charts/vso-utils -f ./charts/vso-utils/test-values.yaml
+
+# Vault connection configuration
+vaultConnection:
+  default:
+    address: "https://vault.example.com:8200"
+    skipTLSVerify: false
+    timeout: "60s"
+    tls:
+      caCertSecretRef: "vault-ca-cert"
+
+# Vault authentication configuration
+vaultAuth:
+  default:
+    method: kubernetes
+    mount: kubernetes
+    vaultConnectionRef: default
+    params:
+      role: "my-app-role"
+      serviceAccount: "default"
+      audiences:
+      - "vault"
+
+  appRole:
+    method: appRole
+    mount: approle
+    vaultConnectionRef: default
+    params:
+      roleId: "my-role-id"
+      secretRef: "approle-secret"
+
+# Static KV secrets
+vaultStaticSecrets:
+  # Basic static secret
+  appConfig:
+    mount: secret
+    vaultAuthRef: default
+    path: app/config
+    type: kv-v2
+    refreshAfter: 1h
+    hmacSecretData: true
+    destination:
+      name: app-config
+      create: true
+      type: Opaque
+      labels:
+        app: myapp
+        environment: production
+
+  # Static secret with transformation
+  apiKeys:
+    mount: secret
+    vaultAuthRef: default
+    path: app/api-keys
+    type: kv-v2
+    refreshAfter: 30m
+    hmacSecretData: true
+    destination:
+      name: api-keys
+      create: true
+      transformation:
+        templates:
+          config.json:
+            text: |
+              {
+                "api": {
+                  "key": "{{ .Secrets.api_key }}",
+                  "secret": "{{ .Secrets.api_secret }}"
+                }
+              }
+        includes:
+        - "^api_.*"
+        excludes:
+        - ".*_internal$"
+
+  # Static secret with rollout restart
+  databaseConfig:
+    mount: secret
+    vaultAuthRef: default
+    path: database/config
+    type: kv-v2
+    refreshAfter: 2h
+    hmacSecretData: true
+    rolloutRestartTargets:
+    - kind: Deployment
+      name: backend
+    - kind: StatefulSet
+      name: worker
+    destination:
+      name: database-config
+      create: true
+
+# Dynamic secrets
+vaultDynamicSecrets:
+  # PostgreSQL database credentials
+  postgresCredentials:
+    mount: database
+    vaultAuthRef: default
+    path: creds/postgres-role
+    renewalPercent: 67
+    revoke: true
+    hmacSecretData: true
+    rolloutRestartTargets:
+    - kind: Deployment
+      name: api-server
+    destination:
+      name: postgres-creds
+      create: true
+      annotations:
+        reloader.stakater.com/match: "true"
+
+  # AWS credentials
+  awsCredentials:
+    mount: aws
+    vaultAuthRef: default
+    path: creds/my-role
+    params:
+      ttl: "1h"
+    renewalPercent: 67
+    revoke: true
+    hmacSecretData: true
+    destination:
+      name: aws-credentials
+      create: true
+
+  # Database with transformation
+  mysqlCredentials:
+    mount: database
+    vaultAuthRef: default
+    path: creds/mysql-role
+    renewalPercent: 67
+    revoke: true
+    hmacSecretData: true
+    destination:
+      name: mysql-creds
+      create: true
+      transformation:
+        templates:
+          connection-string:
+            text: |
+              mysql://{{ .Secrets.username }}:{{ .Secrets.password }}@mysql.example.com:3306/mydb
+
+# PKI certificates
+vaultPKISecrets:
+  # Service TLS certificate
+  serviceTLS:
+    mount: pki
+    vaultAuthRef: default
+    role: service-role
+    commonName: myservice.example.com
+    altNames:
+    - "*.myservice.example.com"
+    - "myservice.svc.cluster.local"
+    format: pem
+    ttl: "720h"
+    expiryOffset: "24h"
+    revoke: true
+    privateKeyFormat: rsa
+    hmacSecretData: true
+    rolloutRestartTargets:
+    - kind: Deployment
+      name: myservice
+    destination:
+      name: service-tls
+      type: kubernetes.io/tls
+      create: true
+
+  # Client certificate for mTLS
+  clientCert:
+    mount: pki
+    vaultAuthRef: default
+    role: client-role
+    commonName: client.example.com
+    format: pem
+    ttl: "168h"
+    expiryOffset: "5h"
+    revoke: true
+    clear: true
+    privateKeyFormat: ec
+    hmacSecretData: true
+    destination:
+      name: client-cert
+      type: kubernetes.io/tls
+      create: true
+      labels:
+        cert-type: client
+        usage: mtls
+
+  # Service mesh certificate
+  serviceMeshCert:
+    mount: pki-intermediate
+    vaultAuthRef: default
+    role: mesh-role
+    commonName: app.mesh.local
+    ipSans:
+    - "10.0.1.100"
+    uriSans:
+    - "spiffe://example.com/ns/default/sa/app"
+    ttl: "72h"
+    expiryOffset: "2h"
+    format: pem
+    excludeCNFromSans: false
+    hmacSecretData: true
+    destination:
+      name: mesh-cert
+      type: kubernetes.io/tls
+      create: true
+
+# Enable VSO operator (optional - usually already installed)
+vso:
+  enabled: false
+  # If enabling, see https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator for configuration options
