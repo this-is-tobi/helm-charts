@@ -1,0 +1,30 @@
+{{- range $connName, $conn := .Values.vaultConnection }}
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultConnection
+metadata:
+  name: {{ printf "%s-%s" (include "template.fullname" $) (include "template.toKebabCase" $connName) }}
+  labels: {{- include "template.labels" (list $ $connName) | nindent 4 }}
+    {{- with $conn.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with $conn.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  address: {{ $conn.address | required (printf "address is required for VaultConnection %s" $connName) }}
+  {{- with $conn.headers }}
+  headers:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $conn.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if hasKey $conn "skipTLSVerify" }}
+  skipTLSVerify: {{ $conn.skipTLSVerify }}
+  {{- end }}
+  {{- with $conn.timeout }}
+  timeout: {{ . }}
+  {{- end }}
+{{- end }}
