@@ -257,6 +257,38 @@ replica:
   # -- Extra configuration of the initDb bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB).
   # @section -- Replica mode
   extraArgs: {}
+infosSecret:
+  # -- Whether or not to create an infos secret containing database connection information (host, port, database name, username, password, and connection string). This secret can be used by applications or backup tools to connect to the database.
+  # @section -- Database
+  create: false
+  # -- Name of the secret to create (defaults to `<fullname>-infos`).
+  # @section -- Database
+  secretName: ""
+  # -- Environment variable keys used in the infos secret. Customize these to match your application's requirements.
+  # @section -- Database
+  keys:
+    # -- Key for database host.
+    # @section -- Database
+    host: "DB_HOST"
+    # -- Key for database port.
+    # @section -- Database
+    port: "DB_PORT"
+    # -- Key for database name.
+    # @section -- Database
+    name: "DB_NAME"
+    # -- Key for database username.
+    # @section -- Database
+    user: "DB_USER"
+    # -- Key for database password.
+    # @section -- Database
+    password: "DB_PASS"
+    # -- Key for database connection string.
+    # @section -- Database
+    url: "DB_URL"
+  # -- Query parameters to append to the connection URL (e.g., sslmode, connect_timeout, application_name). Leave empty for no parameters.
+  # @section -- Database
+  urlParameters: ""
+  # Example: "sslmode=require&connect_timeout=10&application_name=myapp"
 backup:
   # -- Whether or not cnpg cluster backup should be enabled.
   # @section -- Backup

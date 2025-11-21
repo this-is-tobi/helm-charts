@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 1.3.0](https://img.shields.io/badge/Version-1.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.27.1](https://img.shields.io/badge/AppVersion-1.27.1-informational?style=flat-square)
+![Version: 1.4.0](https://img.shields.io/badge/Version-1.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.27.1](https://img.shields.io/badge/AppVersion-1.27.1-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -28,7 +28,7 @@ helm install <release_name> tobi/cnpg-cluster
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 1.3.0
+  targetRevision: 1.4.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -43,7 +43,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 1.3.0
+  version: 1.4.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -54,6 +54,95 @@ dependencies:
 [...]
 cnpg-cluster:
   enabled: true
+```
+
+## Features
+
+### Database Connection Info Secret
+
+The chart can automatically create a Kubernetes Secret containing all necessary database connection information. This is useful for:
+- Application deployments that need database credentials
+- Backup tools like `backup-utils`
+- Monitoring and maintenance scripts
+
+**Enable the feature:**
+
+```yaml
+infosSecret:
+  create: true
+  secretName: "my-db-connection"  # Optional, defaults to <release-name>-infos
+```
+
+**Generated secret contains (keys are configurable):**
+
+| Key | Description | Example | Configurable via |
+|-----|-------------|---------|------------------|
+| `DB_HOST` | PostgreSQL read-write service hostname | `my-postgres-rw.default.svc` | `infosSecret.keys.host` |
+| `DB_PORT` | PostgreSQL port | `5432` | `infosSecret.keys.port` |
+| `DB_NAME` | Database name | `myapp` | `infosSecret.keys.name` |
+| `DB_USER` | Application username | `myapp_user` | `infosSecret.keys.user` |
+| `DB_PASS` | Application password | `generated-password` | `infosSecret.keys.password` |
+| `DB_URL` | Full connection string | `postgresql://user:pass@host:5432/db` | `infosSecret.keys.url` |
+
+**Add query parameters to connection URL:**
+
+```yaml
+infosSecret:
+  create: true
+  urlParameters: "sslmode=require&connect_timeout=10&application_name=myapp"
+  # Generates: postgresql://user:pass@host:5432/db?sslmode=require&connect_timeout=10&application_name=myapp
+```
+
+Common parameters:
+- `sslmode` - SSL/TLS mode (`disable`, `require`, `verify-ca`, `verify-full`)
+- `connect_timeout` - Connection timeout in seconds
+- `application_name` - Application identifier for monitoring
+- `options` - PostgreSQL runtime parameters (e.g., `options=-c%20search_path=myschema`)
+
+**Customize environment variable names:**
+
+```yaml
+infosSecret:
+  create: true
+  keys:
+    host: "POSTGRES_HOST"      # Instead of DB_HOST
+    port: "POSTGRES_PORT"      # Instead of DB_PORT
+    name: "POSTGRES_DB"        # Instead of DB_NAME
+    user: "POSTGRES_USER"      # Instead of DB_USER
+    password: "POSTGRES_PASSWORD"  # Instead of DB_PASS
+    connectionString: "DATABASE_URL"  # Instead of DB_URL
+```
+
+**Usage example with backup-utils:**
+
+```yaml
+# PostgreSQL database
+cnpg-cluster:
+  enabled: true
+  dbName: production
+  credentials:
+    username: app_user
+  infosSecret:
+    create: true
+    secretName: postgres-connection
+
+# Automated backups
+backup-utils:
+  enabled: true
+  backups:
+    postgresBackup:
+      enabled: true
+      type: postgres
+      job:
+        schedule: "0 2 * * *"
+      envFrom:
+        - secretRef:
+            name: postgres-connection  # Reference the infos secret
+      secrets:
+        S3_ENDPOINT: "https://s3.amazonaws.com"
+        S3_ACCESS_KEY: "AKIAIOSFODNN7EXAMPLE"
+        S3_SECRET_KEY: "secret"
+        S3_BUCKET_NAME: "backups"
 ```
 
 ## Values
@@ -104,6 +193,16 @@ cnpg-cluster:
 | exposed | bool | `false` | Whether or not a NodePort service should be created to exposed the database. |
 | imageName | string | `""` | Name of the image used for database.  By default (empty string), the operator will install the latest available minor version of the latest major version of PostgreSQL when the operator was released |
 | imagePullPolicy | string | `"IfNotPresent"` | Pull policy for the database image. |
+| infosSecret.create | bool | `false` | Whether or not to create an infos secret containing database connection information (host, port, database name, username, password, and connection string). This secret can be used by applications or backup tools to connect to the database. |
+| infosSecret.keys | object | `{"host":"DB_HOST","name":"DB_NAME","password":"DB_PASS","port":"DB_PORT","url":"DB_URL","user":"DB_USER"}` | Environment variable keys used in the infos secret. Customize these to match your application's requirements. |
+| infosSecret.keys.host | string | `"DB_HOST"` | Key for database host. |
+| infosSecret.keys.name | string | `"DB_NAME"` | Key for database name. |
+| infosSecret.keys.password | string | `"DB_PASS"` | Key for database password. |
+| infosSecret.keys.port | string | `"DB_PORT"` | Key for database port. |
+| infosSecret.keys.url | string | `"DB_URL"` | Key for database connection string. |
+| infosSecret.keys.user | string | `"DB_USER"` | Key for database username. |
+| infosSecret.secretName | string | `""` | Name of the secret to create (defaults to `<fullname>-infos`). |
+| infosSecret.urlParameters | string | `""` | Query parameters to append to the connection URL (e.g., sslmode, connect_timeout, application_name). Leave empty for no parameters. |
 | initDb.extraArgs | object | `{}` | Extra configuration of the initDb bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB). |
 | instances | int | `3` | Number of instances to spawn in the cluster. |
 | mode | string | `"primary"` | Mode used to deploy the cnpg cluster, it should be `primary`, `replica` or `recovery`. |
