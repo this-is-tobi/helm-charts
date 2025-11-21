@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0](https://img.shields.io/badge/AppVersion-1.0.0-informational?style=flat-square)
+![Version: 2.1.1](https://img.shields.io/badge/Version-2.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0](https://img.shields.io/badge/AppVersion-1.0.0-informational?style=flat-square)
 
 Production-ready Helm chart for automated backups of PostgreSQL, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules and retention policies.
 
@@ -10,13 +10,13 @@ This Helm chart provides a **production-ready solution** for deploying automated
 
 ### Key Features
 
-- 🔄 **Automated Backups**: Schedule backups using cron expressions
-- 🗄️ **Multiple Data Sources**: PostgreSQL, Vault, Qdrant, S3-to-S3
-- ☁️ **S3-Compatible Storage**: Works with AWS S3, MinIO, Wasabi, etc.
-- 🔐 **Secure**: Credentials stored in Kubernetes Secrets
-- 📦 **Resource Efficient**: Configurable CPU/memory limits per job
-- 🔁 **Retention Management**: Automatic cleanup of old backups
-- 🌐 **Global Configuration**: Share common settings across multiple backups
+- **Automated Backups**: Schedule backups using cron expressions
+- **Multiple Data Sources**: PostgreSQL, Vault, Qdrant, S3-to-S3
+- **S3-Compatible Storage**: Works with AWS S3, MinIO, Wasabi, etc.
+- **Secure**: Credentials stored in Kubernetes Secrets
+- **Resource Efficient**: Configurable CPU/memory limits per job
+- **Retention Management**: Automatic cleanup of old backups
+- **Global Configuration**: Share common settings across multiple backups
 
 ### Supported Backup Types
 
@@ -59,7 +59,7 @@ spec:
   sources:
   - repoURL: https://this-is-tobi.github.io/helm-charts
     chart: backup-utils
-    targetRevision: 2.1.0
+    targetRevision: 2.1.1
     helm:
       releaseName: <release_name>
       values: |
@@ -84,7 +84,7 @@ spec:
 ```yaml
 dependencies:
 - name: backup-utils
-  version: 2.1.0
+  version: 2.1.1
   repository: https://this-is-tobi.github.io/helm-charts
   condition: backup-utils.enabled
 ```
