@@ -335,6 +335,7 @@ servicename:
       cpu: "100m"
       # Other stuff like GPU, etc could be added here.
       # nvidia.com/gpu: "1"
+      # ephemeral-storage: "100Mi"
     limits:
       # -- Memory limit for the app.
       # @section -- Servicename
@@ -344,6 +345,7 @@ servicename:
       cpu: "500m"
       # Other stuff like GPU, etc could be added here.
       # nvidia.com/gpu: "1"
+      # ephemeral-storage: "500Mi"
   autoscaling:
     # -- Enable Horizontal Pod Autoscaler for the app.
     # @section -- Servicename

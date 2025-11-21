@@ -1,13 +1,30 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 1.3.0
+version: 1.4.0
 appVersion: "1.27.1"
 description: A Helm Chart to deploy easily a CNPG cluster
 home: https://cloudnative-pg.io
 deprecated: false
-annotations: {}
-keywords: []
+annotations:
+  artifacthub.io/category: database
+  artifacthub.io/license: MIT
+  artifacthub.io/changes: |
+    - kind: added
+      description: New infosSecret feature to automatically generate database connection information secret
+    - kind: added
+      description: Comprehensive documentation for infosSecret with integration examples (backup-utils, applications)
+keywords:
+- postgresql
+- postgres
+- cnpg
+- cloudnative-pg
+- database
+- operator
+- high-availability
+- backup
+- replication
+- kubernetes
 dependencies:
 - name: cloudnative-pg
   alias: cnpg-operator
