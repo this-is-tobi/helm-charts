@@ -488,6 +488,49 @@ entries:
     - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-0.1.0/backup-utils-0.1.0.tgz
     version: 0.1.0
   cnpg-cluster:
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |
+        - kind: added
+          description: New infosSecret feature to automatically generate database connection information secret
+        - kind: added
+          description: Comprehensive documentation for infosSecret with integration examples (backup-utils, applications)
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.27.1
+    created: "2025-11-21T23:39:45.072570974Z"
+    dependencies:
+    - alias: cnpg-operator
+      condition: cnpg-operator.enabled
+      name: cloudnative-pg
+      repository: https://cloudnative-pg.github.io/charts
+      version: '>=0.20.0'
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: 4ee38eb5e3f45b8a26df24ef65369464e836e1260ba1991ace77ed95fe1113a3
+    home: https://cloudnative-pg.io
+    keywords:
+    - postgresql
+    - postgres
+    - cnpg
+    - cloudnative-pg
+    - database
+    - operator
+    - high-availability
+    - backup
+    - replication
+    - kubernetes
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-1.4.0/cnpg-cluster-1.4.0.tgz
+    version: 1.4.0
   - apiVersion: v2
     appVersion: 1.27.1
     created: "2025-11-11T23:57:50.667828213Z"
@@ -1774,4 +1817,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2025-11-21T11:32:06.349076751Z"
+generated: "2025-11-21T23:39:45.07284701Z"
