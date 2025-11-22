@@ -4,6 +4,47 @@ entries:
   - annotations:
       artifacthub.io/category: storage
       artifacthub.io/changes: |
+        - kind: added
+          description: JSON Schema validation (values.schema.json) for configuration validation and IDE auto-completion
+        - kind: added
+          description: extraObjects support for deploying additional Kubernetes resources dynamically
+        - kind: added
+          description: OCI registry distribution via ghcr.io/this-is-tobi/helm-charts
+        - kind: changed
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-11-22T01:49:32.391158414Z"
+    description: Production-ready Helm chart for automated backups of PostgreSQL,
+      Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules
+      and retention policies.
+    digest: da80cc6af84f414b94f155447bedbae3b91ef5e7126bba5decf1a5bdbe9d9dfb
+    keywords:
+    - backup
+    - postgresql
+    - vault
+    - qdrant
+    - s3
+    - rclone
+    - cronjob
+    - kubernetes
+    - database
+    - snapshots
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: backup-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/this-is-tobi/tools
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-2.2.0/backup-utils-2.2.0.tgz
+    version: 2.2.0
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/changes: |
         - kind: changed
           description: Remove emojis from changelog for better readability
       artifacthub.io/license: MIT
@@ -488,6 +529,51 @@ entries:
     - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-0.1.0/backup-utils-0.1.0.tgz
     version: 0.1.0
   cnpg-cluster:
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |
+        - kind: added
+          description: JSON Schema validation (values.schema.json) for improved configuration validation and IDE support
+        - kind: added
+          description: extraObjects support for deploying additional Kubernetes resources dynamically
+        - kind: added
+          description: OCI registry distribution via ghcr.io/this-is-tobi/helm-charts
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.27.1
+    created: "2025-11-22T01:49:32.556587467Z"
+    dependencies:
+    - alias: cnpg-operator
+      condition: cnpg-operator.enabled
+      name: cloudnative-pg
+      repository: https://cloudnative-pg.github.io/charts
+      version: '>=0.20.0'
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: eea5cbbf6a43d083885f62201fd3d1ac75eb5f4581199ccdbf2a4dabc7b3ce00
+    home: https://cloudnative-pg.io
+    keywords:
+    - postgresql
+    - postgres
+    - cnpg
+    - cloudnative-pg
+    - database
+    - operator
+    - high-availability
+    - backup
+    - replication
+    - kubernetes
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-1.5.0/cnpg-cluster-1.5.0.tgz
+    version: 1.5.0
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |
@@ -1212,6 +1298,35 @@ entries:
     - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-0.1.0/cnpg-cluster-0.1.0.tgz
     version: 0.1.0
   dashy:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: deprecated
+          description: This chart is deprecated and will be removed in a future release
+    apiVersion: v2
+    appVersion: 3.1.0
+    created: "2025-11-22T01:49:32.760687048Z"
+    dependencies:
+    - condition: keycloak.enabled
+      name: keycloak
+      repository: https://charts.bitnami.com/bitnami
+      version: '>=24.3.0'
+    deprecated: true
+    description: A Helm chart to deploy Dashy, a self-hostable personal dashboard
+      that includes status-checking, widgets, themes, icon packs, a UI editor etc...
+    digest: e9f22aada5dac8532d1b92c4b3215270c1e153e08de0fa366519fd9758188f80
+    home: https://dashy.to
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: dashy
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/Lissy93/dashy
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/dashy-1.1.0/dashy-1.1.0.tgz
+    version: 1.1.0
   - apiVersion: v2
     appVersion: 3.1.0
     created: "2025-04-26T20:30:01.120959566Z"
@@ -1451,6 +1566,35 @@ entries:
     - https://github.com/this-is-tobi/helm-charts/releases/download/dashy-0.1.1/dashy-0.1.1.tgz
     version: 0.1.1
   homarr:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: deprecated
+          description: This chart is deprecated and will be removed in a future release
+    apiVersion: v2
+    appVersion: 0.15.10
+    created: "2025-11-22T01:49:32.952180202Z"
+    dependencies:
+    - condition: keycloak.enabled
+      name: keycloak
+      repository: https://charts.bitnami.com/bitnami
+      version: '>=24.3.0'
+    deprecated: true
+    description: Customizable browser's home page to interact with your homeserver's
+      Docker containers (e.g. Sonarr/Radarr)
+    digest: da467783f410ec6c9d233a1508ab0e55d5d8a2291e393563fabdeb332fed324c
+    home: https://homarr.dev
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: homarr
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/ajnart/homarr
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.2.0/homarr-0.2.0.tgz
+    version: 0.2.0
   - apiVersion: v2
     appVersion: 0.15.10
     created: "2025-04-26T20:30:01.252121518Z"
@@ -1744,6 +1888,53 @@ entries:
       artifacthub.io/category: security
       artifacthub.io/changes: |
         - kind: added
+          description: JSON Schema validation (values.schema.json) for VSO resource configuration
+        - kind: added
+          description: extraObjects support for deploying additional Kubernetes resources dynamically
+        - kind: added
+          description: OCI registry distribution via ghcr.io/this-is-tobi/helm-charts
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 0.10.0
+    created: "2025-11-22T01:49:33.108767133Z"
+    dependencies:
+    - alias: vso
+      condition: vso.enabled
+      name: vault-secrets-operator
+      repository: https://helm.releases.hashicorp.com
+      version: '>=0.10.0'
+    description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator
+      resources - sync static secrets, generate dynamic credentials, issue PKI certificates,
+      and configure Vault authentication.
+    digest: ad2cab42b652e97a81c38c4e39003a4b3ac194f515ae925c2b6e844bf6623622
+    keywords:
+    - vault
+    - secrets
+    - hashicorp
+    - vso
+    - vault-secrets-operator
+    - kubernetes
+    - security
+    - pki
+    - dynamic-secrets
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: vso-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator
+    - https://developer.hashicorp.com/vault/docs/platform/k8s/vso
+    - https://github.com/hashicorp/vault-secrets-operator
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-1.1.0/vso-utils-1.1.0.tgz
+    version: 1.1.0
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |
+        - kind: added
           description: Support for VaultDynamicSecret resources
         - kind: added
           description: Support for VaultPKISecret resources
@@ -1817,4 +2008,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2025-11-21T23:39:45.07284701Z"
+generated: "2025-11-22T01:49:33.109227287Z"
