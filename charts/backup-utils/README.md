@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 2.1.1](https://img.shields.io/badge/Version-2.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0](https://img.shields.io/badge/AppVersion-1.0.0-informational?style=flat-square)
+![Version: 2.2.0](https://img.shields.io/badge/Version-2.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0](https://img.shields.io/badge/AppVersion-1.0.0-informational?style=flat-square)
 
 Production-ready Helm chart for automated backups of PostgreSQL, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules and retention policies.
 
@@ -59,7 +59,7 @@ spec:
   sources:
   - repoURL: https://this-is-tobi.github.io/helm-charts
     chart: backup-utils
-    targetRevision: 2.1.1
+    targetRevision: 2.2.0
     helm:
       releaseName: <release_name>
       values: |
@@ -84,7 +84,7 @@ spec:
 ```yaml
 dependencies:
 - name: backup-utils
-  version: 2.1.1
+  version: 2.2.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: backup-utils.enabled
 ```
@@ -395,7 +395,7 @@ backups:
     type: postgres
     job:
       schedule: "0 2 * * *"
-      successfulJobsHistoryLimit: 5  # Keep last 5 successful runs
+      successfulJobsHistoryLimit: 5   # Keep last 5 successful runs
       failedJobsHistoryLimit: 10      # Keep last 10 failed runs
       backoffLimit: 5                 # Retry 5 times on failure
       concurrencyPolicy: "Forbid"     # Don't run if previous job still running
@@ -697,6 +697,7 @@ kubectl run -it --rm psql --image=postgres:latest --restart=Never -- \
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | backups | object | `{}` |  |
+| extraObjects | list | `[]` | Add extra specs dynamically to this chart. |
 | fullnameOverride | string | `""` | Override the full resource name (release-name + chart-name). |
 | nameOverride | string | `""` | Override the chart name (used in resource naming). |
 

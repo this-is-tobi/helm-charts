@@ -399,7 +399,7 @@ backups:
     type: postgres
     job:
       schedule: "0 2 * * *"
-      successfulJobsHistoryLimit: 5  # Keep last 5 successful runs
+      successfulJobsHistoryLimit: 5   # Keep last 5 successful runs
       failedJobsHistoryLimit: 10      # Keep last 10 failed runs
       backoffLimit: 5                 # Retry 5 times on failure
       concurrencyPolicy: "Forbid"     # Don't run if previous job still running
