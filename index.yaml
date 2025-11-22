@@ -11,6 +11,48 @@ entries:
         - kind: added
           description: OCI registry distribution via ghcr.io/this-is-tobi/helm-charts
         - kind: changed
+          description: Updated chart metadata and documentation
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-11-22T02:36:01.668841127Z"
+    description: Production-ready Helm chart for automated backups of PostgreSQL,
+      Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules
+      and retention policies.
+    digest: 606d00f2800c094147a6c5b9eab54dd702abff5e8501863eb13e45a2d1f46248
+    keywords:
+    - backup
+    - postgresql
+    - vault
+    - qdrant
+    - s3
+    - rclone
+    - cronjob
+    - kubernetes
+    - database
+    - snapshots
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: backup-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/this-is-tobi/tools
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-2.2.1/backup-utils-2.2.1.tgz
+    version: 2.2.1
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/changes: |
+        - kind: added
+          description: JSON Schema validation (values.schema.json) for configuration validation and IDE auto-completion
+        - kind: added
+          description: extraObjects support for deploying additional Kubernetes resources dynamically
+        - kind: added
+          description: OCI registry distribution via ghcr.io/this-is-tobi/helm-charts
+        - kind: changed
       artifacthub.io/license: MIT
     apiVersion: v2
     appVersion: 1.0.0
@@ -2008,4 +2050,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2025-11-22T01:49:33.109227287Z"
+generated: "2025-11-22T02:36:02.453657609Z"
