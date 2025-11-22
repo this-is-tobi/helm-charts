@@ -34,10 +34,21 @@ jobs:
           helm repo add cnpg https://cloudnative-pg.github.io/charts
           helm repo add hashicorp https://helm.releases.hashicorp.com
 
-      - name: Import GPG key for chart signing
+      - name: Import GPG key
         run: |
           echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --import --batch --no-tty
           gpg --list-secret-keys
+          
+          # Export keys in legacy GPG format for Helm compatibility
+          # Per Helm docs: https://helm.sh/docs/topics/provenance/
+          # GPG 2.1+ uses new format (kbx), but Helm requires legacy format with separate files:
+          # - pubring.gpg: public keys only
+          # - secring.gpg: secret keys only
+          gpg --batch --yes --export > "$HOME/.gnupg/pubring.gpg"
+          echo "${{ secrets.GPG_PASSPHRASE }}" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 --export-secret-keys > "$HOME/.gnupg/secring.gpg"
+          
+          # Verify files were created
+          ls -la "$HOME/.gnupg/"
           
           # Create passphrase file for helm signing
           echo "${{ secrets.GPG_PASSPHRASE }}" > /tmp/passphrase.txt
@@ -52,6 +63,7 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           CR_KEY: "Tobi (Helm Charts) <this-is-tobi@proton.me>"
+          CR_KEYRING: ~/.gnupg/secring.gpg
           CR_PASSPHRASE_FILE: /tmp/passphrase.txt
           CR_SIGN: "true"
 
@@ -77,16 +89,24 @@ jobs:
             chart_file=$(basename "$chart_package")
             chart_name="${chart_file%-*}"
             
-            # Push to GHCR
+            # Push to GHCR (skip if already exists)
             echo "Publishing ${chart_file} to OCI registry..."
-            digest=$(helm push "$chart_package" oci://ghcr.io/${{ github.repository }} | grep Digest | awk '{print $2}')
-            
-            # Sign the OCI artifact with Cosign
-            echo "Signing OCI artifact..."
-            cosign sign --yes "ghcr.io/${{ github.repository }}/${chart_name}@${digest}"
-            
-            echo "✓ Published and signed ${chart_file}"
+            if output=$(helm push "$chart_package" oci://ghcr.io/${{ github.repository }} 2>&1); then
+              echo "$output"
+              digest=$(echo "$output" | grep "Digest:" | awk '{print $2}')
+              
+              # Sign the OCI artifact with Cosign
+              echo "Signing OCI artifact with digest: ${digest}"
+              cosign sign --yes "ghcr.io/${{ github.repository }}/${chart_name}@${digest}"
+              
+              echo "✓ Published and signed ${chart_file}"
+            elif echo "$output" | grep -q "already exists\|409"; then
+              echo "⊘ ${chart_file} already exists in OCI registry, skipping"
+            else
+              echo "✗ Failed to push ${chart_file}"
+              echo "$output"
+              exit 1
+            fi
           done
         env:
           COSIGN_EXPERIMENTAL: 1
-

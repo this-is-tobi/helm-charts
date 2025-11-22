@@ -2,3 +2,4 @@
 owner: this-is-tobi
 git-repo: helm-charts
 sign: true
+skip-existing: true
