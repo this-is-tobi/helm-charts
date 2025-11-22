@@ -1,6 +1,6 @@
 # dashy
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.0](https://img.shields.io/badge/AppVersion-3.1.0-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.0](https://img.shields.io/badge/AppVersion-3.1.0-informational?style=flat-square)
 
 A Helm chart to deploy Dashy, a self-hostable personal dashboard that includes status-checking, widgets, themes, icon packs, a UI editor etc...
 
@@ -28,7 +28,7 @@ helm install <release_name> tobi/dashy
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: dashy
-  targetRevision: 1.0.0
+  targetRevision: 1.1.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -43,7 +43,7 @@ sources:
 [...]
 dependencies:
 - name: dashy
-  version: 1.0.0
+  version: 1.1.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: dashy.enabled
 ```
