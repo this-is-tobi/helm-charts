@@ -3,6 +3,9 @@ nameOverride: ""
 # -- Override the full resource name (release-name + chart-name).
 fullnameOverride: ""
 
+# -- Add extra specs dynamically to this chart.
+extraObjects: []
+
 # Container image pull credentials (optional).
 # Only needed if pulling from a private registry.
 imageCredentials:

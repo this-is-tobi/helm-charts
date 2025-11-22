@@ -1,0 +1,240 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Backup Utils Chart Values",
+  "description": "JSON Schema for backup-utils Helm chart values",
+  "type": "object",
+  "properties": {
+    "nameOverride": {
+      "type": "string",
+      "description": "Override the chart name"
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "description": "Override the full resource name"
+    },
+    "extraObjects": {
+      "type": "array",
+      "description": "Array of extra Kubernetes objects to deploy",
+      "items": {
+        "type": ["object", "string"]
+      }
+    },
+    "imageCredentials": {
+      "type": "object",
+      "properties": {
+        "registry": {
+          "type": "string",
+          "description": "Container registry URL"
+        },
+        "username": {
+          "type": "string",
+          "description": "Registry username"
+        },
+        "password": {
+          "type": "string",
+          "description": "Registry password"
+        },
+        "email": {
+          "type": "string",
+          "description": "Email for registry"
+        }
+      }
+    },
+    "global": {
+      "type": "object",
+      "properties": {
+        "env": {
+          "type": "object",
+          "description": "Global environment variables for all backup jobs",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "secrets": {
+          "type": "object",
+          "description": "Global secret environment variables for all backup jobs",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "backups": {
+      "type": "object",
+      "description": "Backup jobs configuration",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["enabled", "type"],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Enable or disable this backup job"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["postgres", "s3", "qdrant", "vault"],
+            "description": "Backup type"
+          },
+          "image": {
+            "type": "object",
+            "properties": {
+              "repository": {
+                "type": "string",
+                "description": "Container image repository"
+              },
+              "pullPolicy": {
+                "type": "string",
+                "enum": ["Always", "IfNotPresent", "Never"],
+                "default": "IfNotPresent"
+              },
+              "tag": {
+                "type": "string",
+                "description": "Image tag"
+              }
+            }
+          },
+          "job": {
+            "type": "object",
+            "properties": {
+              "schedule": {
+                "type": "string",
+                "description": "Cron schedule expression"
+              },
+              "successfulJobsHistoryLimit": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 3
+              },
+              "failedJobsHistoryLimit": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 3
+              },
+              "concurrencyPolicy": {
+                "type": "string",
+                "enum": ["Allow", "Forbid", "Replace"],
+                "default": "Forbid"
+              },
+              "timeZone": {
+                "type": "string",
+                "description": "IANA timezone for schedule"
+              },
+              "backoffLimit": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 3
+              }
+            }
+          },
+          "jobAnnotations": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "jobLabels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "podAnnotations": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "podLabels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "restartPolicy": {
+            "type": "string",
+            "enum": ["Never", "OnFailure", "Always"],
+            "default": "Never"
+          },
+          "podSecurityContext": {
+            "type": "object"
+          },
+          "container": {
+            "type": "object",
+            "properties": {
+              "port": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535,
+                "default": 8080
+              },
+              "command": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "args": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "securityContext": {
+                "type": "object"
+              }
+            }
+          },
+          "envFrom": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "env": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "secrets": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "resources": {
+            "type": "object",
+            "properties": {
+              "requests": {
+                "type": "object",
+                "properties": {
+                  "memory": {
+                    "type": "string",
+                    "pattern": "^[0-9]+(Ei|Pi|Ti|Gi|Mi|Ki|E|P|T|G|M|K)?$"
+                  },
+                  "cpu": {
+                    "type": "string",
+                    "pattern": "^[0-9]+(\\.[0-9]+)?(m)?$"
+                  }
+                }
+              },
+              "limits": {
+                "type": "object",
+                "properties": {
+                  "memory": {
+                    "type": "string",
+                    "pattern": "^[0-9]+(Ei|Pi|Ti|Gi|Mi|Ki|E|P|T|G|M|K)?$"
+                  },
+                  "cpu": {
+                    "type": "string",
+                    "pattern": "^[0-9]+(\\.[0-9]+)?(m)?$"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

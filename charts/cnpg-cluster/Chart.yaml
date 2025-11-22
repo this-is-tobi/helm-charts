@@ -1,7 +1,7 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 1.4.0
+version: 1.5.0
 appVersion: "1.27.1"
 description: A Helm Chart to deploy easily a CNPG cluster
 home: https://cloudnative-pg.io
@@ -11,9 +11,11 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: added
-      description: New infosSecret feature to automatically generate database connection information secret
+      description: JSON Schema validation (values.schema.json) for improved configuration validation and IDE support
     - kind: added
-      description: Comprehensive documentation for infosSecret with integration examples (backup-utils, applications)
+      description: extraObjects support for deploying additional Kubernetes resources dynamically
+    - kind: added
+      description: OCI registry distribution via ghcr.io/this-is-tobi/helm-charts
 keywords:
 - postgresql
 - postgres

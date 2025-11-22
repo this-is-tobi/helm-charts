@@ -1,0 +1,304 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CNPG Cluster Chart Values",
+  "description": "JSON Schema for cnpg-cluster Helm chart values",
+  "type": "object",
+  "properties": {
+    "nameOverride": {
+      "type": "string",
+      "description": "Override the chart name"
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "description": "Override the full resource name"
+    },
+    "extraObjects": {
+      "type": "array",
+      "description": "Array of extra Kubernetes objects to deploy",
+      "items": {
+        "type": ["object", "string"]
+      }
+    },
+    "imageCredentials": {
+      "type": "object",
+      "properties": {
+        "registry": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "instances": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 3,
+      "description": "Number of PostgreSQL instances"
+    },
+    "imageName": {
+      "type": "string",
+      "description": "PostgreSQL image name"
+    },
+    "imagePullPolicy": {
+      "type": "string",
+      "enum": ["Always", "IfNotPresent", "Never"],
+      "default": "IfNotPresent"
+    },
+    "credentials": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "description": "Database username"
+        },
+        "password": {
+          "type": "string",
+          "description": "Database password"
+        },
+        "postgresPassword": {
+          "type": "string",
+          "description": "Postgres superuser password"
+        },
+        "existingSecrets": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "app": {
+              "type": "object",
+              "properties": {
+                "secretName": {
+                  "type": "string"
+                }
+              }
+            },
+            "postgres": {
+              "type": "object",
+              "properties": {
+                "secretName": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "dbName": {
+      "type": "string",
+      "description": "Database name"
+    },
+    "enableSuperuserAccess": {
+      "type": "boolean",
+      "default": true
+    },
+    "pgHba": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "primaryUpdateStrategy": {
+      "type": "string",
+      "enum": ["unsupervised", "supervised"],
+      "default": "unsupervised"
+    },
+    "storageClass": {
+      "type": "string"
+    },
+    "pvcSize": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string",
+          "pattern": "^[0-9]+(Ei|Pi|Ti|Gi|Mi|Ki|E|P|T|G|M|K)?$",
+          "default": "2Gi"
+        },
+        "wal": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9]+(Ei|Pi|Ti|Gi|Mi|Ki|E|P|T|G|M|K)?$",
+          "default": "1Gi"
+        }
+      }
+    },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "annotations": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "labels": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "exposed": {
+      "type": "boolean",
+      "default": false
+    },
+    "nodePort": {
+      "type": "integer",
+      "minimum": 30000,
+      "maximum": 32767,
+      "default": 30000
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["primary", "replica", "recovery"],
+      "default": "primary"
+    },
+    "infosSecret": {
+      "type": "object",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "default": false,
+          "description": "Create database connection info secret"
+        },
+        "secretName": {
+          "type": "string",
+          "description": "Name of the secret to create"
+        },
+        "keys": {
+          "type": "object",
+          "properties": {
+            "host": {
+              "type": "string",
+              "default": "DB_HOST"
+            },
+            "port": {
+              "type": "string",
+              "default": "DB_PORT"
+            },
+            "name": {
+              "type": "string",
+              "default": "DB_NAME"
+            },
+            "user": {
+              "type": "string",
+              "default": "DB_USER"
+            },
+            "password": {
+              "type": "string",
+              "default": "DB_PASS"
+            },
+            "url": {
+              "type": "string",
+              "default": "DB_URL"
+            }
+          }
+        },
+        "urlParameters": {
+          "type": "string",
+          "description": "Query parameters for DB_URL (e.g., sslmode=require&connect_timeout=10)"
+        }
+      }
+    },
+    "backup": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "legacyMode": {
+          "type": "boolean",
+          "default": true
+        },
+        "destinationPath": {
+          "type": "string"
+        },
+        "endpointURL": {
+          "type": "string"
+        },
+        "retentionPolicy": {
+          "type": "string"
+        }
+      }
+    },
+    "recovery": {
+      "type": "object",
+      "properties": {
+        "destinationPath": {
+          "type": "string"
+        },
+        "endpointURL": {
+          "type": "string"
+        }
+      }
+    },
+    "replica": {
+      "type": "object",
+      "properties": {
+        "destinationPath": {
+          "type": "string"
+        },
+        "endpointURL": {
+          "type": "string"
+        },
+        "clusterName": {
+          "type": "string"
+        },
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 5432
+        },
+        "dbName": {
+          "type": "string"
+        },
+        "sslMode": {
+          "type": "string",
+          "enum": ["disable", "allow", "prefer", "require", "verify-ca", "verify-full"],
+          "default": "prefer"
+        }
+      }
+    },
+    "monitoring": {
+      "type": "object",
+      "properties": {
+        "enablePodMonitor": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "pooler": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "instances": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "type": {
+          "type": "string",
+          "enum": ["rw", "ro"]
+        }
+      }
+    }
+  }
+}

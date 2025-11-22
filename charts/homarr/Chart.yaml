@@ -1,12 +1,15 @@
 apiVersion: v2
 name: homarr
 type: application
-version: 0.1.11
+version: 0.2.0
 appVersion: "0.15.10"
 description: Customizable browser's home page to interact with your homeserver's Docker containers (e.g. Sonarr/Radarr)
 home: https://homarr.dev
-deprecated: false
-annotations: {}
+deprecated: true
+annotations:
+  artifacthub.io/changes: |
+    - kind: deprecated
+      description: This chart is deprecated and will be removed in a future release
 keywords: []
 dependencies:
 - name: keycloak

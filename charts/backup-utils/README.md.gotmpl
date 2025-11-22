@@ -44,15 +44,21 @@ This Helm chart provides a **production-ready solution** for deploying automated
 
 ### CLI
 
+**Using Traditional Helm Repository:**
 ```sh
 helm repo add tobi https://this-is-tobi.github.io/helm-charts
+helm repo update
 helm install <release_name> tobi/{{ template "chart.name" . }}
+```
+
+**Using OCI Registry (Recommended):**
+```sh
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }}
 ```
 
 ### ArgoCD
 
-`application.yaml`:
-
+**Using Traditional Helm Repository:**
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -81,15 +87,54 @@ spec:
     namespace: default
 ```
 
+**Using OCI Registry (Recommended):**
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: backup-utils
+spec:
+  project: default
+  sources:
+  - repoURL: ghcr.io/this-is-tobi/helm-charts
+    chart: {{ template "chart.name" . }}
+    targetRevision: {{ template "chart.version" . }}
+    helm:
+      releaseName: <release_name>
+      values: |
+        backups:
+          postgres-prod:
+            enabled: true
+            type: postgres
+            job:
+              schedule: "0 2 * * *"
+            secrets:
+              DB_HOST: "postgres.default.svc"
+              # ... other config
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+```
+
 ### Helm Dependency
 
-`Chart.yaml`:
-
+**Using Traditional Helm Repository:**
 ```yaml
+# Chart.yaml
 dependencies:
 - name: {{ template "chart.name" . }}
   version: {{ template "chart.version" . }}
   repository: https://this-is-tobi.github.io/helm-charts
+  condition: {{ template "chart.name" . }}.enabled
+```
+
+**Using OCI Registry (Recommended):**
+```yaml
+# Chart.yaml
+dependencies:
+- name: {{ template "chart.name" . }}
+  version: {{ template "chart.version" . }}
+  repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: {{ template "chart.name" . }}.enabled
 ```
 
@@ -399,7 +444,7 @@ backups:
     type: postgres
     job:
       schedule: "0 2 * * *"
-      successfulJobsHistoryLimit: 5  # Keep last 5 successful runs
+      successfulJobsHistoryLimit: 5   # Keep last 5 successful runs
       failedJobsHistoryLimit: 10      # Keep last 10 failed runs
       backoffLimit: 5                 # Retry 5 times on failure
       concurrencyPolicy: "Forbid"     # Don't run if previous job still running

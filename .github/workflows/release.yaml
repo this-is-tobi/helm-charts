@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: write
     steps:
       - name: Checks-out repository
         uses: actions/checkout@v4
@@ -33,9 +34,59 @@ jobs:
           helm repo add cnpg https://cloudnative-pg.github.io/charts
           helm repo add hashicorp https://helm.releases.hashicorp.com
 
+      - name: Import GPG key for chart signing
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --import --batch --no-tty
+          gpg --list-secret-keys
+          
+          # Create passphrase file for helm signing
+          echo "${{ secrets.GPG_PASSPHRASE }}" > /tmp/passphrase.txt
+          chmod 600 /tmp/passphrase.txt
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1
+        id: chart-releaser
         with:
           charts_dir: charts
+          config: ci/configs/cr.yaml
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_KEY: "Tobi (Helm Charts) <this-is-tobi@proton.me>"
+          CR_PASSPHRASE_FILE: /tmp/passphrase.txt
+          CR_SIGN: "true"
+
+      - name: Login to GitHub Container Registry
+        if: steps.chart-releaser.outputs.changed_charts != ''
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Install Cosign for OCI signing
+        if: steps.chart-releaser.outputs.changed_charts != ''
+        uses: sigstore/cosign-installer@v3
+
+      - name: Publish and sign charts to OCI registry
+        if: steps.chart-releaser.outputs.changed_charts != ''
+        run: |
+          # Only process charts that were actually released
+          for chart_package in .cr-release-packages/*.tgz; do
+            if [ ! -f "$chart_package" ]; then
+              echo "No charts to publish"
+              continue
+            fi
+            
+            chart_file=$(basename "$chart_package")
+            chart_name="${chart_file%-*}"
+            
+            # Push to GHCR
+            echo "Publishing ${chart_file} to OCI registry..."
+            digest=$(helm push "$chart_package" oci://ghcr.io/${{ github.repository }} | grep Digest | awk '{print $2}')
+            
+            # Sign the OCI artifact with Cosign
+            echo "Signing OCI artifact..."
+            cosign sign --yes "ghcr.io/${{ github.repository }}/${chart_name}@${digest}"
+            
+            echo "✓ Published and signed ${chart_file}"
+          done
+        env:
+          COSIGN_EXPERIMENTAL: 1
+

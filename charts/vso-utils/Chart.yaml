@@ -1,7 +1,7 @@
 apiVersion: v2
 name: vso-utils
 type: application
-version: 1.0.0
+version: 1.1.0
 appVersion: "0.10.0"
 description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator resources - sync static secrets, generate dynamic credentials, issue PKI certificates, and configure Vault authentication.
 deprecated: false
@@ -10,17 +10,11 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: added
-      description: Support for VaultDynamicSecret resources
+      description: JSON Schema validation (values.schema.json) for VSO resource configuration
     - kind: added
-      description: Support for VaultPKISecret resources
+      description: extraObjects support for deploying additional Kubernetes resources dynamically
     - kind: added
-      description: Support for VaultAuth and VaultConnection resources
-    - kind: changed
-      description: Improved values.yaml structure with comprehensive documentation
-    - kind: changed
-      description: Enhanced template helpers with kebab-case conversion
-    - kind: fixed
-      description: Fixed conditional checks in VaultStaticSecret template
+      description: OCI registry distribution via ghcr.io/this-is-tobi/helm-charts
 keywords:
 - vault
 - secrets

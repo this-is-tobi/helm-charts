@@ -12,15 +12,21 @@
 
 ### CLI
 
+**Using Traditional Helm Repository:**
 ```sh
 helm repo add tobi https://this-is-tobi.github.io/helm-charts
+helm repo update
 helm install <release_name> tobi/{{ template "chart.name" . }}
+```
+
+**Using OCI Registry (Recommended):**
+```sh
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }}
 ```
 
 ### ArgoCD
 
-`application.yaml` :
-
+**Using Helm Repository:**
 ```yaml
 [...]
 sources:
@@ -33,16 +39,40 @@ sources:
     values: ""
 ```
 
+**Using OCI Registry:**
+```yaml
+[...]
+sources:
+- repoURL: ghcr.io/this-is-tobi/helm-charts
+  chart: {{ template "chart.name" . }}
+  targetRevision: {{ template "chart.version" . }}
+  helm:
+    releaseName: <release_name>
+    parameters: []
+    values: ""
+```
+
 ### Helm dependency
 
-`Chart.yaml`:
-
+**Using Helm Repository:**
 ```yaml
+# Chart.yaml
 [...]
 dependencies:
 - name: {{ template "chart.name" . }}
   version: {{ template "chart.version" . }}
   repository: https://this-is-tobi.github.io/helm-charts
+  condition: {{ template "chart.name" . }}.enabled
+```
+
+**Using OCI Registry:**
+```yaml
+# Chart.yaml
+[...]
+dependencies:
+- name: {{ template "chart.name" . }}
+  version: {{ template "chart.version" . }}
+  repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: {{ template "chart.name" . }}.enabled
 ```
 
@@ -103,11 +133,11 @@ Common parameters:
 infosSecret:
   create: true
   keys:
-    host: "POSTGRES_HOST"      # Instead of DB_HOST
-    port: "POSTGRES_PORT"      # Instead of DB_PORT
-    name: "POSTGRES_DB"        # Instead of DB_NAME
-    user: "POSTGRES_USER"      # Instead of DB_USER
-    password: "POSTGRES_PASSWORD"  # Instead of DB_PASS
+    host: "POSTGRES_HOST"             # Instead of DB_HOST
+    port: "POSTGRES_PORT"             # Instead of DB_PORT
+    name: "POSTGRES_DB"               # Instead of DB_NAME
+    user: "POSTGRES_USER"             # Instead of DB_USER
+    password: "POSTGRES_PASSWORD"     # Instead of DB_PASS
     connectionString: "DATABASE_URL"  # Instead of DB_URL
 ```
 
