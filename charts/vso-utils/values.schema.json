@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VSO Utils Chart Values",
+  "description": "JSON Schema for vso-utils Helm chart values",
+  "type": "object",
+  "properties": {
+    "nameOverride": {
+      "type": "string",
+      "description": "Override the chart name"
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "description": "Override the full resource name"
+    },
+    "extraObjects": {
+      "type": "array",
+      "description": "Array of extra Kubernetes objects to deploy",
+      "items": {
+        "type": ["object", "string"]
+      }
+    },
+    "resources": {
+      "type": "object",
+      "description": "Map of Vault Secret Operator resources to create",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["enabled", "type"],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Enable or disable this VSO resource"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["static", "dynamic", "pki", "auth", "connection"],
+            "description": "Type of VSO resource"
+          },
+          "spec": {
+            "type": "object",
+            "description": "VSO resource specification (follows Vault Secret Operator CRD schema)"
+          }
+        }
+      }
+    }
+  }
+}

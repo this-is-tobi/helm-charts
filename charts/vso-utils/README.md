@@ -1,6 +1,6 @@
 # vso-utils
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.10.0](https://img.shields.io/badge/AppVersion-0.10.0-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.10.0](https://img.shields.io/badge/AppVersion-0.10.0-informational?style=flat-square)
 
 Production-ready Helm chart for managing HashiCorp Vault Secret Operator resources - sync static secrets, generate dynamic credentials, issue PKI certificates, and configure Vault authentication.
 
@@ -60,7 +60,7 @@ spec:
   sources:
   - repoURL: https://this-is-tobi.github.io/helm-charts
     chart: vso-utils
-    targetRevision: 1.0.0
+    targetRevision: 1.1.0
     helm:
       releaseName: <release_name>
       values: |
@@ -83,7 +83,7 @@ spec:
 ```yaml
 dependencies:
 - name: vso-utils
-  version: 1.0.0
+  version: 1.1.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: vso-utils.enabled
 ```
@@ -319,6 +319,7 @@ vaultStaticSecrets:
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| extraObjects | list | `[]` | Add extra specs dynamically to this chart. |
 | fullnameOverride | string | `""` | String to fully override the default application name. |
 | nameOverride | string | `""` | Provide a name in place of the default application name. |
 | vaultAuth | object | `{}` |  |

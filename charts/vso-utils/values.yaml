@@ -3,6 +3,8 @@ nameOverride: ""
 # -- String to fully override the default application name.
 fullnameOverride: ""
 
+# -- Add extra specs dynamically to this chart.
+extraObjects: []
 
 # Configuration for Vault Secret Operator resources.
 # Each top-level key under the resource maps (vaultStaticSecrets, vaultDynamicSecrets, etc.) 
