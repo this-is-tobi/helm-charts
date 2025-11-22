@@ -1,7 +1,7 @@
 apiVersion: v2
 name: backup-utils
 type: application
-version: 2.2.0
+version: 2.2.1
 appVersion: "1.0.0"
 description: Production-ready Helm chart for automated backups of PostgreSQL, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules and retention policies.
 deprecated: false
@@ -16,6 +16,7 @@ annotations:
     - kind: added
       description: OCI registry distribution via ghcr.io/this-is-tobi/helm-charts
     - kind: changed
+      description: Updated chart metadata and documentation
 keywords:
 - backup
 - postgresql
