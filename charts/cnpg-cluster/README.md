@@ -14,15 +14,21 @@ A Helm Chart to deploy easily a CNPG cluster
 
 ### CLI
 
+**Using Traditional Helm Repository:**
 ```sh
 helm repo add tobi https://this-is-tobi.github.io/helm-charts
+helm repo update
 helm install <release_name> tobi/cnpg-cluster
+```
+
+**Using OCI Registry (Recommended):**
+```sh
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 1.5.0
 ```
 
 ### ArgoCD
 
-`application.yaml` :
-
+**Using Helm Repository:**
 ```yaml
 [...]
 sources:
@@ -35,16 +41,40 @@ sources:
     values: ""
 ```
 
+**Using OCI Registry:**
+```yaml
+[...]
+sources:
+- repoURL: ghcr.io/this-is-tobi/helm-charts
+  chart: cnpg-cluster
+  targetRevision: 1.5.0
+  helm:
+    releaseName: <release_name>
+    parameters: []
+    values: ""
+```
+
 ### Helm dependency
 
-`Chart.yaml`:
-
+**Using Helm Repository:**
 ```yaml
+# Chart.yaml
 [...]
 dependencies:
 - name: cnpg-cluster
   version: 1.5.0
   repository: https://this-is-tobi.github.io/helm-charts
+  condition: cnpg-cluster.enabled
+```
+
+**Using OCI Registry:**
+```yaml
+# Chart.yaml
+[...]
+dependencies:
+- name: cnpg-cluster
+  version: 1.5.0
+  repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: cnpg-cluster.enabled
 ```
 

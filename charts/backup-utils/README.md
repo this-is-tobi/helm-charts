@@ -40,15 +40,21 @@ This Helm chart provides a **production-ready solution** for deploying automated
 
 ### CLI
 
+**Using Traditional Helm Repository:**
 ```sh
 helm repo add tobi https://this-is-tobi.github.io/helm-charts
+helm repo update
 helm install <release_name> tobi/backup-utils
+```
+
+**Using OCI Registry (Recommended):**
+```sh
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/backup-utils --version 2.2.0
 ```
 
 ### ArgoCD
 
-`application.yaml`:
-
+**Using Traditional Helm Repository:**
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -77,15 +83,54 @@ spec:
     namespace: default
 ```
 
+**Using OCI Registry (Recommended):**
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: backup-utils
+spec:
+  project: default
+  sources:
+  - repoURL: ghcr.io/this-is-tobi/helm-charts
+    chart: backup-utils
+    targetRevision: 2.2.0
+    helm:
+      releaseName: <release_name>
+      values: |
+        backups:
+          postgres-prod:
+            enabled: true
+            type: postgres
+            job:
+              schedule: "0 2 * * *"
+            secrets:
+              DB_HOST: "postgres.default.svc"
+              # ... other config
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+```
+
 ### Helm Dependency
 
-`Chart.yaml`:
-
+**Using Traditional Helm Repository:**
 ```yaml
+# Chart.yaml
 dependencies:
 - name: backup-utils
   version: 2.2.0
   repository: https://this-is-tobi.github.io/helm-charts
+  condition: backup-utils.enabled
+```
+
+**Using OCI Registry (Recommended):**
+```yaml
+# Chart.yaml
+dependencies:
+- name: backup-utils
+  version: 2.2.0
+  repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: backup-utils.enabled
 ```
 

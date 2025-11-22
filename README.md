@@ -1,6 +1,8 @@
 # Helm charts :anchor:
 
-This repository hosts a set of personal Helm Charts and exposes a Helm Repository at [https://this-is-tobi.github.io/helm-charts](https://this-is-tobi.github.io/helm-charts) thanks to Github Pages and the Github Action [chart releaser](https://github.com/helm/chart-releaser-action).
+This repository hosts a set of personal Helm Charts available through:
+- **Helm Repository**: [https://this-is-tobi.github.io/helm-charts](https://this-is-tobi.github.io/helm-charts) (GitHub Pages)
+- **OCI Registry**: `ghcr.io/this-is-tobi/helm-charts` (GitHub Container Registry)
 
 > [!TIP]
 > See charts details [here](https://this-is-tobi.github.io/helm-charts/index.yaml).
@@ -17,39 +19,115 @@ This repository hosts a set of personal Helm Charts and exposes a Helm Repositor
 
 ## Usage
 
-### CLI
+### Traditional Helm Repository
 
 ```sh
+# Add repository
 helm repo add tobi https://this-is-tobi.github.io/helm-charts
+helm repo update
+
+# Search and install
 helm search repo tobi
 helm install <release_name> tobi/<chart_name>
 ```
 
-### Chart Signatures
-
-All charts are cryptographically signed with GPG key `54029E3057EBFE1FA2781C066F5BD8A9D2134DCF`.
-
-To verify charts before installation:
+### OCI Registry
 
 ```sh
-# Import public key
-curl -sSL https://raw.githubusercontent.com/this-is-tobi/helm-charts/main/ci/configs/helm-charts-signing-key.asc | gpg --import
+# Install directly from OCI registry
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/<chart_name> --version <version>
 
-# Install with verification
-helm install <release_name> tobi/<chart_name> --verify
+# Example
+helm install my-db oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 1.5.0
+```
+
+> [!TIP]
+> OCI installation doesn't require `helm repo add` and provides better performance and security.
+
+### Chart Signatures
+
+All charts are signed using GPG for authenticity and integrity verification.
+
+**GPG Key Information:**
+- Key ID: `54029E3057EBFE1FA2781C066F5BD8A9D2134DCF`
+- Public key: [ci/configs/helm-charts-signing-key.asc](./ci/configs/helm-charts-signing-key.asc)
+
+**Verifying Traditional Helm Charts (.tgz):**
+```sh
+# Import the public key
+curl -s https://raw.githubusercontent.com/this-is-tobi/helm-charts/main/ci/configs/helm-charts-signing-key.asc | gpg --import
+
+# Verify a chart
+helm verify <chart-name>-<version>.tgz
+
+# Or during installation
+helm install --verify <release-name> <chart-name>
+```
+
+**Verifying OCI Images:**
+
+OCI artifacts are signed using [Cosign](https://docs.sigstore.dev/cosign/overview/) with keyless signing (OIDC).
+
+```sh
+# Install cosign (if not already installed)
+# macOS: brew install cosign
+# Linux: https://docs.sigstore.dev/cosign/installation/
+
+# Verify OCI chart signature
+cosign verify \
+  --certificate-identity-regexp="https://github.com/this-is-tobi/helm-charts" \
+  --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+  ghcr.io/this-is-tobi/helm-charts/<chart-name>:<version>
+```
+
+### Helm Dependencies
+
+You can use these charts as dependencies in your own Helm charts.
+
+**Using Traditional Helm Repository:**
+```yaml
+# Chart.yaml
+dependencies:
+  - name: <chart_name>
+    version: "<version>"
+    repository: "https://this-is-tobi.github.io/helm-charts"
+```
+
+**Using OCI Registry (Recommended):**
+```yaml
+# Chart.yaml
+dependencies:
+  - name: <chart_name>
+    version: "<version>"
+    repository: "oci://ghcr.io/this-is-tobi/helm-charts"
+```
+
+Then update dependencies:
+```sh
+helm dependency update
 ```
 
 ### ArgoCD
 
+**Using Helm Repository:**
 ```yaml
-[...]
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: <chart_name>
-  targetRevision: <version> # 1.0.*
+  targetRevision: <version>
   helm:
     releaseName: <release_name>
-    parameters: []
+    values: ""
+```
+
+**Using OCI Registry:**
+```yaml
+sources:
+- repoURL: ghcr.io/this-is-tobi/helm-charts
+  chart: <chart_name>
+  targetRevision: <version>
+  helm:
+    releaseName: <release_name>
     values: ""
 ```
 

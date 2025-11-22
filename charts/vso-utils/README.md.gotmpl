@@ -39,15 +39,21 @@ This Helm chart provides a comprehensive and production-ready solution for deplo
 
 ### CLI
 
+**Using Traditional Helm Repository:**
 ```sh
 helm repo add tobi https://this-is-tobi.github.io/helm-charts
+helm repo update
 helm install <release_name> tobi/{{ template "chart.name" . }}
+```
+
+**Using OCI Registry (Recommended):**
+```sh
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }}
 ```
 
 ### ArgoCD
 
-`application.yaml`:
-
+**Using Helm Repository:**
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -74,15 +80,52 @@ spec:
     namespace: default
 ```
 
+**Using OCI Registry:**
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vso-utils
+spec:
+  project: default
+  sources:
+  - repoURL: ghcr.io/this-is-tobi/helm-charts
+    chart: {{ template "chart.name" . }}
+    targetRevision: {{ template "chart.version" . }}
+    helm:
+      releaseName: <release_name>
+      values: |
+        vaultStaticSecrets:
+          appConfig:
+            mount: secret
+            vaultAuthRef: default
+            path: app/config
+            destination:
+              name: app-config
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+```
+
 ### Helm Dependency
 
-`Chart.yaml`:
-
+**Using Helm Repository:**
 ```yaml
+# Chart.yaml
 dependencies:
 - name: {{ template "chart.name" . }}
   version: {{ template "chart.version" . }}
   repository: https://this-is-tobi.github.io/helm-charts
+  condition: {{ template "chart.name" . }}.enabled
+```
+
+**Using OCI Registry:**
+```yaml
+# Chart.yaml
+dependencies:
+- name: {{ template "chart.name" . }}
+  version: {{ template "chart.version" . }}
+  repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: {{ template "chart.name" . }}.enabled
 ```
 

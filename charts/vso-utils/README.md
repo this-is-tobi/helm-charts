@@ -41,15 +41,21 @@ This Helm chart provides a comprehensive and production-ready solution for deplo
 
 ### CLI
 
+**Using Traditional Helm Repository:**
 ```sh
 helm repo add tobi https://this-is-tobi.github.io/helm-charts
+helm repo update
 helm install <release_name> tobi/vso-utils
+```
+
+**Using OCI Registry (Recommended):**
+```sh
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/vso-utils --version 1.1.0
 ```
 
 ### ArgoCD
 
-`application.yaml`:
-
+**Using Helm Repository:**
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -76,15 +82,52 @@ spec:
     namespace: default
 ```
 
+**Using OCI Registry:**
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vso-utils
+spec:
+  project: default
+  sources:
+  - repoURL: ghcr.io/this-is-tobi/helm-charts
+    chart: vso-utils
+    targetRevision: 1.1.0
+    helm:
+      releaseName: <release_name>
+      values: |
+        vaultStaticSecrets:
+          appConfig:
+            mount: secret
+            vaultAuthRef: default
+            path: app/config
+            destination:
+              name: app-config
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+```
+
 ### Helm Dependency
 
-`Chart.yaml`:
-
+**Using Helm Repository:**
 ```yaml
+# Chart.yaml
 dependencies:
 - name: vso-utils
   version: 1.1.0
   repository: https://this-is-tobi.github.io/helm-charts
+  condition: vso-utils.enabled
+```
+
+**Using OCI Registry:**
+```yaml
+# Chart.yaml
+dependencies:
+- name: vso-utils
+  version: 1.1.0
+  repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: vso-utils.enabled
 ```
 

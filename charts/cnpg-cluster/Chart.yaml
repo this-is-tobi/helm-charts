@@ -14,6 +14,8 @@ annotations:
       description: JSON Schema validation (values.schema.json) for improved configuration validation and IDE support
     - kind: added
       description: extraObjects support for deploying additional Kubernetes resources dynamically
+    - kind: added
+      description: OCI registry distribution via ghcr.io/this-is-tobi/helm-charts
 keywords:
 - postgresql
 - postgres
