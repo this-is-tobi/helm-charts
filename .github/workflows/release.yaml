@@ -70,7 +70,10 @@ jobs:
       - name: Login to GitHub Container Registry
         if: steps.chart-releaser.outputs.changed_charts != ''
         run: |
+          # Login with Helm for pushing charts
           echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+          # Also login with Docker for Cosign (which uses Docker credentials)
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Install Cosign for OCI signing
         if: steps.chart-releaser.outputs.changed_charts != ''
