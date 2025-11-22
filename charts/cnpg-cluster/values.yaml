@@ -3,6 +3,9 @@ nameOverride: ""
 # -- String to fully override the default application name.
 fullnameOverride: ""
 
+# -- Add extra specs dynamically to this chart.
+extraObjects: []
+
 # Image credentials configuration.
 imageCredentials:
   # -- Registry to pull images from.

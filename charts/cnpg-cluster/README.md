@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 1.4.0](https://img.shields.io/badge/Version-1.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.27.1](https://img.shields.io/badge/AppVersion-1.27.1-informational?style=flat-square)
+![Version: 1.5.0](https://img.shields.io/badge/Version-1.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.27.1](https://img.shields.io/badge/AppVersion-1.27.1-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -28,7 +28,7 @@ helm install <release_name> tobi/cnpg-cluster
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 1.4.0
+  targetRevision: 1.5.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -43,7 +43,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 1.4.0
+  version: 1.5.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -105,11 +105,11 @@ Common parameters:
 infosSecret:
   create: true
   keys:
-    host: "POSTGRES_HOST"      # Instead of DB_HOST
-    port: "POSTGRES_PORT"      # Instead of DB_PORT
-    name: "POSTGRES_DB"        # Instead of DB_NAME
-    user: "POSTGRES_USER"      # Instead of DB_USER
-    password: "POSTGRES_PASSWORD"  # Instead of DB_PASS
+    host: "POSTGRES_HOST"             # Instead of DB_HOST
+    port: "POSTGRES_PORT"             # Instead of DB_PORT
+    name: "POSTGRES_DB"               # Instead of DB_NAME
+    user: "POSTGRES_USER"             # Instead of DB_USER
+    password: "POSTGRES_PASSWORD"     # Instead of DB_PASS
     connectionString: "DATABASE_URL"  # Instead of DB_URL
 ```
 
@@ -306,6 +306,7 @@ backup-utils:
 |-----|------|---------|-------------|
 | annotations | object | `{}` | Additional annotations for created resources. |
 | cnpg-operator.enabled | bool | `false` | Whether or not cnpg operator should be deployed (See. https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg?modal=values). |
+| extraObjects | list | `[]` | Add extra specs dynamically to this chart. |
 | fullnameOverride | string | `""` | String to fully override the default application name. |
 | labels | object | `{}` | Additional cnpg cluster labels. |
 | logLevel | string | `"info"` | Log level used by the operator (one of `error`, `warning`, `info` (default), `debug`, `trace`). |
