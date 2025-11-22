@@ -33,9 +33,23 @@ jobs:
           helm repo add cnpg https://cloudnative-pg.github.io/charts
           helm repo add hashicorp https://helm.releases.hashicorp.com
 
+      - name: Import GPG key for chart signing
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --import --batch --no-tty
+          gpg --list-secret-keys
+          
+          # Create passphrase file for helm signing
+          echo "${{ secrets.GPG_PASSPHRASE }}" > /tmp/passphrase.txt
+          chmod 600 /tmp/passphrase.txt
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1
         with:
           charts_dir: charts
+          config: ci/configs/cr.yaml
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_KEY: "Tobi (Helm Charts) <this-is-tobi@proton.me>"
+          CR_PASSPHRASE_FILE: /tmp/passphrase.txt
+          CR_SIGN: "true"
+

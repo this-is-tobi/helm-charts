@@ -25,6 +25,20 @@ helm search repo tobi
 helm install <release_name> tobi/<chart_name>
 ```
 
+### Chart Signatures
+
+All charts are cryptographically signed with GPG key `54029E3057EBFE1FA2781C066F5BD8A9D2134DCF`.
+
+To verify charts before installation:
+
+```sh
+# Import public key
+curl -sSL https://raw.githubusercontent.com/this-is-tobi/helm-charts/main/ci/configs/helm-charts-signing-key.asc | gpg --import
+
+# Install with verification
+helm install <release_name> tobi/<chart_name> --verify
+```
+
 ### ArgoCD
 
 ```yaml
