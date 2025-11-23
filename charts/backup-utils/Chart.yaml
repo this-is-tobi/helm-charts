@@ -1,7 +1,7 @@
 apiVersion: v2
 name: backup-utils
 type: application
-version: 2.2.1
+version: 2.2.2
 appVersion: "1.0.0"
 description: Production-ready Helm chart for automated backups of PostgreSQL, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules and retention policies.
 deprecated: false
@@ -10,13 +10,15 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: added
-      description: JSON Schema validation (values.schema.json) for configuration validation and IDE auto-completion
+      description: Default image repository (ghcr.io/this-is-tobi/tools/backup) and tag (appVersion)
     - kind: added
-      description: extraObjects support for deploying additional Kubernetes resources dynamically
+      description: Default values for all job parameters (successfulJobsHistoryLimit, failedJobsHistoryLimit, concurrencyPolicy, timeZone, backoffLimit)
     - kind: added
-      description: OCI registry distribution via ghcr.io/this-is-tobi/helm-charts
+      description: Default pod restartPolicy (Never) and resource requests/limits
     - kind: changed
-      description: Updated chart metadata and documentation
+      description: Schema now accepts both string and number types for secrets (e.g., DB_PORT)
+    - kind: fixed
+      description: Added toString conversion before b64enc in secret helper to handle numeric values correctly
 keywords:
 - backup
 - postgresql
