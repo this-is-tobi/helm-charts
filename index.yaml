@@ -5,6 +5,50 @@ entries:
       artifacthub.io/category: storage
       artifacthub.io/changes: |
         - kind: added
+          description: Default image repository (ghcr.io/this-is-tobi/tools/backup) and tag (appVersion)
+        - kind: added
+          description: Default values for all job parameters (successfulJobsHistoryLimit, failedJobsHistoryLimit, concurrencyPolicy, timeZone, backoffLimit)
+        - kind: added
+          description: Default pod restartPolicy (Never) and resource requests/limits
+        - kind: changed
+          description: Schema now accepts both string and number types for secrets (e.g., DB_PORT)
+        - kind: fixed
+          description: Added toString conversion before b64enc in secret helper to handle numeric values correctly
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-11-23T03:55:52.602441819Z"
+    description: Production-ready Helm chart for automated backups of PostgreSQL,
+      Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules
+      and retention policies.
+    digest: 712e84b9c45633abadc80a4fb7a3871279519e28119d6bd2d27c48cfa15ac116
+    keywords:
+    - backup
+    - postgresql
+    - vault
+    - qdrant
+    - s3
+    - rclone
+    - cronjob
+    - kubernetes
+    - database
+    - snapshots
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: backup-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/this-is-tobi/tools
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-2.2.2/backup-utils-2.2.2.tgz
+    version: 2.2.2
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/changes: |
+        - kind: added
           description: JSON Schema validation (values.schema.json) for configuration validation and IDE auto-completion
         - kind: added
           description: extraObjects support for deploying additional Kubernetes resources dynamically
@@ -571,6 +615,49 @@ entries:
     - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-0.1.0/backup-utils-0.1.0.tgz
     version: 0.1.0
   cnpg-cluster:
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |
+        - kind: added
+          description: Default value for pooler.instances in template and schema (default 3)
+        - kind: fixed
+          description: Prevent nil pointer error when pooler is enabled without specifying instances
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.27.1
+    created: "2025-11-23T03:55:52.797375703Z"
+    dependencies:
+    - alias: cnpg-operator
+      condition: cnpg-operator.enabled
+      name: cloudnative-pg
+      repository: https://cloudnative-pg.github.io/charts
+      version: '>=0.20.0'
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: 7555d8b7b7cd1eeeb0553bb7a70fbf9f512f9b47834a0cc4816b33d9345cedc2
+    home: https://cloudnative-pg.io
+    keywords:
+    - postgresql
+    - postgres
+    - cnpg
+    - cloudnative-pg
+    - database
+    - operator
+    - high-availability
+    - backup
+    - replication
+    - kubernetes
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-1.5.1/cnpg-cluster-1.5.1.tgz
+    version: 1.5.1
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |
@@ -1929,6 +2016,49 @@ entries:
   - annotations:
       artifacthub.io/category: security
       artifacthub.io/changes: |
+        - kind: fixed
+          description: Added toString conversion before b64enc in vso-utils.secret helper for type safety (preventive fix)
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 0.10.0
+    created: "2025-11-23T03:55:52.96265014Z"
+    dependencies:
+    - alias: vso
+      condition: vso.enabled
+      name: vault-secrets-operator
+      repository: https://helm.releases.hashicorp.com
+      version: '>=0.10.0'
+    description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator
+      resources - sync static secrets, generate dynamic credentials, issue PKI certificates,
+      and configure Vault authentication.
+    digest: 887e04a4f0e29ba98ee16b2c43b64236c0a0ecda77236320fb078bd321d057ff
+    keywords:
+    - vault
+    - secrets
+    - hashicorp
+    - vso
+    - vault-secrets-operator
+    - kubernetes
+    - security
+    - pki
+    - dynamic-secrets
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: vso-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator
+    - https://developer.hashicorp.com/vault/docs/platform/k8s/vso
+    - https://github.com/hashicorp/vault-secrets-operator
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-1.1.1/vso-utils-1.1.1.tgz
+    version: 1.1.1
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |
         - kind: added
           description: JSON Schema validation (values.schema.json) for VSO resource configuration
         - kind: added
@@ -2050,4 +2180,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2025-11-22T02:36:02.453657609Z"
+generated: "2025-11-23T03:55:52.963092461Z"
