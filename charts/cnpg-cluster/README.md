@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 1.5.0](https://img.shields.io/badge/Version-1.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.27.1](https://img.shields.io/badge/AppVersion-1.27.1-informational?style=flat-square)
+![Version: 1.5.1](https://img.shields.io/badge/Version-1.5.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.27.1](https://img.shields.io/badge/AppVersion-1.27.1-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -23,7 +23,7 @@ helm install <release_name> tobi/cnpg-cluster
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 1.5.0
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 1.5.1
 ```
 
 ### ArgoCD
@@ -34,7 +34,7 @@ helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster 
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 1.5.0
+  targetRevision: 1.5.1
   helm:
     releaseName: <release_name>
     parameters: []
@@ -47,7 +47,7 @@ sources:
 sources:
 - repoURL: ghcr.io/this-is-tobi/helm-charts
   chart: cnpg-cluster
-  targetRevision: 1.5.0
+  targetRevision: 1.5.1
   helm:
     releaseName: <release_name>
     parameters: []
@@ -62,7 +62,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 1.5.0
+  version: 1.5.1
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -73,7 +73,7 @@ dependencies:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 1.5.0
+  version: 1.5.1
   repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -140,7 +140,7 @@ infosSecret:
     name: "POSTGRES_DB"               # Instead of DB_NAME
     user: "POSTGRES_USER"             # Instead of DB_USER
     password: "POSTGRES_PASSWORD"     # Instead of DB_PASS
-    connectionString: "DATABASE_URL"  # Instead of DB_URL
+    url: "DATABASE_URL"               # Instead of DB_URL
 ```
 
 **Usage example with backup-utils:**

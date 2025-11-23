@@ -8,7 +8,7 @@ metadata:
   annotations: {{- toYaml .Values.annotations | nindent 4 }}
   {{- end }}
 spec:
-  instances: {{ .Values.pooler.instances }}
+  instances: {{ .Values.pooler.instances | default 3 }}
   cluster:
     name: {{ include "template.fullname" . }}
   type: {{ .Values.pooler.type }}

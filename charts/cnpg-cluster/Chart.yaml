@@ -1,7 +1,7 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 1.5.0
+version: 1.5.1
 appVersion: "1.27.1"
 description: A Helm Chart to deploy easily a CNPG cluster
 home: https://cloudnative-pg.io
@@ -11,11 +11,9 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: added
-      description: JSON Schema validation (values.schema.json) for improved configuration validation and IDE support
-    - kind: added
-      description: extraObjects support for deploying additional Kubernetes resources dynamically
-    - kind: added
-      description: OCI registry distribution via ghcr.io/this-is-tobi/helm-charts
+      description: Default value for pooler.instances in template and schema (default 3)
+    - kind: fixed
+      description: Prevent nil pointer error when pooler is enabled without specifying instances
 keywords:
 - postgresql
 - postgres
