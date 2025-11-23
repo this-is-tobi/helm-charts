@@ -292,7 +292,8 @@
         },
         "instances": {
           "type": "integer",
-          "minimum": 1
+          "minimum": 1,
+          "default": 3
         },
         "type": {
           "type": "string",

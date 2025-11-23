@@ -39,7 +39,7 @@ Create container environment variables from secret
 */}}
 {{- define "vso-utils.secret" -}}
 {{ range $key, $val := .secrets }}
-{{ $key }}: {{ $val | b64enc | quote }}
+{{ $key }}: {{ $val | toString | b64enc | quote }}
 {{- end }}
 {{- end }}
 

@@ -9,9 +9,9 @@ metadata:
     {{- include "backup-utils.labels" (list $ $backupName) | nindent 4 }}
 spec:
   schedule: {{ $backup.job.schedule }}
-  successfulJobsHistoryLimit: {{ $backup.job.successfulJobsHistoryLimit }}
-  failedJobsHistoryLimit: {{ $backup.job.failedJobsHistoryLimit }}
-  concurrencyPolicy: {{ $backup.job.concurrencyPolicy }}
+  successfulJobsHistoryLimit: {{ $backup.job.successfulJobsHistoryLimit | default 3 }}
+  failedJobsHistoryLimit: {{ $backup.job.failedJobsHistoryLimit | default 3 }}
+  concurrencyPolicy: {{ $backup.job.concurrencyPolicy | default "Forbid" }}
   timeZone: {{ $backup.job.timeZone | default "UTC" }}
   jobTemplate:
     metadata:
@@ -27,7 +27,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      backoffLimit: {{ $backup.job.backoffLimit }}
+      backoffLimit: {{ $backup.job.backoffLimit | default 3 }}
       template:
         metadata:
           {{- if $backup.podAnnotations }}
@@ -46,7 +46,7 @@ spec:
           imagePullSecrets:
           - name: {{ include "backup-utils.name" $ }}-pullsecret
           {{- end }}
-          restartPolicy: {{ $backup.restartPolicy }}
+          restartPolicy: {{ $backup.restartPolicy | default "Never" }}
           {{- if $backup.podSecurityContext }}
           securityContext:
             {{- toYaml $backup.podSecurityContext | nindent 12 }}
@@ -57,8 +57,20 @@ spec:
             securityContext:
               {{- toYaml $backup.container.securityContext | nindent 14 }}
             {{- end }}
-            image: {{ printf "%s:%s" $backup.image.repository ($backup.image.tag | default "latest") }}
-            imagePullPolicy: {{ $backup.image.pullPolicy }}
+            {{- $imageRepo := "ghcr.io/this-is-tobi/tools/backup" }}
+            {{- if and $backup.image (hasKey $backup.image "repository") }}
+            {{- $imageRepo = $backup.image.repository }}
+            {{- end }}
+            {{- $imageTag := $.Chart.AppVersion }}
+            {{- if and $backup.image (hasKey $backup.image "tag") }}
+            {{- $imageTag = $backup.image.tag }}
+            {{- end }}
+            image: {{ printf "%s:%s" $imageRepo $imageTag }}
+            {{- $pullPolicy := "IfNotPresent" }}
+            {{- if and $backup.image (hasKey $backup.image "pullPolicy") }}
+            {{- $pullPolicy = $backup.image.pullPolicy }}
+            {{- end }}
+            imagePullPolicy: {{ $pullPolicy }}
             {{- if and $backup.container (hasKey $backup.container "command") }}
             command:
             {{- range $backup.container.command }}
@@ -90,7 +102,17 @@ spec:
             {{- if $backup.envFrom }}
               {{- toYaml $backup.envFrom | nindent 12 }}
             {{- end }}
+            {{- if $backup.resources }}
             resources:
               {{- toYaml $backup.resources | nindent 14 }}
+            {{- else }}
+            resources:
+              requests:
+                memory: "128Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "250m"
+            {{- end }}
 {{- end }}
 {{- end }}

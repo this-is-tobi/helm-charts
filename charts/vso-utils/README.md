@@ -1,6 +1,6 @@
 # vso-utils
 
-![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.10.0](https://img.shields.io/badge/AppVersion-0.10.0-informational?style=flat-square)
+![Version: 1.1.1](https://img.shields.io/badge/Version-1.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.10.0](https://img.shields.io/badge/AppVersion-0.10.0-informational?style=flat-square)
 
 Production-ready Helm chart for managing HashiCorp Vault Secret Operator resources - sync static secrets, generate dynamic credentials, issue PKI certificates, and configure Vault authentication.
 
@@ -50,7 +50,7 @@ helm install <release_name> tobi/vso-utils
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/vso-utils --version 1.1.0
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/vso-utils --version 1.1.1
 ```
 
 ### ArgoCD
@@ -66,7 +66,7 @@ spec:
   sources:
   - repoURL: https://this-is-tobi.github.io/helm-charts
     chart: vso-utils
-    targetRevision: 1.1.0
+    targetRevision: 1.1.1
     helm:
       releaseName: <release_name>
       values: |
@@ -93,7 +93,7 @@ spec:
   sources:
   - repoURL: ghcr.io/this-is-tobi/helm-charts
     chart: vso-utils
-    targetRevision: 1.1.0
+    targetRevision: 1.1.1
     helm:
       releaseName: <release_name>
       values: |
@@ -116,7 +116,7 @@ spec:
 # Chart.yaml
 dependencies:
 - name: vso-utils
-  version: 1.1.0
+  version: 1.1.1
   repository: https://this-is-tobi.github.io/helm-charts
   condition: vso-utils.enabled
 ```
@@ -126,7 +126,7 @@ dependencies:
 # Chart.yaml
 dependencies:
 - name: vso-utils
-  version: 1.1.0
+  version: 1.1.1
   repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: vso-utils.enabled
 ```
