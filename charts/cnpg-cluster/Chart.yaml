@@ -1,7 +1,7 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 1.5.1
+version: 1.5.2
 appVersion: "1.27.1"
 description: A Helm Chart to deploy easily a CNPG cluster
 home: https://cloudnative-pg.io
@@ -10,10 +10,8 @@ annotations:
   artifacthub.io/category: database
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: added
-      description: Default value for pooler.instances in template and schema (default 3)
-    - kind: fixed
-      description: Prevent nil pointer error when pooler is enabled without specifying instances
+    - kind: changed
+      description: Simplified and streamlined README documentation for better readability
 keywords:
 - postgresql
 - postgres
