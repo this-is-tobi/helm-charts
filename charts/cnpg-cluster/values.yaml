@@ -267,8 +267,6 @@ infosSecret:
   # -- Name of the secret to create (defaults to `<fullname>-infos`).
   # @section -- Database
   secretName: ""
-  # -- Environment variable keys used in the infos secret. Customize these to match your application's requirements.
-  # @section -- Database
   keys:
     # -- Key for database host.
     # @section -- Database
