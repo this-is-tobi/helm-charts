@@ -2094,6 +2094,51 @@ entries:
       artifacthub.io/category: security
       artifacthub.io/changes: |
         - kind: fixed
+          description: Fixed template helper calls to use vso-utils.* naming convention instead of deprecated template.* aliases when used as a subchart
+        - kind: removed
+          description: Removed deprecated template.* helper aliases to eliminate confusion and complexity
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 0.10.0
+    created: "2025-11-26T01:37:47.552158888Z"
+    dependencies:
+    - alias: vso
+      condition: vso.enabled
+      name: vault-secrets-operator
+      repository: https://helm.releases.hashicorp.com
+      version: '>=0.10.0'
+    description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator
+      resources - sync static secrets, generate dynamic credentials, issue PKI certificates,
+      and configure Vault authentication.
+    digest: 88b83d2fcddae5eb5234538041e222fe2cdc831e6ef81defae22b0e94bc600fc
+    keywords:
+    - vault
+    - secrets
+    - hashicorp
+    - vso
+    - vault-secrets-operator
+    - kubernetes
+    - security
+    - pki
+    - dynamic-secrets
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: vso-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator
+    - https://developer.hashicorp.com/vault/docs/platform/k8s/vso
+    - https://github.com/hashicorp/vault-secrets-operator
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-1.1.2/vso-utils-1.1.2.tgz
+    version: 1.1.2
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |
+        - kind: fixed
           description: Added toString conversion before b64enc in vso-utils.secret helper for type safety (preventive fix)
       artifacthub.io/license: MIT
     apiVersion: v2
@@ -2257,4 +2302,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2025-11-25T02:30:22.067006306Z"
+generated: "2025-11-26T01:37:47.552349966Z"
