@@ -19,7 +19,17 @@ spec:
   mount: {{ $auth.mount | required (printf "mount is required for VaultAuth %s" $authName) }}
   {{- with $auth.params }}
   params:
-    {{- toYaml . | nindent 4 }}
+    {{- range $key, $value := . }}
+    {{- if eq $key "audiences" }}
+    {{- if kindIs "slice" $value }}
+    audiences: {{ join "," $value | quote }}
+    {{- else }}
+    audiences: {{ $value | quote }}
+    {{- end }}
+    {{- else }}
+    {{ $key }}: {{ $value | toYaml }}
+    {{- end }}
+    {{- end }}
   {{- end }}
   {{- with $auth.headers }}
   headers:

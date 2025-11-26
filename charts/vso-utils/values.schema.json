@@ -19,27 +19,207 @@
         "type": ["object", "string"]
       }
     },
-    "resources": {
+    "vaultStaticSecrets": {
       "type": "object",
-      "description": "Map of Vault Secret Operator resources to create",
+      "description": "VaultStaticSecret resources for syncing static KV secrets from Vault",
       "additionalProperties": {
         "type": "object",
-        "required": ["enabled", "type"],
+        "required": ["mount", "vaultAuthRef", "path", "destination"],
         "properties": {
-          "enabled": {
-            "type": "boolean",
-            "description": "Enable or disable this VSO resource"
+          "annotations": { "type": "object" },
+          "labels": { "type": "object" },
+          "namespace": { "type": "string" },
+          "mount": { "type": "string" },
+          "vaultAuthRef": { "type": "string" },
+          "path": { "type": "string" },
+          "version": { "type": ["integer", "null"] },
+          "type": { "type": "string", "enum": ["kv-v1", "kv-v2"], "default": "kv-v2" },
+          "refreshAfter": { "type": "string" },
+          "hmacSecretData": { "type": "boolean", "default": true },
+          "rolloutRestartTargets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": { "type": "string" },
+                "name": { "type": "string" }
+              }
+            }
           },
-          "type": {
-            "type": "string",
-            "enum": ["static", "dynamic", "pki", "auth", "connection"],
-            "description": "Type of VSO resource"
-          },
-          "spec": {
+          "destination": {
             "type": "object",
-            "description": "VSO resource specification (follows Vault Secret Operator CRD schema)"
+            "required": ["name"],
+            "properties": {
+              "create": { "type": "boolean", "default": true },
+              "overwrite": { "type": "boolean" },
+              "labels": { "type": "object" },
+              "annotations": { "type": "object" },
+              "name": { "type": "string" },
+              "type": { "type": "string", "default": "Opaque" },
+              "transformation": { "type": "object" }
+            }
           }
         }
+      }
+    },
+    "vaultDynamicSecrets": {
+      "type": "object",
+      "description": "VaultDynamicSecret resources for generating dynamic secrets from Vault",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["mount", "vaultAuthRef", "path", "destination"],
+        "properties": {
+          "annotations": { "type": "object" },
+          "labels": { "type": "object" },
+          "namespace": { "type": "string" },
+          "mount": { "type": "string" },
+          "vaultAuthRef": { "type": "string" },
+          "path": { "type": "string" },
+          "params": { "type": "object" },
+          "renewalPercent": { "type": "integer", "default": 67 },
+          "revoke": { "type": "boolean", "default": true },
+          "hmacSecretData": { "type": "boolean", "default": true },
+          "rolloutRestartTargets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": { "type": "string" },
+                "name": { "type": "string" }
+              }
+            }
+          },
+          "destination": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "create": { "type": "boolean", "default": true },
+              "overwrite": { "type": "boolean" },
+              "labels": { "type": "object" },
+              "annotations": { "type": "object" },
+              "name": { "type": "string" },
+              "type": { "type": "string", "default": "Opaque" },
+              "transformation": { "type": "object" }
+            }
+          }
+        }
+      }
+    },
+    "vaultPKISecrets": {
+      "type": "object",
+      "description": "VaultPKISecret resources for generating PKI certificates from Vault",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["mount", "vaultAuthRef", "role", "commonName", "destination"],
+        "properties": {
+          "annotations": { "type": "object" },
+          "labels": { "type": "object" },
+          "namespace": { "type": "string" },
+          "mount": { "type": "string" },
+          "vaultAuthRef": { "type": "string" },
+          "role": { "type": "string" },
+          "commonName": { "type": "string" },
+          "altNames": { "type": "array", "items": { "type": "string" } },
+          "ipSans": { "type": "array", "items": { "type": "string" } },
+          "uriSans": { "type": "array", "items": { "type": "string" } },
+          "otherSans": { "type": "array", "items": { "type": "string" } },
+          "format": { "type": "string", "enum": ["pem", "der", "pem_bundle"], "default": "pem" },
+          "revoke": { "type": "boolean", "default": true },
+          "clear": { "type": "boolean", "default": false },
+          "expiryOffset": { "type": "string", "default": "5m" },
+          "ttl": { "type": "string", "default": "720h" },
+          "excludeCNFromSans": { "type": "boolean", "default": false },
+          "privateKeyFormat": { "type": "string", "enum": ["rsa", "ec", "ed25519"], "default": "rsa" },
+          "hmacSecretData": { "type": "boolean", "default": true },
+          "rolloutRestartTargets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": { "type": "string" },
+                "name": { "type": "string" }
+              }
+            }
+          },
+          "destination": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "create": { "type": "boolean", "default": true },
+              "overwrite": { "type": "boolean" },
+              "labels": { "type": "object" },
+              "annotations": { "type": "object" },
+              "name": { "type": "string" },
+              "type": { "type": "string", "default": "kubernetes.io/tls" },
+              "transformation": { "type": "object" }
+            }
+          }
+        }
+      }
+    },
+    "vaultAuth": {
+      "type": "object",
+      "description": "VaultAuth resources for configuring Vault authentication",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["method", "mount"],
+        "properties": {
+          "annotations": { "type": "object" },
+          "labels": { "type": "object" },
+          "namespace": { "type": "string" },
+          "method": { 
+            "type": "string",
+            "enum": ["kubernetes", "jwt", "appRole", "aws", "gcp", "ldap"]
+          },
+          "mount": { "type": "string" },
+          "params": { 
+            "type": "object",
+            "properties": {
+              "role": { "type": "string" },
+              "serviceAccount": { "type": "string" },
+              "audiences": { 
+                "oneOf": [
+                  { "type": "string" },
+                  { "type": "array", "items": { "type": "string" } }
+                ]
+              },
+              "roleId": { "type": "string" },
+              "secretRef": { "type": "string" }
+            }
+          },
+          "headers": { "type": "object" },
+          "vaultConnectionRef": { "type": "string" },
+          "storageEncryption": { "type": "object" }
+        }
+      }
+    },
+    "vaultConnection": {
+      "type": "object",
+      "description": "VaultConnection resources for configuring Vault server connection details",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["address"],
+        "properties": {
+          "annotations": { "type": "object" },
+          "labels": { "type": "object" },
+          "address": { "type": "string" },
+          "headers": { "type": "object" },
+          "tls": {
+            "type": "object",
+            "properties": {
+              "caCertSecretRef": { "type": "string" }
+            }
+          },
+          "skipTLSVerify": { "type": "boolean", "default": false },
+          "timeout": { "type": "string", "default": "60s" }
+        }
+      }
+    },
+    "vso": {
+      "type": "object",
+      "description": "Vault Secrets Operator deployment configuration",
+      "properties": {
+        "enabled": { "type": "boolean", "default": false }
       }
     }
   }
