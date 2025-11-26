@@ -118,14 +118,5 @@ App labels
 {{- end }}
 
 
-{{/*
-Backward compatibility aliases for 'template' prefix
-DEPRECATED: These will be removed in v2.0.0
-*/}}
-{{- define "template.name" -}}{{ include "vso-utils.name" . }}{{- end }}
-{{- define "template.chart" -}}{{ include "vso-utils.chart" . }}{{- end }}
-{{- define "template.fullname" -}}{{ include "vso-utils.fullname" . }}{{- end }}
-{{- define "template.labels" -}}{{ include "vso-utils.labels" . }}{{- end }}
-{{- define "template.selectorLabels" -}}{{ include "vso-utils.selectorLabels" . }}{{- end }}
-{{- define "template.toKebabCase" -}}{{ include "vso-utils.toKebabCase" . }}{{- end }}
+
 
