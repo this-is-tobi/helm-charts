@@ -2092,6 +2092,55 @@ entries:
   vso-utils:
   - annotations:
       artifacthub.io/category: security
+      artifacthub.io/changes: "- kind: fixed\n  description: |\n    Fixed VaultAuth
+        template to use method-specific configuration blocks (kubernetes, jwt, appRole,
+        aws, gcp) \n    instead of generic params field, matching VSO API specification.
+        This is a BREAKING CHANGE - update your \n    values to use typed auth configs,
+        e.g., `kubernetes: { role, serviceAccount, audiences }` instead of \n    `params:
+        { role, serviceAccount, audiences }`.\n- kind: changed\n  description: Updated
+        JSON schema to reflect proper VaultAuth structure with typed auth method configurations\n-
+        kind: changed\n  description: Updated test-values.yaml to demonstrate correct
+        VaultAuth configuration structure\n"
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 0.10.0
+    created: "2025-11-26T02:52:48.152687651Z"
+    dependencies:
+    - alias: vso
+      condition: vso.enabled
+      name: vault-secrets-operator
+      repository: https://helm.releases.hashicorp.com
+      version: '>=0.10.0'
+    description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator
+      resources - sync static secrets, generate dynamic credentials, issue PKI certificates,
+      and configure Vault authentication.
+    digest: 27224e97b3ccef0d2a56a9ab91eb6d3af7628b16bbd4d02000ffccdfc7f2101e
+    keywords:
+    - vault
+    - secrets
+    - hashicorp
+    - vso
+    - vault-secrets-operator
+    - kubernetes
+    - security
+    - pki
+    - dynamic-secrets
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: vso-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator
+    - https://developer.hashicorp.com/vault/docs/platform/k8s/vso
+    - https://github.com/hashicorp/vault-secrets-operator
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-1.1.4/vso-utils-1.1.4.tgz
+    version: 1.1.4
+  - annotations:
+      artifacthub.io/category: security
       artifacthub.io/changes: |
         - kind: fixed
           description: Fixed VaultAuth params rendering to properly handle audiences field (supports both string and array formats, converts arrays to comma-separated strings)
@@ -2349,4 +2398,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2025-11-26T02:00:03.798626875Z"
+generated: "2025-11-26T02:52:48.152881614Z"
