@@ -16,7 +16,7 @@ vaultAuth:
     method: kubernetes
     mount: kubernetes
     vaultConnectionRef: default
-    params:
+    kubernetes:
       role: "my-app-role"
       serviceAccount: "default"
       audiences:
@@ -26,7 +26,7 @@ vaultAuth:
     method: appRole
     mount: approle
     vaultConnectionRef: default
-    params:
+    appRole:
       roleId: "my-role-id"
       secretRef: "approle-secret"
 

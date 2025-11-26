@@ -169,27 +169,89 @@
           "namespace": { "type": "string" },
           "method": { 
             "type": "string",
-            "enum": ["kubernetes", "jwt", "appRole", "aws", "gcp", "ldap"]
+            "enum": ["kubernetes", "jwt", "appRole", "aws", "gcp"]
           },
           "mount": { "type": "string" },
-          "params": { 
+          "kubernetes": {
             "type": "object",
+            "description": "Kubernetes auth method configuration",
             "properties": {
               "role": { "type": "string" },
               "serviceAccount": { "type": "string" },
               "audiences": { 
-                "oneOf": [
-                  { "type": "string" },
-                  { "type": "array", "items": { "type": "string" } }
-                ]
+                "type": "array",
+                "items": { "type": "string" }
               },
+              "tokenExpirationSeconds": { 
+                "type": "integer",
+                "minimum": 600,
+                "default": 600
+              }
+            }
+          },
+          "jwt": {
+            "type": "object",
+            "description": "JWT auth method configuration",
+            "properties": {
+              "role": { "type": "string" },
+              "secretRef": { "type": "string" },
+              "serviceAccount": { "type": "string" },
+              "audiences": { 
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "tokenExpirationSeconds": { 
+                "type": "integer",
+                "minimum": 600,
+                "default": 600
+              }
+            }
+          },
+          "appRole": {
+            "type": "object",
+            "description": "AppRole auth method configuration",
+            "properties": {
               "roleId": { "type": "string" },
               "secretRef": { "type": "string" }
             }
           },
+          "aws": {
+            "type": "object",
+            "description": "AWS auth method configuration",
+            "properties": {
+              "role": { "type": "string" },
+              "region": { "type": "string" },
+              "headerValue": { "type": "string" },
+              "sessionName": { "type": "string" },
+              "stsEndpoint": { "type": "string" },
+              "iamEndpoint": { "type": "string" },
+              "secretRef": { "type": "string" },
+              "irsaServiceAccount": { "type": "string" }
+            }
+          },
+          "gcp": {
+            "type": "object",
+            "description": "GCP auth method configuration",
+            "properties": {
+              "role": { "type": "string" },
+              "workloadIdentityServiceAccount": { "type": "string" },
+              "region": { "type": "string" },
+              "clusterName": { "type": "string" },
+              "projectID": { "type": "string" }
+            }
+          },
+          "params": { 
+            "type": "object",
+            "description": "Generic params for additional auth configuration not covered by typed fields"
+          },
           "headers": { "type": "object" },
           "vaultConnectionRef": { "type": "string" },
-          "storageEncryption": { "type": "object" }
+          "storageEncryption": { "type": "object" },
+          "vaultAuthGlobalRef": { "type": "object" },
+          "allowedNamespaces": { 
+            "type": "array",
+            "items": { "type": "string" }
+          }
         }
       }
     },

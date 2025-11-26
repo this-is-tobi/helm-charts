@@ -17,19 +17,29 @@ spec:
   {{- end }}
   method: {{ $auth.method | required (printf "method is required for VaultAuth %s" $authName) }}
   mount: {{ $auth.mount | required (printf "mount is required for VaultAuth %s" $authName) }}
+  {{- with $auth.kubernetes }}
+  kubernetes:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $auth.jwt }}
+  jwt:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $auth.appRole }}
+  appRole:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $auth.aws }}
+  aws:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $auth.gcp }}
+  gcp:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with $auth.params }}
   params:
-    {{- range $key, $value := . }}
-    {{- if eq $key "audiences" }}
-    {{- if kindIs "slice" $value }}
-    audiences: {{ join "," $value | quote }}
-    {{- else }}
-    audiences: {{ $value | quote }}
-    {{- end }}
-    {{- else }}
-    {{ $key }}: {{ $value | toYaml }}
-    {{- end }}
-    {{- end }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- with $auth.headers }}
   headers:
