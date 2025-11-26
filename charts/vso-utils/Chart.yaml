@@ -1,7 +1,7 @@
 apiVersion: v2
 name: vso-utils
 type: application
-version: 1.1.1
+version: 1.1.2
 appVersion: "0.10.0"
 description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator resources - sync static secrets, generate dynamic credentials, issue PKI certificates, and configure Vault authentication.
 deprecated: false
@@ -10,7 +10,9 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: fixed
-      description: Added toString conversion before b64enc in vso-utils.secret helper for type safety (preventive fix)
+      description: Fixed template helper calls to use vso-utils.* naming convention instead of deprecated template.* aliases when used as a subchart
+    - kind: removed
+      description: Removed deprecated template.* helper aliases to eliminate confusion and complexity
 keywords:
 - vault
 - secrets

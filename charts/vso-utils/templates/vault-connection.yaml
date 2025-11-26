@@ -3,8 +3,8 @@
 apiVersion: secrets.hashicorp.com/v1beta1
 kind: VaultConnection
 metadata:
-  name: {{ printf "%s-%s" (include "template.fullname" $) (include "template.toKebabCase" $connName) }}
-  labels: {{- include "template.labels" (list $ $connName) | nindent 4 }}
+  name: {{ printf "%s-%s" (include "vso-utils.fullname" $) (include "vso-utils.toKebabCase" $connName) }}
+  labels: {{- include "vso-utils.labels" (list $ $connName) | nindent 4 }}
     {{- with $conn.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
