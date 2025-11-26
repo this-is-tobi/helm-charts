@@ -212,35 +212,66 @@ vaultPKISecrets: {}
 # VaultAuth resources for configuring Vault authentication.
 # See: https://developer.hashicorp.com/vault/docs/platform/k8s/vso/api-reference#vaultauth
 vaultAuth: {}
-  # Example configuration:
+  # Example configurations:
+  # 
+  # Kubernetes auth method:
   # default:
-  #   # -- Additional annotations for the VaultAuth resource.
-  #   annotations: {}
-  #   # -- Additional labels for the VaultAuth resource.
-  #   labels: {}
-  #   # -- Namespace in Vault for authentication.
-  #   namespace: ""
-  #   # -- Vault authentication method ("kubernetes", "jwt", "appRole", "aws", "gcp", "ldap").
   #   method: "kubernetes"
-  #   # -- Mount path of the auth method in Vault (required).
   #   mount: "kubernetes"
-  #   # -- Parameters specific to the authentication method.
-  #   params: {}
-  #     # For Kubernetes auth:
-  #     # role: "my-role"
-  #     # serviceAccount: "default"
-  #     # audiences: ["vault"]
-  #     # For AppRole:
-  #     # roleId: "my-role-id"
-  #     # secretRef: "approle-secret"
-  #   # -- Headers to include in Vault requests.
-  #   headers: {}
-  #   # -- Vault connection reference (optional, defaults to "default").
   #   vaultConnectionRef: "default"
-  #   # -- StorageEncryption configuration for encrypting cached credentials.
-  #   storageEncryption: {}
-  #     # keyName: "encryption-key"
-  #     # mount: "transit"
+  #   kubernetes:
+  #     role: "my-app-role"
+  #     serviceAccount: "default"
+  #     audiences: ["vault"]
+  #     tokenExpirationSeconds: 600
+  #
+  # JWT auth method:
+  # jwtAuth:
+  #   method: "jwt"
+  #   mount: "jwt"
+  #   jwt:
+  #     role: "my-role"
+  #     secretRef: "jwt-token-secret"  # Secret containing JWT token in 'jwt' key
+  #
+  # AppRole auth method:
+  # appRoleAuth:
+  #   method: "appRole"
+  #   mount: "approle"
+  #   appRole:
+  #     roleId: "my-role-id"
+  #     secretRef: "approle-secret"  # Secret containing SecretID in 'id' key
+  #
+  # AWS auth method:
+  # awsAuth:
+  #   method: "aws"
+  #   mount: "aws"
+  #   aws:
+  #     role: "my-aws-role"
+  #     region: "us-east-1"
+  #     # Optional:
+  #     irsaServiceAccount: "my-sa"  # For EKS IRSA
+  #     secretRef: "aws-credentials"  # For static credentials
+  #
+  # GCP auth method:
+  # gcpAuth:
+  #   method: "gcp"
+  #   mount: "gcp"
+  #   gcp:
+  #     role: "my-gcp-role"
+  #     workloadIdentityServiceAccount: "my-sa@project.iam.gserviceaccount.com"
+  #     region: "us-central1"
+  #     clusterName: "my-cluster"
+  #     projectID: "my-project"
+  #
+  # Common optional fields for all auth methods:
+  #   annotations: {}
+  #   labels: {}
+  #   namespace: ""  # Vault namespace (Enterprise)
+  #   headers: {}
+  #   params: {}  # Generic params for additional configuration
+  #   storageEncryption:
+  #     keyName: "encryption-key"
+  #     mount: "transit"
 
 
 # VaultConnection resources for configuring Vault server connection details.
