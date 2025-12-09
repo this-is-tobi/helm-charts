@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 2.2.3](https://img.shields.io/badge/Version-2.2.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.2](https://img.shields.io/badge/AppVersion-1.0.2-informational?style=flat-square)
+![Version: 2.3.0](https://img.shields.io/badge/Version-2.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.1.0](https://img.shields.io/badge/AppVersion-1.1.0-informational?style=flat-square)
 
 Production-ready Helm chart for automated backups of PostgreSQL, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules and retention policies.
 
@@ -23,6 +23,7 @@ This Helm chart provides a **production-ready solution** for deploying automated
 | Type | Description | Required Environment Variables |
 |------|-------------|-------------------------------|
 | **postgres** | PostgreSQL database dumps using `pg_dump` | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS` |
+| **mariadb** | MariaDB/MySQL database dumps using `mariadb-dump` | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS` |
 | **vault** | HashiCorp Vault snapshots (raft storage) | `VAULT_ADDR`, `VAULT_TOKEN` |
 | **s3** | S3-to-S3 bucket synchronization | `SOURCE_S3_ENDPOINT`, `SOURCE_S3_ACCESS_KEY`, `SOURCE_S3_SECRET_KEY`, `SOURCE_S3_BUCKET_NAME` |
 | **qdrant** | Qdrant vector database snapshots | `QDRANT_URL`, `QDRANT_API_KEY`, `QDRANT_COLLECTION` (optional) |
@@ -49,7 +50,7 @@ helm install <release_name> tobi/backup-utils
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/backup-utils --version 2.2.3
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/backup-utils --version 2.3.0
 ```
 
 ### ArgoCD
@@ -65,7 +66,7 @@ spec:
   sources:
   - repoURL: https://this-is-tobi.github.io/helm-charts
     chart: backup-utils
-    targetRevision: 2.2.3
+    targetRevision: 2.3.0
     helm:
       releaseName: <release_name>
       values: |
@@ -94,7 +95,7 @@ spec:
   sources:
   - repoURL: ghcr.io/this-is-tobi/helm-charts
     chart: backup-utils
-    targetRevision: 2.2.3
+    targetRevision: 2.3.0
     helm:
       releaseName: <release_name>
       values: |
@@ -119,7 +120,7 @@ spec:
 # Chart.yaml
 dependencies:
 - name: backup-utils
-  version: 2.2.3
+  version: 2.3.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: backup-utils.enabled
 ```
@@ -129,7 +130,7 @@ dependencies:
 # Chart.yaml
 dependencies:
 - name: backup-utils
-  version: 2.2.3
+  version: 2.3.0
   repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: backup-utils.enabled
 ```
@@ -234,7 +235,44 @@ backups:
         cpu: "500m"
 ```
 
-### Example 2: Vault Snapshot Backup
+### Example 2: MariaDB/MySQL Backup
+
+Daily MariaDB backup at 2:30 AM with custom dump arguments:
+
+```yaml
+backups:
+  mariadbProduction:
+    enabled: true
+    type: mariadb
+    job:
+      schedule: "30 2 * * *"  # Daily at 2:30 AM UTC
+      timeZone: "Europe/Paris"
+    env:
+      RETENTION: "30d"
+      DB_DUMP_ARGS: "--single-transaction --routines --triggers --events"  # Optional custom args
+    secrets:
+      # MariaDB/MySQL connection
+      DB_HOST: "mariadb.default.svc.cluster.local"
+      DB_PORT: "3306"
+      DB_NAME: "production"
+      DB_USER: "backup_user"
+      DB_PASS: "secure_password"
+      # S3 destination
+      S3_ENDPOINT: "https://s3.amazonaws.com"
+      S3_ACCESS_KEY: "AKIAIOSFODNN7EXAMPLE"
+      S3_SECRET_KEY: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+      S3_BUCKET_NAME: "company-backups"
+      S3_BUCKET_PREFIX: "mariadb/production/"
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "200m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+```
+
+### Example 3: Vault Snapshot Backup
 
 Hourly Vault snapshots with 7-day retention:
 
@@ -260,7 +298,7 @@ backups:
       S3_BUCKET_PREFIX: "snapshots/"
 ```
 
-### Example 3: Qdrant Vector Database Backup
+### Example 4: Qdrant Vector Database Backup
 
 Backup specific Qdrant collection daily:
 
@@ -285,7 +323,7 @@ backups:
       S3_BUCKET_PREFIX: "qdrant/vectors/"
 ```
 
-### Example 4: S3-to-S3 Bucket Sync
+### Example 5: S3-to-S3 Bucket Sync
 
 Sync data from one S3 bucket to another (cross-region backup):
 
@@ -314,7 +352,7 @@ backups:
       S3_BUCKET_PREFIX: "production-uploads/"
 ```
 
-### Example 5: Multiple Backups with Global Configuration
+### Example 6: Multiple Backups with Global Configuration
 
 Share S3 credentials across multiple backup jobs:
 
