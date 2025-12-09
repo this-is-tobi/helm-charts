@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 2.3.0](https://img.shields.io/badge/Version-2.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.1.0](https://img.shields.io/badge/AppVersion-1.1.0-informational?style=flat-square)
+![Version: 2.3.1](https://img.shields.io/badge/Version-2.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.1.1](https://img.shields.io/badge/AppVersion-1.1.1-informational?style=flat-square)
 
 Production-ready Helm chart for automated backups of PostgreSQL, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules and retention policies.
 
@@ -50,7 +50,7 @@ helm install <release_name> tobi/backup-utils
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/backup-utils --version 2.3.0
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/backup-utils --version 2.3.1
 ```
 
 ### ArgoCD
@@ -66,7 +66,7 @@ spec:
   sources:
   - repoURL: https://this-is-tobi.github.io/helm-charts
     chart: backup-utils
-    targetRevision: 2.3.0
+    targetRevision: 2.3.1
     helm:
       releaseName: <release_name>
       values: |
@@ -95,7 +95,7 @@ spec:
   sources:
   - repoURL: ghcr.io/this-is-tobi/helm-charts
     chart: backup-utils
-    targetRevision: 2.3.0
+    targetRevision: 2.3.1
     helm:
       releaseName: <release_name>
       values: |
@@ -120,7 +120,7 @@ spec:
 # Chart.yaml
 dependencies:
 - name: backup-utils
-  version: 2.3.0
+  version: 2.3.1
   repository: https://this-is-tobi.github.io/helm-charts
   condition: backup-utils.enabled
 ```
@@ -130,7 +130,7 @@ dependencies:
 # Chart.yaml
 dependencies:
 - name: backup-utils
-  version: 2.3.0
+  version: 2.3.1
   repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: backup-utils.enabled
 ```
@@ -466,6 +466,66 @@ backups:
     env:
       RCLONE_EXTRA_ARGS: "--transfers=16 --checkers=32 --buffer-size=256M"
 ```
+
+### Streaming Upload Limitations
+
+When backing up databases using streaming methods (PostgreSQL with `pg_dump`, MariaDB with `mariadb-dump`), rclone uses multipart uploads with a default chunk size of **5 MiB**. Due to S3 API limitations (maximum 10,000 parts per upload), this imposes a maximum file size constraint.
+
+**Default Configuration:**
+- **Chunk size**: 5 MiB (default `--s3-chunk-size`)
+- **Maximum parts**: 10,000 (S3 limit)
+- **Maximum backup size**: ~48.8 GiB (5 MiB × 10,000 parts)
+
+**For Larger Databases:**
+
+If your database dump exceeds ~48 GiB, you must increase the chunk size using `RCLONE_EXTRA_ARGS`:
+
+```yaml
+backups:
+  largeDatabaseBackup:
+    enabled: true
+    type: postgres  # or mariadb
+    env:
+      # For databases up to ~600 GB
+      RCLONE_EXTRA_ARGS: "--s3-chunk-size=64M"
+     
+      # For databases up to ~1.2 TB
+      # RCLONE_EXTRA_ARGS: "--s3-chunk-size=128M"
+     
+      # For databases up to ~2.4 TB
+      # RCLONE_EXTRA_ARGS: "--s3-chunk-size=256M"
+    resources:
+      requests:
+        memory: "1Gi"  # Increase memory for larger chunks
+        cpu: "500m"
+      limits:
+        memory: "4Gi"
+        cpu: "2000m"
+```
+
+**Memory Considerations:**
+
+Larger chunk sizes require more memory. The formula for memory usage is approximately:
+```
+Memory = chunk_size × upload_concurrency × transfers
+```
+
+With default settings (`--s3-upload-concurrency=4`, `--transfers=4`):
+- 5 MiB chunks: ~80 MiB memory
+- 64 MiB chunks: ~1 GiB memory
+- 128 MiB chunks: ~2 GiB memory
+- 256 MiB chunks: ~4 GiB memory
+
+**Quick Reference Table:**
+
+| Chunk Size | Max Backup Size | Recommended Memory | Use Case |
+|------------|----------------|-------------------|----------|
+| 5 MiB (default) | ~48.8 GiB | 256 MiB | Small to medium databases |
+| 64 MiB | ~625 GiB | 1 GiB | Large databases |
+| 128 MiB | ~1.25 TiB | 2 GiB | Very large databases |
+| 256 MiB | ~2.5 TiB | 4 GiB | Enterprise databases |
+
+**Note:** This limitation only affects streaming backups (PostgreSQL, MariaDB). S3-to-S3 sync and other backup types that use file-based uploads are not affected as rclone can determine the file size in advance.
 
 ### Job History and Retry
 
