@@ -72,7 +72,7 @@
           },
           "type": {
             "type": "string",
-            "enum": ["postgres", "s3", "qdrant", "vault"],
+            "enum": ["postgres", "s3", "qdrant", "vault", "mariadb"],
             "description": "Backup type"
           },
           "image": {
