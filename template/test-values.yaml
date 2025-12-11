@@ -84,9 +84,33 @@ servicename:
   - secretRef:
       name: my-secret
   env:
-    FOO: "FOO"
-  secrets:
-    BAR: "BAR"
+    - name: "A"
+      value: "A"
+    - name: "B"
+      valueFrom:
+        configMapKeyRef:
+          name: "my-config"
+          key: "B"
+    - name: "C"
+      valueFrom:
+        secretKeyRef:
+          name: "my-secret"
+          key: "C"
+    # A: "A"
+    # B:
+    #   valueFrom:
+    #     configMapKeyRef:
+    #       name: "my-config"
+    #       key: "B"
+    # C:
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: "my-secret"
+    #       key: "C"
+  envCm:
+    D: "D"
+  envSecret:
+    E: "E"
   probes:
     healthcheck:
       path: "/healthz"

@@ -18,9 +18,10 @@ A Helm chart to deploy chartname.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| global.env | object | `{}` | Map of environment variables to inject into all containers. |
+| global.env | object | `{}` | Map or array of environment variables to inject into all containers (`valueFrom` supported). |
+| global.envCm | object | `{}` | Map of environment variables to inject into a configmap loaded by all containers (`valueFrom` not supported). |
+| global.envSecret | object | `{}` | Map of environment variables to inject into a secret loaded by all containers (`valueFrom` not supported). |
 | global.ingress | object | `{}` | Whether or not ingress should be enabled globally, it could be shared by all components that support ingress. |
-| global.secrets | object | `{}` | Map of environment variables to inject into all containers. |
 
 ### Servicename
 
@@ -33,8 +34,10 @@ A Helm chart to deploy chartname.
 | servicename.command | list | `[]` | Servicename container command. |
 | servicename.containerPort | int | `8080` | Servicename container port number. |
 | servicename.containerPortName | string | `"http"` | Servicename container port name. |
-| servicename.env | object | `{}` | Servicename container env variables, it will be injected into a configmap and loaded into the container. |
+| servicename.env | object | `{}` | Map or array of environment variables to inject into the app container (`valueFrom` supported). |
+| servicename.envCm | object | `{}` | Map of environment variables to inject into a configmap loaded by the app container (`valueFrom` not supported). |
 | servicename.envFrom | list | `[]` | Servicename container env variables loaded from configmap or secret reference. |
+| servicename.envSecret | object | `{}` | Map of environment variables to inject into a secret loaded by the app container (`valueFrom` not supported). |
 | servicename.extraContainers | list | `[]` | Extra containers to add to the app pod as sidecars. |
 | servicename.extraPorts | list | `[]` | Servicename extra container ports. |
 | servicename.hostAliases | list | `[]` | Host aliases that will be injected at pod-level into /etc/hosts. |
@@ -46,7 +49,6 @@ A Helm chart to deploy chartname.
 | servicename.podSecurityContext | object | `{}` | Toggle and define pod-level security context. |
 | servicename.replicaCount | int | `1` | The number of application controller pods to run. |
 | servicename.revisionHistoryLimit | int | `10` | Revision history limit for the app. |
-| servicename.secrets | object | `{}` | Servicename container env secrets, it will be injected into a secret and loaded into the container. |
 | servicename.securityContext | object | `{}` | Toggle and define container-level security context. |
 | servicename.statefulset | bool | `false` | Should the app run as a StatefulSet instead of a Deployment. |
 | servicename.tolerations | list | `[]` | Default tolerations for app. |

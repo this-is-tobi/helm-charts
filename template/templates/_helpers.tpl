@@ -46,20 +46,39 @@ Create image pull secret.
 
 
 {{/*
-Create container environment variables from configmap.
+Create container environment variables with tranform from map to array
+*/}}
+{{- define "helper.env.map-to-array" -}}
+{{- if kindIs "map" . }}
+  {{- range $key, $val := . }}
+- name: {{ $key }}
+    {{- if kindIs "map" $val }}
+      {{- toYaml $val | nindent 2 }}
+    {{- else }}
+  value: {{ $val | quote }}
+    {{- end }}
+  {{- end }}
+{{- else }}
+  {{- toYaml . }}
+{{- end }}
+{{- end }}
+
+
+{{/*
+Create configmap environment variables.
 */}}
 {{- define "helper.env" -}}
-{{ range $key, $val := .env }}
+{{ range $key, $val := . }}
 {{ $key }}: {{ tpl (toYaml $val) . | quote }}
 {{- end }}
 {{- end }}
 
 
 {{/*
-Create container environment variables from secret.
+Create secret environment variables.
 */}}
 {{- define "helper.secret" -}}
-{{ range $key, $val := .secrets }}
+{{ range $key, $val := . }}
 {{ $key }}: {{ tpl (toYaml $val) . | b64enc | quote }}
 {{- end }}
 {{- end }}
@@ -100,9 +119,12 @@ Define a file checksum to trigger rollout on configmap of secret change.
 {{- define "helper.checksum" -}}
 {{- $ := index . 0 }}
 {{- $path := index . 1 }}
-{{- $resourceType := include (print $.Template.BasePath $path) $ | fromYaml -}}
-{{- if $resourceType -}}
+{{- $rendered := include (print $.Template.BasePath $path) $ }}
+{{- if $rendered }}
+{{- $resourceType := $rendered | fromYaml -}}
+{{- if and $resourceType $resourceType.kind $resourceType.metadata $resourceType.metadata.name -}}
 checksum/{{ $resourceType.kind | lower }}-{{ $resourceType.metadata.name }}: {{ $resourceType.data | toYaml | sha256sum }}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
