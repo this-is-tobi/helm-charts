@@ -61,7 +61,8 @@ spec:
         {{- end }}
         {{- end }}
         ports:
-        - containerPort: {{ .Values.servicename.contrainerPort }}
+        - containerPort: {{ .Values.servicename.containerPort }}
+          name: {{ .Values.servicename.containerPortName | default "http" }}
           protocol: TCP
         {{- if .Values.servicename.extraPorts }}
           {{- toYaml .Values.servicename.extraPorts | nindent 8 }}
