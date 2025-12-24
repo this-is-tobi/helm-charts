@@ -1,24 +1,16 @@
 apiVersion: v2
 name: vso-utils
 type: application
-version: 1.1.4
-appVersion: "0.10.0"
+version: 1.1.5
+appVersion: "1.1.0"
 description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator resources - sync static secrets, generate dynamic credentials, issue PKI certificates, and configure Vault authentication.
 deprecated: false
 annotations:
   artifacthub.io/category: security
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: fixed
-      description: |
-        Fixed VaultAuth template to use method-specific configuration blocks (kubernetes, jwt, appRole, aws, gcp) 
-        instead of generic params field, matching VSO API specification. This is a BREAKING CHANGE - update your 
-        values to use typed auth configs, e.g., `kubernetes: { role, serviceAccount, audiences }` instead of 
-        `params: { role, serviceAccount, audiences }`.
     - kind: changed
-      description: Updated JSON schema to reflect proper VaultAuth structure with typed auth method configurations
-    - kind: changed
-      description: Updated test-values.yaml to demonstrate correct VaultAuth configuration structure
+      description: Upgraded vault-secrets-operator dependency to 1.1.0
 keywords:
 - vault
 - secrets
@@ -32,7 +24,7 @@ keywords:
 dependencies:
 - name: vault-secrets-operator
   alias: vso
-  version: ">=0.10.0"
+  version: ">=1.0.0"
   repository: https://helm.releases.hashicorp.com
   condition: vso.enabled
 sources:
