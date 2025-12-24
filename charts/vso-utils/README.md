@@ -1,6 +1,6 @@
 # vso-utils
 
-![Version: 1.1.4](https://img.shields.io/badge/Version-1.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.10.0](https://img.shields.io/badge/AppVersion-0.10.0-informational?style=flat-square)
+![Version: 1.1.5](https://img.shields.io/badge/Version-1.1.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.1.0](https://img.shields.io/badge/AppVersion-1.1.0-informational?style=flat-square)
 
 Production-ready Helm chart for managing HashiCorp Vault Secret Operator resources - sync static secrets, generate dynamic credentials, issue PKI certificates, and configure Vault authentication.
 
@@ -8,7 +8,7 @@ Production-ready Helm chart for managing HashiCorp Vault Secret Operator resourc
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://helm.releases.hashicorp.com | vso(vault-secrets-operator) | >=0.10.0 |
+| https://helm.releases.hashicorp.com | vso(vault-secrets-operator) | >=1.0.0 |
 
 ## Overview
 
@@ -50,7 +50,7 @@ helm install <release_name> tobi/vso-utils
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/vso-utils --version 1.1.4
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/vso-utils --version 1.1.5
 ```
 
 ### ArgoCD
@@ -66,7 +66,7 @@ spec:
   sources:
   - repoURL: https://this-is-tobi.github.io/helm-charts
     chart: vso-utils
-    targetRevision: 1.1.4
+    targetRevision: 1.1.5
     helm:
       releaseName: <release_name>
       values: |
@@ -93,7 +93,7 @@ spec:
   sources:
   - repoURL: ghcr.io/this-is-tobi/helm-charts
     chart: vso-utils
-    targetRevision: 1.1.4
+    targetRevision: 1.1.5
     helm:
       releaseName: <release_name>
       values: |
@@ -116,7 +116,7 @@ spec:
 # Chart.yaml
 dependencies:
 - name: vso-utils
-  version: 1.1.4
+  version: 1.1.5
   repository: https://this-is-tobi.github.io/helm-charts
   condition: vso-utils.enabled
 ```
@@ -126,7 +126,7 @@ dependencies:
 # Chart.yaml
 dependencies:
 - name: vso-utils
-  version: 1.1.4
+  version: 1.1.5
   repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: vso-utils.enabled
 ```
