@@ -1,8 +1,8 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 1.5.2
-appVersion: "1.27.1"
+version: 1.5.3
+appVersion: "1.28.0"
 description: A Helm Chart to deploy easily a CNPG cluster
 home: https://cloudnative-pg.io
 deprecated: false
@@ -11,7 +11,7 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: changed
-      description: Simplified and streamlined README documentation for better readability
+      description: Upgraded cloudnative-pg dependency to 0.27.0
 keywords:
 - postgresql
 - postgres
@@ -26,7 +26,7 @@ keywords:
 dependencies:
 - name: cloudnative-pg
   alias: cnpg-operator
-  version: ">=0.20.0"
+  version: ">=0.23.0"
   repository: https://cloudnative-pg.github.io/charts
   condition: cnpg-operator.enabled
 sources:
