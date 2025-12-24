@@ -8,6 +8,54 @@ global:
     GLOBAL_FOO: "GLOBAL_FOO"
   secrets:
     GLOBAL_BAR: "GLOBAL_BAR"
+  # Gateway API test configuration
+  gateway:
+    create: true
+    name: "test-gateway"
+    className: "nginx"
+    annotations:
+      gateway/test: "true"
+    labels:
+      gateway/test: "true"
+    listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      hostname: "*.example.com"
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      port: 443
+      protocol: HTTPS
+      hostname: "*.example.com"
+      tls:
+        mode: Terminate
+        certificateRefs:
+        - kind: Secret
+          name: example-com-tls
+      allowedRoutes:
+        namespaces:
+          from: Same
+  httpRoute:
+    enabled: true
+    annotations:
+      httproute/test: "true"
+    labels:
+      httproute/test: "true"
+    parentRefs:
+    - name: test-gateway
+      sectionName: https
+    hostnames:
+    - "api.example.com"
+    rules:
+    - matches:
+      - path:
+          type: PathPrefix
+          value: "/"
+      backendRefs:
+      - name: chart-test-servicename
+        port: 80
 
 
 # App configuration.
@@ -42,6 +90,60 @@ servicename:
     - secretName: domain.local-tls
       hosts:
       - domain.local
+  # Gateway API HTTPRoute test configuration
+  httpRoute:
+    enabled: true
+    annotations:
+      httproute/servicename: "true"
+    labels:
+      httproute/servicename: "true"
+    parentRefs:
+    - name: test-gateway
+      sectionName: https
+    hostnames:
+    - "app.example.com"
+    rules:
+    - matches:
+      - path:
+          type: PathPrefix
+          value: "/app"
+        headers:
+        - type: Exact
+          name: "x-version"
+          value: "v1"
+      filters:
+      - type: RequestHeaderModifier
+        requestHeaderModifier:
+          add:
+          - name: "x-forwarded-app"
+            value: "servicename"
+      backendRefs:
+      - port: 80
+        weight: 100
+    - matches:
+      - path:
+          type: PathPrefix
+          value: "/api"
+  # Gateway API GRPCRoute test configuration
+  grpcRoute:
+    enabled: true
+    annotations:
+      grpcroute/servicename: "true"
+    labels:
+      grpcroute/servicename: "true"
+    parentRefs:
+    - name: test-gateway
+      sectionName: https
+    hostnames:
+    - "grpc.example.com"
+    rules:
+    - matches:
+      - method:
+          type: Exact
+          service: "mypackage.MyService"
+          method: "MyMethod"
+      backendRefs:
+      - port: 50051
   podAnnotations:
     pod/foo: "bar"
   podLabels:

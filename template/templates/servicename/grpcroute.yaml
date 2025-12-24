@@ -1,0 +1,107 @@
+{{- if .Values.servicename.grpcRoute.enabled -}}
+{{- $fullNameApp := printf "%s-%s" (include "helper.fullname" .) "servicename" -}}
+{{- $svcPortApp := .Values.servicename.service.port -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: GRPCRoute
+metadata:
+  name: {{ printf "%s-%s" (include "helper.fullname" .) "servicename" }}
+  labels: {{- (include "helper.labels" (dict "root" . "componentName" "servicename")) | nindent 4 }}
+  {{- if .Values.servicename.grpcRoute.labels }}
+    {{- toYaml .Values.servicename.grpcRoute.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.servicename.grpcRoute.annotations }}
+  annotations:
+    {{- tpl (toYaml .Values.servicename.grpcRoute.annotations) . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.servicename.grpcRoute.parentRefs }}
+  parentRefs:
+  {{- range .Values.servicename.grpcRoute.parentRefs }}
+  - name: {{ .name }}
+    {{- if .namespace }}
+    namespace: {{ .namespace }}
+    {{- end }}
+    {{- if .sectionName }}
+    sectionName: {{ .sectionName }}
+    {{- end }}
+    {{- if .port }}
+    port: {{ .port }}
+    {{- end }}
+    {{- if .group }}
+    group: {{ .group }}
+    {{- end }}
+    {{- if .kind }}
+    kind: {{ .kind }}
+    {{- end }}
+  {{- end }}
+  {{- end }}
+  {{- if .Values.servicename.grpcRoute.hostnames }}
+  hostnames:
+  {{- range .Values.servicename.grpcRoute.hostnames }}
+  - {{ . | quote }}
+  {{- end }}
+  {{- end }}
+  {{- if .Values.servicename.grpcRoute.rules }}
+  rules:
+  {{- range .Values.servicename.grpcRoute.rules }}
+  {{- if .matches }}
+  - matches:
+    {{- range .matches }}
+    {{- if .method }}
+    - method:
+        {{- if .method.type }}
+        type: {{ .method.type }}
+        {{- end }}
+        {{- if .method.service }}
+        service: {{ .method.service }}
+        {{- end }}
+        {{- if .method.method }}
+        method: {{ .method.method }}
+        {{- end }}
+    {{- end }}
+      {{- if .headers }}
+      headers:
+      {{- range .headers }}
+      - type: {{ .type | default "Exact" }}
+        name: {{ .name }}
+        value: {{ .value }}
+      {{- end }}
+      {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- if .filters }}
+    filters:
+    {{- toYaml .filters | nindent 4 }}
+    {{- end }}
+    {{- if .backendRefs }}
+    backendRefs:
+    {{- range .backendRefs }}
+    - name: {{ .name | default $fullNameApp }}
+      port: {{ .port | default $svcPortApp }}
+      {{- if .weight }}
+      weight: {{ .weight }}
+      {{- end }}
+      {{- if .group }}
+      group: {{ .group }}
+      {{- end }}
+      {{- if .kind }}
+      kind: {{ .kind }}
+      {{- end }}
+      {{- if .namespace }}
+      namespace: {{ .namespace }}
+      {{- end }}
+    {{- end }}
+    {{- else }}
+    backendRefs:
+    - name: {{ $fullNameApp }}
+      port: {{ $svcPortApp }}
+    {{- end }}
+  {{- end }}
+  {{- else }}
+  {{/* Default rule when no rules specified - routes all gRPC traffic */}}
+  rules:
+  - backendRefs:
+    - name: {{ $fullNameApp }}
+      port: {{ $svcPortApp }}
+  {{- end }}
+{{- end }}

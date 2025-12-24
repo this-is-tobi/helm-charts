@@ -21,7 +21,22 @@ A Helm chart to deploy chartname.
 | global.env | object | `{}` | Map or array of environment variables to inject into all containers (`valueFrom` supported). |
 | global.envCm | object | `{}` | Map of environment variables to inject into a configmap loaded by all containers (`valueFrom` not supported). |
 | global.envSecret | object | `{}` | Map of environment variables to inject into a secret loaded by all containers (`valueFrom` not supported). |
-| global.ingress | object | `{}` | Whether or not ingress should be enabled globally, it could be shared by all components that support ingress. |
+| global.httpRoute | object | `{}` | Globally shared httproute configuration. |
+| global.ingress | object | `{}` | Globally shared ingress configuration. |
+
+### Gateway
+
+#### General
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| gateway.addresses | list | `[]` | Gateway addresses configuration. |
+| gateway.annotations | object | `{}` | Additional gateway annotations. |
+| gateway.className | string | `""` | GatewayClass name. Required when creating a Gateway. |
+| gateway.create | bool | `false` | Create a Gateway resource. Usually, you reference an existing Gateway managed by the infrastructure team. |
+| gateway.labels | object | `{}` | Additional gateway labels. |
+| gateway.listeners | list | `[]` | Gateway listeners configuration. |
+| gateway.name | string | `""` | Name of the Gateway resource. If not set, uses the release fullname. |
 
 ### Servicename
 
@@ -65,6 +80,28 @@ A Helm chart to deploy chartname.
 | servicename.autoscaling.minReplicas | int | `1` | Minimum number of replicas for the app. |
 | servicename.autoscaling.targetCPUUtilizationPercentage | int | `80` | Average CPU utilization percentage for the app. |
 | servicename.autoscaling.targetMemoryUtilizationPercentage | int | `80` | Average memory utilization percentage for the app. |
+
+#### GrpcRoute
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| servicename.grpcRoute.annotations | object | `{}` | Additional GRPCRoute annotations. |
+| servicename.grpcRoute.enabled | bool | `false` | Enable a GRPCRoute resource for this service. |
+| servicename.grpcRoute.hostnames | list | `[]` | Hostnames for the GRPCRoute to match. |
+| servicename.grpcRoute.labels | object | `{}` | Additional GRPCRoute labels. |
+| servicename.grpcRoute.parentRefs | list | `[]` | Parent references (Gateways) to attach the GRPCRoute to. |
+| servicename.grpcRoute.rules | list | `[]` | Routing rules for the GRPCRoute. |
+
+#### HttpRoute
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| servicename.httpRoute.annotations | object | `{}` | Additional HTTPRoute annotations. |
+| servicename.httpRoute.enabled | bool | `false` | Enable an HTTPRoute resource for this service. |
+| servicename.httpRoute.hostnames | list | `[]` | Hostnames for the HTTPRoute to match. |
+| servicename.httpRoute.labels | object | `{}` | Additional HTTPRoute labels. |
+| servicename.httpRoute.parentRefs | list | `[]` | Parent references (Gateways) to attach the HTTPRoute to. |
+| servicename.httpRoute.rules | list | `[]` | Routing rules for the HTTPRoute. |
 
 #### Image
 

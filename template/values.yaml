@@ -42,7 +42,7 @@ global:
   # @section -- Global
   envSecret: {}
     # E: "E"
-  # -- Whether or not ingress should be enabled globally, it could be shared by all components that support ingress.
+  # -- Globally shared ingress configuration.
   # @section -- Global
   ingress: {}
     # enabled: false
@@ -60,6 +60,100 @@ global:
     # - secretName: domain.local-tls
     #   hosts:
     #   - domain.local
+  # -- Globally shared httproute configuration.
+  # @section -- Global
+  httpRoute: {}
+    # enabled: false
+    # annotations: {}
+    # labels: {}
+    # parentRefs: []
+    # - name: my-gateway
+    #   namespace: gateway-namespace
+    #   sectionName: https
+    # hostnames: []
+    # - "example.com"
+    # - "*.example.com"
+    # rules: []
+    # - matches:
+    #   - path:
+    #       type: PathPrefix
+    #       value: "/"
+    #     headers:
+    #     - type: Exact
+    #       name: "x-version"
+    #       value: "v1"
+    #     queryParams:
+    #     - type: Exact
+    #       name: "debug"
+    #       value: "true"
+    #     method: GET
+    #   filters:
+    #   - type: RequestHeaderModifier
+    #     requestHeaderModifier:
+    #       add:
+    #       - name: "x-custom-header"
+    #         value: "my-value"
+    #   - type: RequestRedirect
+    #     requestRedirect:
+    #       scheme: https
+    #       port: 443
+    #   backendRefs:
+    #   - name: my-service
+    #     port: 80
+    #     weight: 100
+    #   hosts:
+    #   - domain.local
+
+
+## Gateway API configuration (alternative to Ingress)
+## Ref: https://gateway-api.sigs.k8s.io/
+gateway:
+  # -- Create a Gateway resource. Usually, you reference an existing Gateway managed by the infrastructure team.
+  # @section -- Global
+  create: false
+  # -- Name of the Gateway resource. If not set, uses the release fullname.
+  # @section -- Global
+  name: ""
+  # -- GatewayClass name. Required when creating a Gateway.
+  # @section -- Global
+  className: ""
+  # -- Additional gateway annotations.
+  # @section -- Global
+  annotations: {}
+  # -- Additional gateway labels.
+  # @section -- Global
+  labels: {}
+  # -- Gateway addresses configuration.
+  # @section -- Global
+  addresses: []
+  # - type: IPAddress
+  #   value: "192.168.1.100"
+  # - type: Hostname
+  #   value: "gateway.example.com"
+  # -- Gateway listeners configuration.
+  # @section -- Global
+  listeners: []
+  # - name: http
+  #   port: 80
+  #   protocol: HTTP
+  #   hostname: "*.example.com"
+  #   allowedRoutes:
+  #     namespaces:
+  #       from: Same  # Same, All, or Selector
+  #     kinds:
+  #     - kind: HTTPRoute
+  # - name: https
+  #   port: 443
+  #   protocol: HTTPS
+  #   hostname: "*.example.com"
+  #   tls:
+  #     mode: Terminate  # Terminate or Passthrough
+  #     certificateRefs:
+  #     - kind: Secret
+  #       name: example-com-tls
+  #   allowedRoutes:
+  #     namespaces:
+  #       from: Same
 
 
 servicename:
@@ -116,6 +210,89 @@ servicename:
     # - secretName: domain.local-tls
     #   hosts:
     #   - domain.local
+  ## Gateway API HTTPRoute configuration (alternative to Ingress)
+  ## Ref: https://gateway-api.sigs.k8s.io/api-types/httproute/
+  httpRoute:
+    # -- Enable an HTTPRoute resource for this service.
+    # @section -- Servicename
+    enabled: false
+    # -- Additional HTTPRoute annotations.
+    # @section -- Servicename
+    annotations: {}
+    # -- Additional HTTPRoute labels.
+    # @section -- Servicename
+    labels: {}
+    # -- Parent references (Gateways) to attach the HTTPRoute to.
+    # @section -- Servicename
+    parentRefs: []
+    # - name: my-gateway
+    #   namespace: gateway-namespace  # optional
+    #   sectionName: https            # optional, specific listener name
+    # -- Hostnames for the HTTPRoute to match.
+    # @section -- Servicename
+    hostnames: []
+    # - "example.com"
+    # - "api.example.com"
+    # -- Routing rules for the HTTPRoute.
+    # @section -- Servicename
+    rules: []
+    # - matches:
+    #   - path:
+    #       type: PathPrefix     # PathPrefix, Exact, or RegularExpression
+    #       value: "/"
+    #     headers:
+    #     - type: Exact
+    #       name: "x-version"
+    #       value: "v1"
+    #     method: GET
+    #   filters:
+    #   - type: RequestHeaderModifier
+    #     requestHeaderModifier:
+    #       add:
+    #       - name: "x-custom-header"
+    #         value: "my-value"
+    #   backendRefs:
+    #   - name: my-service       # defaults to chart service if not set
+    #     port: 80               # defaults to service port if not set
+    #     weight: 100            # for traffic splitting
+  ## Gateway API GRPCRoute configuration (for gRPC services)
+  ## Ref: https://gateway-api.sigs.k8s.io/api-types/grpcroute/
+  grpcRoute:
+    # -- Enable a GRPCRoute resource for this service.
+    # @section -- Servicename
+    enabled: false
+    # -- Additional GRPCRoute annotations.
+    # @section -- Servicename
+    annotations: {}
+    # -- Additional GRPCRoute labels.
+    # @section -- Servicename
+    labels: {}
+    # -- Parent references (Gateways) to attach the GRPCRoute to.
+    # @section -- Servicename
+    parentRefs: []
+    # - name: my-gateway
+    #   namespace: gateway-namespace
+    #   sectionName: grpc
+    # -- Hostnames for the GRPCRoute to match.
+    # @section -- Servicename
+    hostnames: []
+    # - "grpc.example.com"
+    # -- Routing rules for the GRPCRoute.
+    # @section -- Servicename
+    rules: []
+    # - matches:
+    #   - method:
+    #       type: Exact          # Exact or RegularExpression
+    #       service: "mypackage.MyService"
+    #       method: "MyMethod"
+    #     headers:
+    #     - type: Exact
+    #       name: "x-version"
+    #       value: "v1"
+    #   backendRefs:
+    #   - name: my-grpc-service
+    #     port: 50051
+    #     weight: 100
   # -- Annotations for the app deployed pods.
   # @section -- Servicename
   podAnnotations: {}
