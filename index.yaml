@@ -5,6 +5,42 @@ entries:
       artifacthub.io/category: storage
       artifacthub.io/changes: |
         - kind: changed
+          description: Upgrade backup image to v1.1.3
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.1.3
+    created: "2026-01-08T22:40:02.95992982Z"
+    description: Production-ready Helm chart for automated backups of PostgreSQL,
+      MariaDB, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable
+      schedules and retention policies.
+    digest: 3fcb2ec60a728b264f69448fe607da0926eaa8fb3fa3a2fdf7a06ce34f360f8f
+    keywords:
+    - backup
+    - postgresql
+    - vault
+    - qdrant
+    - s3
+    - rclone
+    - cronjob
+    - kubernetes
+    - database
+    - snapshots
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: backup-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/this-is-tobi/tools
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-2.3.4/backup-utils-2.3.4.tgz
+    version: 2.3.4
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/changes: |
+        - kind: changed
           description: Upgrade backup image to v1.1.2
       artifacthub.io/license: MIT
     apiVersion: v2
@@ -2630,4 +2666,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2025-12-24T21:27:17.898525351Z"
+generated: "2026-01-08T22:40:02.960335978Z"
