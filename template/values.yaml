@@ -22,7 +22,7 @@ global:
     #       name: "my-secret"
     #       key: "C"
     #
-    # - name: "A" 
+    # - name: "A"
     #   value: "A"
     # - name: "B"
     #   valueFrom:
@@ -42,6 +42,10 @@ global:
   # @section -- Global
   envSecret: {}
     # E: "E"
+
+  # -- Global Docker image registry
+  # @section -- Global
+  imageRegistry: ""
   # -- Globally shared ingress configuration.
   # @section -- Global
   ingress: {}
@@ -164,9 +168,12 @@ servicename:
   # @section -- Servicename
   replicaCount: 1
   image:
+    # -- Registry to use for the app.
+    # @section -- Servicename
+    registry: "docker.io"
     # -- Repository to use for the app.
     # @section -- Servicename
-    repository: "docker.io/debian"
+    repository: "debian"
     # -- Image pull policy for the app.
     # @section -- Servicename
     pullPolicy: "IfNotPresent"
@@ -372,7 +379,7 @@ servicename:
     #       name: "my-secret"
     #       key: "C"
     #
-    # - name: "A" 
+    # - name: "A"
     #   value: "A"
     # - name: "B"
     #   valueFrom:
@@ -558,7 +565,7 @@ servicename:
     extraPorts: []
     # - port: 9090
     #   targetPort: 9090
-    #   protocol: "TCP" 
+    #   protocol: "TCP"
     #   name: "metrics"
   resources:
     requests:

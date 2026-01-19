@@ -22,6 +22,7 @@ A Helm chart to deploy chartname.
 | global.envCm | object | `{}` | Map of environment variables to inject into a configmap loaded by all containers (`valueFrom` not supported). |
 | global.envSecret | object | `{}` | Map of environment variables to inject into a secret loaded by all containers (`valueFrom` not supported). |
 | global.httpRoute | object | `{}` | Globally shared httproute configuration. |
+| global.imageRegistry | string | `""` | Global Docker image registry |
 | global.ingress | object | `{}` | Globally shared ingress configuration. |
 
 ### Gateway
@@ -108,7 +109,8 @@ A Helm chart to deploy chartname.
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | servicename.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the app. |
-| servicename.image.repository | string | `"docker.io/debian"` | Repository to use for the app. |
+| servicename.image.registry | string | `"docker.io"` | Registry to use for the app. |
+| servicename.image.repository | string | `"debian"` | Repository to use for the app. |
 | servicename.image.tag | string | `""` | Tag to use for the app. Overrides the image tag whose default is the chart appVersion. |
 
 #### Ingress
