@@ -5,6 +5,9 @@ nameOverride: ""
 # @section -- General
 fullnameOverride: ""
 
+# -- Add labels to all the deployed resources
+# @section -- General
+commonLabels: {}
 
 global:
   # -- Map or array of environment variables to inject into all containers (`valueFrom` supported).
@@ -107,7 +110,6 @@ global:
     #     weight: 100
     #   hosts:
     #   - domain.local
-
 
 ## Gateway API configuration (alternative to Ingress)
 ## Ref: https://gateway-api.sigs.k8s.io/

@@ -10,6 +10,7 @@ A Helm chart to deploy chartname.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| commonLabels | object | `{}` | Add labels to all the deployed resources |
 | extraObjects | list | `[]` | Add extra specs dynamically to this chart. |
 | fullnameOverride | string | `""` | String to fully override the default application name. |
 | nameOverride | string | `""` | Provide a name in place of the default application name. |
