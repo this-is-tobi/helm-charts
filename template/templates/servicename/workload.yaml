@@ -1,0 +1,144 @@
+{{- $workload := .Values.servicename.workload.type | default "deployment" }}
+
+apiVersion: apps/v1
+kind: {{ if eq $workload "daemonset" }}DaemonSet{{- else if eq $workload "statefulset" }}StatefulSet{{- else }}Deployment{{- end }}
+metadata:
+  name: {{ printf "%s-%s" (include "helper.fullname" .) "servicename" }}
+  labels:
+    {{- include "helper.labels" (dict "root" . "componentName" "servicename") | nindent 4 }}
+
+spec:
+  {{- if eq $workload "deployment" }}
+  {{- if not .Values.servicename.autoscaling.enabled }}
+  replicas: {{ .Values.servicename.replicaCount }}
+  {{- end }}
+  revisionHistoryLimit: {{ .Values.servicename.revisionHistoryLimit | default 10 }}
+  strategy:
+    type: {{ .Values.servicename.strategy.type }}
+    {{- if eq .Values.servicename.strategy.type "RollingUpdate" }}
+    rollingUpdate:
+      maxUnavailable: {{ .Values.servicename.strategy.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ .Values.servicename.strategy.rollingUpdate.maxSurge }}
+    {{- end }}
+  {{- end }}
+
+  {{- if eq $workload "daemonset" }}
+  updateStrategy:
+    type: {{ .Values.servicename.updateStrategy.type | default "RollingUpdate" }}
+    {{- if eq (.Values.servicename.updateStrategy.type | default "RollingUpdate") "RollingUpdate" }}
+    rollingUpdate:
+      maxUnavailable: {{ .Values.servicename.updateStrategy.rollingUpdate.maxUnavailable | default 1 }}
+    {{- end }}
+  {{- end }}
+
+  {{- if eq $workload "statefulset" }}
+  serviceName: {{ printf "%s-%s" (include "helper.fullname" .) "servicename" | trunc 63 | trimSuffix "-" }}
+  replicas: {{ .Values.servicename.replicaCount }}
+  updateStrategy:
+    type: {{ .Values.servicename.updateStrategy.type | default "RollingUpdate" }}
+  {{- end }}
+
+  selector:
+    matchLabels:
+      {{- include "helper.selectorLabels" (dict "root" . "componentName" "servicename") | nindent 6 }}
+
+  template:
+    metadata:
+      annotations:
+        {{- include "helper.checksum" (list $ "/servicename/configmap.yaml") | nindent 8 }}
+        {{- include "helper.checksum" (list $ "/servicename/secret.yaml") | nindent 8 }}
+        {{- with .Values.servicename.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "helper.labels" (dict "root" . "componentName" "servicename") | nindent 8 }}
+        {{- with .Values.servicename.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+
+    spec:
+      {{- with .Values.servicename.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- if .Values.servicename.serviceAccount.enabled }}
+      serviceAccountName: {{ .Values.servicename.serviceAccount.name | default (printf "%s-%s" (include "helper.fullname" .) "servicename") }}
+      {{- end }}
+
+      {{- with .Values.servicename.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.servicename.initContainers }}
+      initContainers:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+
+      containers:
+        - name: servicename
+          image: "{{ .Values.global.imageRegistry | default .Values.servicename.image.registry }}/{{ .Values.servicename.image.repository }}:{{ .Values.servicename.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.servicename.image.pullPolicy }}
+
+          {{- with .Values.servicename.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          {{- with .Values.servicename.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          {{- with .Values.servicename.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          ports:
+            - name: {{ .Values.servicename.containerPortName | default "http" }}
+              containerPort: {{ .Values.servicename.containerPort }}
+              protocol: TCP
+            {{- with .Values.servicename.extraPorts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+
+          {{- with .Values.servicename.env }}
+          env:
+            {{- include "helper.env.map-to-array" . | nindent 12 }}
+          {{- end }}
+
+          {{- with .Values.servicename.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          {{- with .Values.servicename.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+      {{- with .Values.servicename.extraContainers }}
+      {{- tpl (toYaml .) $ | nindent 6 }}
+      {{- end }}
+
+      {{- with .Values.servicename.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.servicename.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.servicename.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.servicename.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

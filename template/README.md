@@ -67,11 +67,11 @@ A Helm chart to deploy chartname.
 | servicename.replicaCount | int | `1` | The number of application controller pods to run. |
 | servicename.revisionHistoryLimit | int | `10` | Revision history limit for the app. |
 | servicename.securityContext | object | `{}` | Toggle and define container-level security context. |
-| servicename.statefulset | bool | `false` | Should the app run as a StatefulSet instead of a Deployment. |
 | servicename.tolerations | list | `[]` | Default tolerations for app. |
 | servicename.volumeClaims | list | `[]` | List of volumeClaims to add. |
 | servicename.volumeMounts | list | `[]` | List of mounts to add (normally used with `volumes` or `volumeClaims`). |
 | servicename.volumes | list | `[]` | List of volumes to add. |
+| servicename.workload | object | `{"type":"deployment"}` | Should the app run as a Deployment, StatefulSet or DaemonSet. |
 
 #### Autoscaling
 
@@ -241,6 +241,14 @@ A Helm chart to deploy chartname.
 | servicename.strategy.rollingUpdate.maxSurge | int | `1` | The maximum number of pods that can be scheduled above the desired number of pods. |
 | servicename.strategy.rollingUpdate.maxUnavailable | int | `1` | The maximum number of pods that can be unavailable during the update process. |
 | servicename.strategy.type | string | `"RollingUpdate"` | Strategy type used to replace old Pods by new ones, can be `Recreate` or `RollingUpdate`. |
+
+#### UpdateStrategy
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| servicename.updateStrategy.rollingUpdate.maxSurge | int | `1` | The maximum number of pods that can be scheduled above the desired number of pods. |
+| servicename.updateStrategy.rollingUpdate.maxUnavailable | int | `1` | The maximum number of pods that can be unavailable during the update process. |
+| servicename.updateStrategy.type | string | `"RollingUpdate"` | UpdateStrategy type used to replace old Pods by new ones, can be `OnDelete` or `RollingUpdate`. |
 
 ## Sources
 
