@@ -5,6 +5,42 @@ entries:
       artifacthub.io/category: storage
       artifacthub.io/changes: |
         - kind: changed
+          description: Upgrade backup image to v1.1.4
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.1.4
+    created: "2026-02-01T21:30:32.593968978Z"
+    description: Production-ready Helm chart for automated backups of PostgreSQL,
+      MariaDB, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable
+      schedules and retention policies.
+    digest: 775a87fd1c24fdc8e773ed41b01b1aff04315db5139726c7d2bf8cbd15a625ca
+    keywords:
+    - backup
+    - postgresql
+    - vault
+    - qdrant
+    - s3
+    - rclone
+    - cronjob
+    - kubernetes
+    - database
+    - snapshots
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: backup-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/this-is-tobi/tools
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-2.3.5/backup-utils-2.3.5.tgz
+    version: 2.3.5
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/changes: |
+        - kind: changed
           description: Upgrade backup image to v1.1.3
       artifacthub.io/license: MIT
     apiVersion: v2
@@ -2319,6 +2355,49 @@ entries:
       artifacthub.io/category: security
       artifacthub.io/changes: |
         - kind: changed
+          description: Upgraded vault-secrets-operator dependency to 1.2.0
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.2.0
+    created: "2026-02-01T21:30:32.721324918Z"
+    dependencies:
+    - alias: vso
+      condition: vso.enabled
+      name: vault-secrets-operator
+      repository: https://helm.releases.hashicorp.com
+      version: '>=1.0.0'
+    description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator
+      resources - sync static secrets, generate dynamic credentials, issue PKI certificates,
+      and configure Vault authentication.
+    digest: 4b2a69a1daf713634b07b56230ad3b30429d4fad0be70400eac30da30666a46a
+    keywords:
+    - vault
+    - secrets
+    - hashicorp
+    - vso
+    - vault-secrets-operator
+    - kubernetes
+    - security
+    - pki
+    - dynamic-secrets
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: vso-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator
+    - https://developer.hashicorp.com/vault/docs/platform/k8s/vso
+    - https://github.com/hashicorp/vault-secrets-operator
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-1.1.6/vso-utils-1.1.6.tgz
+    version: 1.1.6
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |
+        - kind: changed
           description: Upgraded vault-secrets-operator dependency to 1.1.0
       artifacthub.io/license: MIT
     apiVersion: v2
@@ -2666,4 +2745,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-01-08T22:40:02.960335978Z"
+generated: "2026-02-01T21:30:32.721690535Z"
