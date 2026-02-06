@@ -1,6 +1,5 @@
 {{- if .Values.global.httpRoute.enabled -}}
 {{- $fullNameApp := printf "%s-%s" (include "helper.fullname" .) "global" -}}
-{{- $svcPortApp := .Values.servicename.service.port -}}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -81,7 +80,7 @@ spec:
     backendRefs:
     {{- range .backendRefs }}
     - name: {{ .name | default $fullNameApp }}
-      port: {{ .port | default $svcPortApp }}
+      port: {{ .port | default 80 }}
       {{- if .weight }}
       weight: {{ .weight }}
       {{- end }}
@@ -98,7 +97,7 @@ spec:
     {{- else }}
     backendRefs:
     - name: {{ $fullNameApp }}
-      port: {{ $svcPortApp }}
+      port: 80
     {{- end }}
   {{- end }}
   {{- else }}
@@ -110,6 +109,6 @@ spec:
         value: "/"
     backendRefs:
     - name: {{ $fullNameApp }}
-      port: {{ $svcPortApp }}
+      port: 80
   {{- end }}
 {{- end }}

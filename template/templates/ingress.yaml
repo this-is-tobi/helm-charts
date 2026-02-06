@@ -1,6 +1,5 @@
 {{- if .Values.global.ingress.enabled -}}
 {{- $fullNameApp := printf "%s-%s" (include "helper.fullname" .) "global" -}}
-{{- $svcPortApp := .Values.servicename.service.port -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -39,7 +38,7 @@ spec:
           {{- if .backend }}
             name: {{ .backend.serviceName | default $fullNameApp }}
             port:
-              number: {{ .backend.portNumber | default $svcPortApp }}
+              number: {{ .backend.portNumber | default 80 }}
           {{- else }}
             name: {{ $fullNameApp }}
             port:
