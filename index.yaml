@@ -5,6 +5,42 @@ entries:
       artifacthub.io/category: storage
       artifacthub.io/changes: |
         - kind: changed
+          description: Upgrade backup image to v1.1.5
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.1.5
+    created: "2026-02-12T10:28:30.702426179Z"
+    description: Production-ready Helm chart for automated backups of PostgreSQL,
+      MariaDB, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable
+      schedules and retention policies.
+    digest: 31177206f03338757d1fbcecbf1a6d6526d348addf1fe035102c15f7247de9f6
+    keywords:
+    - backup
+    - postgresql
+    - vault
+    - qdrant
+    - s3
+    - rclone
+    - cronjob
+    - kubernetes
+    - database
+    - snapshots
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: backup-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/this-is-tobi/tools
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-2.3.6/backup-utils-2.3.6.tgz
+    version: 2.3.6
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/changes: |
+        - kind: changed
           description: Upgrade backup image to v1.1.4
       artifacthub.io/license: MIT
     apiVersion: v2
@@ -871,6 +907,47 @@ entries:
     - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-0.1.0/backup-utils-0.1.0.tgz
     version: 0.1.0
   cnpg-cluster:
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |
+        - kind: changed
+          description: Upgraded cloudnative-pg dependency to 0.27.1
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.28.1
+    created: "2026-02-12T10:28:30.897230322Z"
+    dependencies:
+    - alias: cnpg-operator
+      condition: cnpg-operator.enabled
+      name: cloudnative-pg
+      repository: https://cloudnative-pg.github.io/charts
+      version: '>=0.23.0'
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: 8814ca9e18a1a981576aeea02d758aa30756ed8ffdedec9551a4585a98a1e3c8
+    home: https://cloudnative-pg.io
+    keywords:
+    - postgresql
+    - postgres
+    - cnpg
+    - cloudnative-pg
+    - database
+    - operator
+    - high-availability
+    - backup
+    - replication
+    - kubernetes
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-1.5.4/cnpg-cluster-1.5.4.tgz
+    version: 1.5.4
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |
@@ -2745,4 +2822,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-02-01T21:30:32.721690535Z"
+generated: "2026-02-12T10:28:30.897672056Z"
