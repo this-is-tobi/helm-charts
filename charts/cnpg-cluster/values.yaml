@@ -416,6 +416,9 @@ monitoring:
     # -- Additional match labels for the podMonitor
     # @section -- Monitoring
     extraMatchLabels: {}
+# -- Additional specifications to add to the cnpg cluster manifest (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-Cluster). This allows you to replace any default configuration of the chart and add new configurations that are not yet supported (for example, when a new version of the CNPG is released with new features that are not yet supported).
+# @section -- Database
+extraSpec: {}
 
 
 # CNPG operator configuration
