@@ -910,6 +910,47 @@ entries:
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |
+        - kind: added
+          description: Added `extraSpec` field to allow additional specifications in the CNPG cluster manifest.
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.28.1
+    created: "2026-03-11T00:09:14.983015681Z"
+    dependencies:
+    - alias: cnpg-operator
+      condition: cnpg-operator.enabled
+      name: cloudnative-pg
+      repository: https://cloudnative-pg.github.io/charts
+      version: '>=0.23.0'
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: 43f0d87640e6e770ef85d8bebdfefbd94a1c9a7f0b357be2ce13a5ceeff9cf87
+    home: https://cloudnative-pg.io
+    keywords:
+    - postgresql
+    - postgres
+    - cnpg
+    - cloudnative-pg
+    - database
+    - operator
+    - high-availability
+    - backup
+    - replication
+    - kubernetes
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-1.6.0/cnpg-cluster-1.6.0.tgz
+    version: 1.6.0
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |
         - kind: changed
           description: Upgraded cloudnative-pg dependency to 0.27.1
       artifacthub.io/license: MIT
@@ -2822,4 +2863,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-02-12T10:28:30.897672056Z"
+generated: "2026-03-11T00:09:14.983355241Z"
