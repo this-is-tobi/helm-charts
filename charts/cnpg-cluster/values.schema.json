@@ -300,6 +300,11 @@
           "enum": ["rw", "ro"]
         }
       }
+    },
+    "extraSpec": {
+      "type": "object",
+      "description": "Additional specifications to add to the cnpg cluster manifest (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-Cluster)",
+      "additionalProperties": true
     }
   }
 }

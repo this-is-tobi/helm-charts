@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 1.5.4](https://img.shields.io/badge/Version-1.5.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.28.1](https://img.shields.io/badge/AppVersion-1.28.1-informational?style=flat-square)
+![Version: 1.6.0](https://img.shields.io/badge/Version-1.6.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.28.1](https://img.shields.io/badge/AppVersion-1.28.1-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -23,7 +23,7 @@ helm install <release_name> tobi/cnpg-cluster
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 1.5.4
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 1.6.0
 ```
 
 ### ArgoCD
@@ -34,7 +34,7 @@ helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster 
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 1.5.4
+  targetRevision: 1.6.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -47,7 +47,7 @@ sources:
 sources:
 - repoURL: ghcr.io/this-is-tobi/helm-charts
   chart: cnpg-cluster
-  targetRevision: 1.5.4
+  targetRevision: 1.6.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -62,7 +62,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 1.5.4
+  version: 1.6.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -73,7 +73,7 @@ dependencies:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 1.5.4
+  version: 1.6.0
   repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -449,6 +449,7 @@ backup-utils:
 | dbName | string | `""` | Name of the database (Default is `fullnameOverride` > `nameOverride` > name of the Helm release). |
 | enableSuperuserAccess | bool | `true` | Enable superuser access. |
 | exposed | bool | `false` | Whether or not a NodePort service should be created to exposed the database. |
+| extraSpec | object | `{}` | Additional specifications to add to the cnpg cluster manifest (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-Cluster). This allows you to replace any default configuration of the chart and add new configurations that are not yet supported (for example, when a new version of the CNPG is released with new features that are not yet supported). |
 | imageName | string | `""` | Name of the image used for database.  By default (empty string), the operator will install the latest available minor version of the latest major version of PostgreSQL when the operator was released |
 | imagePullPolicy | string | `"IfNotPresent"` | Pull policy for the database image. |
 | infosSecret.create | bool | `false` | Whether or not to create an infos secret containing database connection information (host, port, database name, username, password, and connection string). This secret can be used by applications or backup tools to connect to the database. |

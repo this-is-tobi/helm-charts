@@ -131,3 +131,6 @@ spec:
   {{- if .Values.topologySpreadConstraints }}
   topologySpreadConstraints: {{- toYaml .Values.topologySpreadConstraints | nindent 4 }}
   {{- end }}
+  {{- if .Values.extraSpec }}
+  {{- toYaml .Values.extraSpec | nindent 2 }}
+  {{- end }}
