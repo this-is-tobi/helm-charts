@@ -9,13 +9,11 @@ This repository hosts a set of personal Helm Charts available through:
 
 ## Chart list
 
-| Chart                                 | Application                                                             | Description                         | ArtifactHub                                                                        |
-| ------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------- |
-| [backup-utils](./charts/backup-utils) | -                                                                       | Easy backup tools deployment.       | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/backup-utils) |
-| [cnpg-cluster](./charts/cnpg-cluster) | [CNPG](https://cloudnative-pg.io)                                       | Easy CNPG cluster deployment.       | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/cnpg-cluster) |
-| [dashy](./charts/dashy)               | [Dashy](https://github.com/lissy93/dashy)                               | A self-hostable personal dashboard. | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/dashy)        |
-| [homarr](./charts/homarr)             | [Homarr](https://github.com/ajnart/homarr)                              | A self-hostable personal dashboard. | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/homarr)       |
-| [vso-utils](./charts/vso-utils)       | [VSO](https://developer.hashicorp.com/vault/docs/deploy/kubernetes/vso) | Easy VSO objects deployment.        | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/vso-utils)    |
+| Chart                                 | Application                                                             | Description                   | ArtifactHub                                                                        |
+| ------------------------------------- | ----------------------------------------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------- |
+| [backup-utils](./charts/backup-utils) | -                                                                       | Easy backup tools deployment. | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/backup-utils) |
+| [cnpg-cluster](./charts/cnpg-cluster) | [CNPG](https://cloudnative-pg.io)                                       | Easy CNPG cluster deployment. | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/cnpg-cluster) |
+| [vso-utils](./charts/vso-utils)       | [VSO](https://developer.hashicorp.com/vault/docs/deploy/kubernetes/vso) | Easy VSO objects deployment.  | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/vso-utils)    |
 
 ## Usage
 
