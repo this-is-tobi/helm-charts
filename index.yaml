@@ -2545,6 +2545,49 @@ entries:
       artifacthub.io/category: security
       artifacthub.io/changes: |
         - kind: changed
+          description: Upgraded vault-secrets-operator dependency to 1.3.0
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.3.0
+    created: "2026-03-13T22:38:51.214003447Z"
+    dependencies:
+    - alias: vso
+      condition: vso.enabled
+      name: vault-secrets-operator
+      repository: https://helm.releases.hashicorp.com
+      version: '>=1.0.0'
+    description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator
+      resources - sync static secrets, generate dynamic credentials, issue PKI certificates,
+      and configure Vault authentication.
+    digest: c71494aa2f0e063e31602cb42fb5703c58c712445b118a5baa2a64f574e56881
+    keywords:
+    - vault
+    - secrets
+    - hashicorp
+    - vso
+    - vault-secrets-operator
+    - kubernetes
+    - security
+    - pki
+    - dynamic-secrets
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: vso-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator
+    - https://developer.hashicorp.com/vault/docs/platform/k8s/vso
+    - https://github.com/hashicorp/vault-secrets-operator
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-1.1.7/vso-utils-1.1.7.tgz
+    version: 1.1.7
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |
+        - kind: changed
           description: Upgraded vault-secrets-operator dependency to 1.2.0
       artifacthub.io/license: MIT
     apiVersion: v2
@@ -2935,4 +2978,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-03-13T22:32:44.061828599Z"
+generated: "2026-03-13T22:38:51.214260044Z"
