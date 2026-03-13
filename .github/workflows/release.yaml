@@ -17,7 +17,7 @@ jobs:
       id-token: write  # Required for OIDC authentication with Sigstore/Cosign
     steps:
       - name: Checks-out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -78,7 +78,7 @@ jobs:
 
       - name: Install Cosign for OCI signing
         if: steps.chart-releaser.outputs.changed_charts != ''
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@v4.1.0
 
       - name: Publish and sign charts to OCI registry
         if: steps.chart-releaser.outputs.changed_charts != ''
