@@ -13,7 +13,7 @@ metadata:
   annotations: {{- toYaml .Values.annotations | nindent 4 }}
   {{- end }}
 spec:
-  schedule: {{ .Values.backup.cron }}
+  schedule: {{ quote .Values.backup.cron }}
   backupOwnerReference: self
   cluster:
     name: {{ include "template.fullname" . }}
