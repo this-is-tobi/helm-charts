@@ -312,6 +312,252 @@
       "type": "object",
       "description": "Additional specifications to add to the cnpg cluster manifest (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-Cluster)",
       "additionalProperties": true
+    },
+    "databases": {
+      "type": "array",
+      "description": "Declarative database management using the CNPG Database CRD. Each entry creates a Database resource. Not created in replica mode.",
+      "items": {
+        "type": "object",
+        "required": ["name", "owner"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the database inside PostgreSQL (immutable after creation)",
+            "minLength": 1,
+            "not": {
+              "enum": ["postgres", "template0", "template1"]
+            }
+          },
+          "owner": {
+            "type": "string",
+            "description": "Role name of the database owner",
+            "minLength": 1
+          },
+          "ensure": {
+            "type": "string",
+            "enum": ["present", "absent"],
+            "default": "present"
+          },
+          "databaseReclaimPolicy": {
+            "type": "string",
+            "enum": ["retain", "delete"],
+            "default": "retain"
+          },
+          "template": {
+            "type": "string"
+          },
+          "encoding": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "localeProvider": {
+            "type": "string"
+          },
+          "localeCollate": {
+            "type": "string"
+          },
+          "localeCType": {
+            "type": "string"
+          },
+          "icuLocale": {
+            "type": "string"
+          },
+          "icuRules": {
+            "type": "string"
+          },
+          "builtinLocale": {
+            "type": "string"
+          },
+          "collationVersion": {
+            "type": "string"
+          },
+          "isTemplate": {
+            "type": "boolean"
+          },
+          "allowConnections": {
+            "type": "boolean"
+          },
+          "connectionLimit": {
+            "type": "integer"
+          },
+          "tablespace": {
+            "type": "string"
+          },
+          "extensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "ensure": {
+                  "type": "string",
+                  "enum": ["present", "absent"],
+                  "default": "present"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "schemas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "owner"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "owner": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "ensure": {
+                  "type": "string",
+                  "enum": ["present", "absent"],
+                  "default": "present"
+                }
+              }
+            }
+          },
+          "fdws": {
+            "type": "array",
+            "description": "Foreign data wrappers to manage",
+            "items": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "ensure": {
+                  "type": "string",
+                  "enum": ["present", "absent"],
+                  "default": "present"
+                },
+                "handler": {
+                  "type": "string"
+                },
+                "validator": {
+                  "type": "string"
+                },
+                "owner": {
+                  "type": "string"
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["name", "value"],
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      },
+                      "ensure": {
+                        "type": "string",
+                        "enum": ["present", "absent"],
+                        "default": "present"
+                      }
+                    }
+                  }
+                },
+                "usage": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": ["grant", "revoke"],
+                        "default": "grant"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "servers": {
+            "type": "array",
+            "description": "Foreign servers to manage",
+            "items": {
+              "type": "object",
+              "required": ["name", "fdw"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "ensure": {
+                  "type": "string",
+                  "enum": ["present", "absent"],
+                  "default": "present"
+                },
+                "fdw": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["name", "value"],
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      },
+                      "ensure": {
+                        "type": "string",
+                        "enum": ["present", "absent"],
+                        "default": "present"
+                      }
+                    }
+                  }
+                },
+                "usage": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": ["grant", "revoke"],
+                        "default": "grant"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

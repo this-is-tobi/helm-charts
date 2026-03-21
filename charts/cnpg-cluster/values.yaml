@@ -421,6 +421,86 @@ monitoring:
     # -- Additional match labels for the podMonitor
     # @section -- Monitoring
     extraMatchLabels: {}
+# Declarative database management using the CNPG Database CRD (postgresql.cnpg.io/v1 Database).
+# Each entry creates a separate Database resource managed by the CNPG operator.
+# Note: Database CRDs are NOT created in replica mode (CNPG limitation).
+# Reserved database names (postgres, template0, template1) cannot be used.
+# @section -- Databases
+databases: []
+  # - # -- Name of the database inside PostgreSQL (required, immutable after creation).
+  #   # @section -- Databases
+  #   name: "mydb"
+  #   # -- Role name of the database owner (required).
+  #   # @section -- Databases
+  #   owner: "myuser"
+  #   # -- Whether the database should be present or absent (default: present).
+  #   # @section -- Databases
+  #   ensure: "present"
+  #   # -- Policy for end-of-life maintenance: retain (default) or delete.
+  #   # @section -- Databases
+  #   databaseReclaimPolicy: "retain"
+  #   # -- Template database name (immutable after creation).
+  #   # @section -- Databases
+  #   template: ""
+  #   # -- Character set encoding (immutable after creation).
+  #   # @section -- Databases
+  #   encoding: ""
+  #   # -- Default collation order and character classification (immutable after creation).
+  #   # @section -- Databases
+  #   locale: ""
+  #   # -- Locale provider: icu or builtin (immutable, available from PostgreSQL 16).
+  #   # @section -- Databases
+  #   localeProvider: ""
+  #   # -- LC_COLLATE setting (immutable after creation).
+  #   # @section -- Databases
+  #   localeCollate: ""
+  #   # -- LC_CTYPE setting (immutable after creation).
+  #   # @section -- Databases
+  #   localeCType: ""
+  #   # -- ICU locale (requires localeProvider=icu, immutable, available from PostgreSQL 15).
+  #   # @section -- Databases
+  #   icuLocale: ""
+  #   # -- Additional ICU collation rules (requires localeProvider=icu, immutable, available from PostgreSQL 16).
+  #   # @section -- Databases
+  #   icuRules: ""
+  #   # -- Builtin locale (requires localeProvider=builtin, immutable, available from PostgreSQL 17).
+  #   # @section -- Databases
+  #   builtinLocale: ""
+  #   # -- Collation version (immutable after creation).
+  #   # @section -- Databases
+  #   collationVersion: ""
+  #   # -- Whether this database is a template (IS_TEMPLATE).
+  #   # @section -- Databases
+  #   isTemplate: false
+  #   # -- Whether connections are allowed (ALLOW_CONNECTIONS).
+  #   # @section -- Databases
+  #   allowConnections: true
+  #   # -- Maximum concurrent connections (-1 means no limit).
+  #   # @section -- Databases
+  #   connectionLimit: -1
+  #   # -- Default tablespace for this database.
+  #   # @section -- Databases
+  #   tablespace: ""
+  #   # -- List of extensions to manage in this database.
+  #   # @section -- Databases
+  #   extensions: []
+  #     # - name: "postgis"
+  #     #   ensure: "present"
+  #     #   version: ""
+  #     #   schema: "public"
+  #   # -- List of schemas to manage in this database.
+  #   # @section -- Databases
+  #   schemas: []
+  #     # - name: "myschema"
+  #     #   owner: "myuser"
+  #     #   ensure: "present"
+  #   # -- List of foreign data wrappers to manage in this database.
+  #   # @section -- Databases
+  #   fdws: []
+  #   # -- List of foreign servers to manage in this database.
+  #   # @section -- Databases
+  #   servers: []
+
 # -- Additional specifications to add to the cnpg cluster manifest (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-Cluster). This allows you to replace any default configuration of the chart and add new configurations that are not yet supported (for example, when a new version of the CNPG is released with new features that are not yet supported).
 # @section -- Database
 extraSpec: {}
