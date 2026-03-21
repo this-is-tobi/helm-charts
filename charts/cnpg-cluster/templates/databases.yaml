@@ -1,0 +1,77 @@
+{{- $fullname := include "template.fullname" . }}
+{{- $labels := include "template.labels" . }}
+{{- if and .Values.databases (ne .Values.mode "replica") }}
+{{- range .Values.databases }}
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: {{ printf "%s-db-%s" $fullname .name }}
+  labels: {{- $labels | nindent 4 }}
+spec:
+  name: {{ .name }}
+  owner: {{ .owner }}
+  cluster:
+    name: {{ $fullname }}
+  {{- if .ensure }}
+  ensure: {{ .ensure }}
+  {{- end }}
+  {{- if .databaseReclaimPolicy }}
+  databaseReclaimPolicy: {{ .databaseReclaimPolicy }}
+  {{- end }}
+  {{- if .template }}
+  template: {{ .template }}
+  {{- end }}
+  {{- if .encoding }}
+  encoding: {{ .encoding }}
+  {{- end }}
+  {{- if .locale }}
+  locale: {{ .locale }}
+  {{- end }}
+  {{- if .localeProvider }}
+  localeProvider: {{ .localeProvider }}
+  {{- end }}
+  {{- if .localeCollate }}
+  localeCollate: {{ .localeCollate }}
+  {{- end }}
+  {{- if .localeCType }}
+  localeCType: {{ .localeCType }}
+  {{- end }}
+  {{- if .icuLocale }}
+  icuLocale: {{ .icuLocale }}
+  {{- end }}
+  {{- if .icuRules }}
+  icuRules: {{ .icuRules }}
+  {{- end }}
+  {{- if .builtinLocale }}
+  builtinLocale: {{ .builtinLocale }}
+  {{- end }}
+  {{- if .collationVersion }}
+  collationVersion: {{ .collationVersion }}
+  {{- end }}
+  {{- if not (kindIs "invalid" .isTemplate) }}
+  isTemplate: {{ .isTemplate }}
+  {{- end }}
+  {{- if not (kindIs "invalid" .allowConnections) }}
+  allowConnections: {{ .allowConnections }}
+  {{- end }}
+  {{- if not (kindIs "invalid" .connectionLimit) }}
+  connectionLimit: {{ .connectionLimit }}
+  {{- end }}
+  {{- if .tablespace }}
+  tablespace: {{ .tablespace }}
+  {{- end }}
+  {{- if .extensions }}
+  extensions: {{- toYaml .extensions | nindent 2 }}
+  {{- end }}
+  {{- if .schemas }}
+  schemas: {{- toYaml .schemas | nindent 2 }}
+  {{- end }}
+  {{- if .fdws }}
+  fdws: {{- toYaml .fdws | nindent 2 }}
+  {{- end }}
+  {{- if .servers }}
+  servers: {{- toYaml .servers | nindent 2 }}
+  {{- end }}
+{{- end }}
+{{- end }}
