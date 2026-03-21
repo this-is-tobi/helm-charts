@@ -982,6 +982,55 @@ entries:
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |
+        - kind: fixed
+          description: Disable backup resources (ObjectStore, ScheduledBackup, plugins) during recovery mode to prevent WAL archive collision.
+        - kind: fixed
+          description: Support legacy barmanObjectStore in recovery and replica externalClusters when `backup.legacyMode` is `true`.
+        - kind: added
+          description: Added separate recovery ObjectStore for plugin mode to avoid reusing the backup destination path.
+        - kind: added
+          description: Added `backup.pluginExtraParameters` to pass extra parameters to the barman-cloud backup plugin.
+        - kind: added
+          description: Added declarative database management via the CNPG Database CRD (`databases` key in values).
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.28.1
+    created: "2026-03-21T15:59:33.102959054Z"
+    dependencies:
+    - alias: cnpg-operator
+      condition: cnpg-operator.enabled
+      name: cloudnative-pg
+      repository: https://cloudnative-pg.github.io/charts
+      version: '>=0.23.0'
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: 92eeaff9e9496b62647b542b5279aaaa507c470e032540f16d8c81ddb77dee81
+    home: https://cloudnative-pg.io
+    keywords:
+    - postgresql
+    - postgres
+    - cnpg
+    - cloudnative-pg
+    - database
+    - operator
+    - high-availability
+    - backup
+    - replication
+    - kubernetes
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-1.7.0/cnpg-cluster-1.7.0.tgz
+    version: 1.7.0
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |
         - kind: added
           description: Added `extraSpec` field to allow additional specifications in the CNPG cluster manifest.
       artifacthub.io/license: MIT
@@ -2978,4 +3027,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-03-13T22:38:51.214260044Z"
+generated: "2026-03-21T15:59:33.103383439Z"
