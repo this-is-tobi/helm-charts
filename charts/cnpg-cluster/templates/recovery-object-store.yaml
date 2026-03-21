@@ -1,0 +1,52 @@
+{{- if and (eq .Values.mode "recovery") (not .Values.backup.legacyMode) }}
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: {{ printf "%s-%s" (include "template.fullname" .) "recovery-store" }}
+  labels: {{- include "template.labels" . | nindent 4 }}
+  {{- if .Values.annotations }}
+  annotations: {{- toYaml .Values.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  configuration:
+    destinationPath: {{ .Values.recovery.destinationPath | default .Values.backup.destinationPath }}
+    endpointURL: {{ .Values.recovery.endpointURL | default .Values.backup.endpointURL }}
+    {{- $useRecoveryCA := or .Values.recovery.endpointCA.create .Values.recovery.endpointCA.secretName }}
+    {{- $useBackupCA := or .Values.backup.endpointCA.create .Values.backup.endpointCA.secretName }}
+    {{- if or $useRecoveryCA $useBackupCA }}
+    endpointCA:
+      {{- if $useRecoveryCA }}
+      name: {{ .Values.recovery.endpointCA.secretName | default (printf "%s-%s" (include "template.fullname" .) "recovery-ca") }}
+      key: {{ .Values.recovery.endpointCA.key }}
+      {{- else }}
+      name: {{ .Values.backup.endpointCA.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-ca") }}
+      key: {{ .Values.backup.endpointCA.key }}
+      {{- end }}
+    {{- end }}
+    {{- $useRecoveryCreds := or .Values.recovery.s3Credentials.create .Values.recovery.s3Credentials.secretName }}
+    s3Credentials:
+      accessKeyId:
+        {{- if $useRecoveryCreds }}
+        name: {{ .Values.recovery.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "recovery-creds") }}
+        key: {{ .Values.recovery.s3Credentials.accessKeyId.key }}
+        {{- else }}
+        name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
+        key: {{ .Values.backup.s3Credentials.accessKeyId.key }}
+        {{- end }}
+      secretAccessKey:
+        {{- if $useRecoveryCreds }}
+        name: {{ .Values.recovery.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "recovery-creds") }}
+        key: {{ .Values.recovery.s3Credentials.secretAccessKey.key }}
+        {{- else }}
+        name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
+        key: {{ .Values.backup.s3Credentials.secretAccessKey.key }}
+        {{- end }}
+      region:
+        {{- if $useRecoveryCreds }}
+        name: {{ .Values.recovery.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "recovery-creds") }}
+        key: {{ .Values.recovery.s3Credentials.region.key }}
+        {{- else }}
+        name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
+        key: {{ .Values.backup.s3Credentials.region.key }}
+        {{- end }}
+{{- end }}

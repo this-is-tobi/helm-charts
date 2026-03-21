@@ -77,11 +77,56 @@ spec:
       {{- end }}
   externalClusters:
   - name: {{ .Values.recovery.clusterName | default (include "template.fullname" .) }}
+    {{- if .Values.backup.legacyMode }}
+    barmanObjectStore:
+      destinationPath: {{ .Values.recovery.destinationPath | default .Values.backup.destinationPath }}
+      endpointURL: {{ .Values.recovery.endpointURL | default .Values.backup.endpointURL }}
+      {{- $useRecoveryCA := or .Values.recovery.endpointCA.create .Values.recovery.endpointCA.secretName }}
+      {{- $useBackupCA := or .Values.backup.endpointCA.create .Values.backup.endpointCA.secretName }}
+      {{- if or $useRecoveryCA $useBackupCA }}
+      endpointCA:
+        {{- if $useRecoveryCA }}
+        name: {{ .Values.recovery.endpointCA.secretName | default (printf "%s-%s" (include "template.fullname" .) "recovery-ca") }}
+        key: {{ .Values.recovery.endpointCA.key }}
+        {{- else }}
+        name: {{ .Values.backup.endpointCA.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-ca") }}
+        key: {{ .Values.backup.endpointCA.key }}
+        {{- end }}
+      {{- end }}
+      {{- $useRecoveryCreds := or .Values.recovery.s3Credentials.create .Values.recovery.s3Credentials.secretName }}
+      s3Credentials:
+        accessKeyId:
+          {{- if $useRecoveryCreds }}
+          name: {{ .Values.recovery.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "recovery-creds") }}
+          key: {{ .Values.recovery.s3Credentials.accessKeyId.key }}
+          {{- else }}
+          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
+          key: {{ .Values.backup.s3Credentials.accessKeyId.key }}
+          {{- end }}
+        secretAccessKey:
+          {{- if $useRecoveryCreds }}
+          name: {{ .Values.recovery.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "recovery-creds") }}
+          key: {{ .Values.recovery.s3Credentials.secretAccessKey.key }}
+          {{- else }}
+          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
+          key: {{ .Values.backup.s3Credentials.secretAccessKey.key }}
+          {{- end }}
+        region:
+          {{- if $useRecoveryCreds }}
+          name: {{ .Values.recovery.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "recovery-creds") }}
+          key: {{ .Values.recovery.s3Credentials.region.key }}
+          {{- else }}
+          name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
+          key: {{ .Values.backup.s3Credentials.region.key }}
+          {{- end }}
+      serverName: {{ .Values.recovery.clusterName | default (include "template.fullname" .) }}
+    {{- else }}
     plugin:
       name: barman-cloud.cloudnative-pg.io
       parameters:
-        barmanObjectName: {{ printf "%s-%s" (include "template.fullname" .) "backup-store" }}
+        barmanObjectName: {{ printf "%s-%s" (include "template.fullname" .) "recovery-store" }}
         serverName: {{ .Values.recovery.clusterName | default (include "template.fullname" .) }}
+    {{- end }}
   {{- else if eq .Values.mode "replica" }}
   bootstrap:
     recovery:
@@ -94,11 +139,33 @@ spec:
     source: {{ .Values.replica.clusterName | default (include "template.fullname" .) }}
   externalClusters:
   - name: {{ .Values.replica.clusterName | default (include "template.fullname" .) }}
+    {{- if .Values.backup.legacyMode }}
+    barmanObjectStore:
+      destinationPath: {{ .Values.replica.destinationPath }}
+      endpointURL: {{ .Values.replica.endpointURL }}
+      {{- if or .Values.replica.endpointCA.create .Values.replica.endpointCA.secretName }}
+      endpointCA:
+        name: {{ .Values.replica.endpointCA.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-ca") }}
+        key: {{ .Values.replica.endpointCA.key }}
+      {{- end }}
+      s3Credentials:
+        accessKeyId:
+          name: {{ .Values.replica.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-creds") }}
+          key: {{ .Values.replica.s3Credentials.accessKeyId.key }}
+        secretAccessKey:
+          name: {{ .Values.replica.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-creds") }}
+          key: {{ .Values.replica.s3Credentials.secretAccessKey.key }}
+        region:
+          name: {{ .Values.replica.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-creds") }}
+          key: {{ .Values.replica.s3Credentials.region.key }}
+      serverName: {{ .Values.replica.clusterName | default (include "template.fullname" .) }}
+    {{- else }}
     plugin:
       name: barman-cloud.cloudnative-pg.io
       parameters:
         barmanObjectName: {{ printf "%s-%s" (include "template.fullname" .) "replica-store" }}
         serverName: {{ .Values.replica.clusterName | default (include "template.fullname" .) }}
+    {{- end }}
     {{- if .Values.replica.host }}
     connectionParameters:
       host: {{ .Values.replica.host }}
@@ -108,15 +175,18 @@ spec:
     {{- end }}
   {{- end }}
   {{/* Plugin-based backup and replica configuration (official barman-cloud plugin method) */}}
-  {{- if or (and .Values.backup.enabled (not .Values.backup.legacyMode)) (eq .Values.mode "replica") }}
+  {{- if or (and .Values.backup.enabled (not .Values.backup.legacyMode) (ne .Values.mode "recovery")) (and (eq .Values.mode "replica") (not .Values.backup.legacyMode)) }}
   plugins:
-  {{- if and .Values.backup.enabled (not .Values.backup.legacyMode) }}
+  {{- if and .Values.backup.enabled (not .Values.backup.legacyMode) (ne .Values.mode "recovery") }}
   - name: barman-cloud.cloudnative-pg.io
     isWALArchiver: true
     parameters:
       barmanObjectName: {{ printf "%s-%s" (include "template.fullname" .) "backup-store" }}
+      {{- range $key, $val := .Values.backup.pluginExtraParameters }}
+      {{ $key }}: {{ $val | quote }}
+      {{- end }}
   {{- end }}
-  {{- if eq .Values.mode "replica" }}
+  {{- if and (eq .Values.mode "replica") (not .Values.backup.legacyMode) }}
   - name: barman-cloud.cloudnative-pg.io
     parameters:
       barmanObjectName: {{ printf "%s-%s" (include "template.fullname" .) "replica-store" }}
