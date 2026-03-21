@@ -983,6 +983,49 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |
         - kind: fixed
+          description: Quote `backup.cron` in ScheduledBackup to prevent YAML parsing issues with leading `*` in cron expressions.
+        - kind: changed
+          description: Improve README documentation with a dedicated Databases section and properly categorized `logLevel` and `databases` keys.
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.28.1
+    created: "2026-03-21T16:56:33.332717248Z"
+    dependencies:
+    - alias: cnpg-operator
+      condition: cnpg-operator.enabled
+      name: cloudnative-pg
+      repository: https://cloudnative-pg.github.io/charts
+      version: '>=0.23.0'
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: 079cf03d84bf8e01b5a19e5ffa09963572a14c2782e6d29e41376e6823963a23
+    home: https://cloudnative-pg.io
+    keywords:
+    - postgresql
+    - postgres
+    - cnpg
+    - cloudnative-pg
+    - database
+    - operator
+    - high-availability
+    - backup
+    - replication
+    - kubernetes
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-1.7.1/cnpg-cluster-1.7.1.tgz
+    version: 1.7.1
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |
+        - kind: fixed
           description: Disable backup resources (ObjectStore, ScheduledBackup, plugins) during recovery mode to prevent WAL archive collision.
         - kind: fixed
           description: Support legacy barmanObjectStore in recovery and replica externalClusters when `backup.legacyMode` is `true`.
@@ -3027,4 +3070,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-03-21T15:59:33.103383439Z"
+generated: "2026-03-21T16:56:33.333079117Z"
