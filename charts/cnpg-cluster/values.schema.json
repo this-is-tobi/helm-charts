@@ -221,6 +221,13 @@
           "type": "boolean",
           "default": true
         },
+        "pluginExtraParameters": {
+          "type": "object",
+          "description": "Extra parameters to pass to the barman-cloud backup plugin (e.g. serverName).",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "destinationPath": {
           "type": "string"
         },

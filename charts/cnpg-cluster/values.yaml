@@ -297,6 +297,11 @@ backup:
   # -- Use legacy in-tree backup method instead of barman-cloud plugin (deprecated, will be removed in future CNPG versions). When `false` (recommended), uses the official barman-cloud plugin with ObjectStore CRD. When `true`, falls back to the deprecated in-tree barmanObjectStore configuration.
   # @section -- Backup
   legacyMode: true
+  # -- Extra parameters to pass to the barman-cloud backup plugin (e.g. `serverName` to isolate WAL paths when reusing the same S3 bucket after a recovery).
+  # Only used when `backup.legacyMode` is set to `false`.
+  # @section -- Backup
+  pluginExtraParameters: {}
+  # serverName: "my-cluster-v2"
   # -- S3 destination path for cnpg backups (it should be set like `s3://<bucket_name>/<path>`).
   # @section -- Backup
   destinationPath: ""
