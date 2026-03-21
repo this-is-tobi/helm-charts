@@ -116,7 +116,7 @@ This template will be removed in a future version when CloudNativePG drops suppo
 Only use this when backup.legacyMode is explicitly set to true.
 */}}
 {{- define "template.legacy.backup" -}}
-{{- if and .Values.backup.enabled .Values.backup.legacyMode }}
+{{- if and .Values.backup.enabled .Values.backup.legacyMode (ne .Values.mode "recovery") }}
 backup:
   barmanObjectStore:
     destinationPath: {{ .Values.backup.destinationPath }}

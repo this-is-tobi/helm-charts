@@ -1,9 +1,4 @@
-{{/*
-Plugin-based backup ObjectStore resource.
-Only created when backup is enabled and NOT in legacy mode.
-This uses the official barman-cloud plugin architecture.
-*/}}
-{{- if and .Values.backup.enabled (not .Values.backup.legacyMode) }}
+{{- if and .Values.backup.enabled (not .Values.backup.legacyMode) (ne .Values.mode "recovery") }}
 apiVersion: barmancloud.cnpg.io/v1
 kind: ObjectStore
 metadata:

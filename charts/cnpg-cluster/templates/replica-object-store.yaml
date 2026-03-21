@@ -1,8 +1,4 @@
-{{/*
-Plugin-based replica ObjectStore resource.
-Only created in replica mode using the official barman-cloud plugin architecture.
-*/}}
-{{- if eq .Values.mode "replica" }}
+{{- if and (eq .Values.mode "replica") (not .Values.backup.legacyMode) }}
 apiVersion: barmancloud.cnpg.io/v1
 kind: ObjectStore
 metadata:

@@ -1,9 +1,4 @@
-{{/*
-ScheduledBackup resource.
-Uses plugin method when legacyMode is false (default).
-Uses traditional method when legacyMode is true.
-*/}}
-{{- if .Values.backup.enabled }}
+{{- if and .Values.backup.enabled (ne .Values.mode "recovery") }}
 apiVersion: postgresql.cnpg.io/v1
 kind: ScheduledBackup
 metadata:
