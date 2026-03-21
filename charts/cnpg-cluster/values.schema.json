@@ -236,6 +236,10 @@
         },
         "retentionPolicy": {
           "type": "string"
+        },
+        "cron": {
+          "type": "string",
+          "description": "Cron expression for scheduled backups (quoted to handle leading `*`)."
         }
       }
     },
