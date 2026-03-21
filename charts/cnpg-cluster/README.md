@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 1.7.0](https://img.shields.io/badge/Version-1.7.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.28.1](https://img.shields.io/badge/AppVersion-1.28.1-informational?style=flat-square)
+![Version: 1.7.1](https://img.shields.io/badge/Version-1.7.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.28.1](https://img.shields.io/badge/AppVersion-1.28.1-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -23,7 +23,7 @@ helm install <release_name> tobi/cnpg-cluster
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 1.7.0
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 1.7.1
 ```
 
 ### ArgoCD
@@ -34,7 +34,7 @@ helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster 
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 1.7.0
+  targetRevision: 1.7.1
   helm:
     releaseName: <release_name>
     parameters: []
@@ -47,7 +47,7 @@ sources:
 sources:
 - repoURL: ghcr.io/this-is-tobi/helm-charts
   chart: cnpg-cluster
-  targetRevision: 1.7.0
+  targetRevision: 1.7.1
   helm:
     releaseName: <release_name>
     parameters: []
@@ -62,7 +62,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 1.7.0
+  version: 1.7.1
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -73,7 +73,7 @@ dependencies:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 1.7.0
+  version: 1.7.1
   repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -464,11 +464,18 @@ backup-utils:
 | infosSecret.urlParameters | string | `""` | Query parameters to append to the connection URL (e.g., sslmode, connect_timeout, application_name). Leave empty for no parameters. |
 | initDb.extraArgs | object | `{}` | Extra configuration of the initDb bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB). |
 | instances | int | `3` | Number of instances to spawn in the cluster. |
+| logLevel | string | `"info"` | Log level used by the operator (one of `error`, `warning`, `info` (default), `debug`, `trace`). |
 | mode | string | `"primary"` | Mode used to deploy the cnpg cluster, it should be `primary`, `replica` or `recovery`. |
 | nodePort | int | `30000` | Port used for NodePort service. Needs `exposed` tu be true. |
 | parameters | object | `{}` | Customize Postgresql parameters. |
 | pgHba | list | `[]` | Client authentication entries for pg_hba.conf file (See. https://www.postgresql.org/docs/current/auth-pg-hba-conf.html). |
 | primaryUpdateStrategy | string | `"unsupervised"` | Rolling update strategy used. `unsupervised` for automated update of the primary once all replicas have been upgraded (default). `supervised` for manual supervision to perform the switchover of the primary. |
+
+### Databases
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| databases | list | `[]` | Declarative management of databases inside the cnpg cluster. Each entry creates a separate Database CRD (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-Database). Note that Database CRDs are NOT created in replica mode (CNPG limitation) and that reserved database names (postgres, template0, template1) cannot be used. |
 
 ### Image pull secret
 
@@ -565,11 +572,9 @@ backup-utils:
 |-----|------|---------|-------------|
 | annotations | object | `{}` | Additional annotations for created resources. |
 | cnpg-operator.enabled | bool | `false` | Whether or not cnpg operator should be deployed (See. https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg?modal=values). |
-| databases | list | `[]` |  |
 | extraObjects | list | `[]` | Add extra specs dynamically to this chart. |
 | fullnameOverride | string | `""` | String to fully override the default application name. |
 | labels | object | `{}` | Additional cnpg cluster labels. |
-| logLevel | string | `"info"` | Log level used by the operator (one of `error`, `warning`, `info` (default), `debug`, `trace`). |
 | nameOverride | string | `""` | Provide a name in place of the default application name. |
 
 ## Maintainers

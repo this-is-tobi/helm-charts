@@ -387,6 +387,7 @@ affinity:
 # @section -- Affinity
 topologySpreadConstraints: []
 # -- Log level used by the operator (one of `error`, `warning`, `info` (default), `debug`, `trace`).
+# @section -- Database
 logLevel: "info"
 pooler:
   # -- Whether or not Pgbouncer should be enabled.
@@ -421,10 +422,7 @@ monitoring:
     # -- Additional match labels for the podMonitor
     # @section -- Monitoring
     extraMatchLabels: {}
-# Declarative database management using the CNPG Database CRD (postgresql.cnpg.io/v1 Database).
-# Each entry creates a separate Database resource managed by the CNPG operator.
-# Note: Database CRDs are NOT created in replica mode (CNPG limitation).
-# Reserved database names (postgres, template0, template1) cannot be used.
+# -- Declarative management of databases inside the cnpg cluster. Each entry creates a separate Database CRD (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-Database). Note that Database CRDs are NOT created in replica mode (CNPG limitation) and that reserved database names (postgres, template0, template1) cannot be used.
 # @section -- Databases
 databases: []
   # - # -- Name of the database inside PostgreSQL (required, immutable after creation).

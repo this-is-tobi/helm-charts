@@ -1,7 +1,7 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 1.7.0
+version: 1.7.1
 appVersion: "1.28.1"
 description: A Helm Chart to deploy easily a CNPG cluster
 home: https://cloudnative-pg.io
@@ -11,15 +11,9 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: fixed
-      description: Disable backup resources (ObjectStore, ScheduledBackup, plugins) during recovery mode to prevent WAL archive collision.
-    - kind: fixed
-      description: Support legacy barmanObjectStore in recovery and replica externalClusters when `backup.legacyMode` is `true`.
-    - kind: added
-      description: Added separate recovery ObjectStore for plugin mode to avoid reusing the backup destination path.
-    - kind: added
-      description: Added `backup.pluginExtraParameters` to pass extra parameters to the barman-cloud backup plugin.
-    - kind: added
-      description: Added declarative database management via the CNPG Database CRD (`databases` key in values).
+      description: Quote `backup.cron` in ScheduledBackup to prevent YAML parsing issues with leading `*` in cron expressions.
+    - kind: changed
+      description: Improve README documentation with a dedicated Databases section and properly categorized `logLevel` and `databases` keys.
 keywords:
 - postgresql
 - postgres
