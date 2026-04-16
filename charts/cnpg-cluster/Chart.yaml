@@ -1,8 +1,8 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 1.7.1
-appVersion: "1.28.1"
+version: 2.0.0
+appVersion: "1.29.0"
 description: A Helm Chart to deploy easily a CNPG cluster
 home: https://cloudnative-pg.io
 deprecated: false
@@ -10,10 +10,10 @@ annotations:
   artifacthub.io/category: database
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: fixed
-      description: Quote `backup.cron` in ScheduledBackup to prevent YAML parsing issues with leading `*` in cron expressions.
     - kind: changed
-      description: Improve README documentation with a dedicated Databases section and properly categorized `logLevel` and `databases` keys.
+      description: Remove CNPG operator dependency.
+    - kind: changed
+      description: Change default backup method to barman-cloud plugin and keep option to use legacy in-tree backup method (deprecated).
 keywords:
 - postgresql
 - postgres
@@ -25,12 +25,7 @@ keywords:
 - backup
 - replication
 - kubernetes
-dependencies:
-- name: cloudnative-pg
-  alias: cnpg-operator
-  version: ">=0.23.0"
-  repository: https://cloudnative-pg.github.io/charts
-  condition: cnpg-operator.enabled
+dependencies: []
 sources:
 - https://github.com/this-is-tobi/helm-charts
 - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg

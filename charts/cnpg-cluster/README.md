@@ -1,14 +1,8 @@
 # cnpg-cluster
 
-![Version: 1.7.1](https://img.shields.io/badge/Version-1.7.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.28.1](https://img.shields.io/badge/AppVersion-1.28.1-informational?style=flat-square)
+![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.29.0](https://img.shields.io/badge/AppVersion-1.29.0-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
-
-## Requirements
-
-| Repository | Name | Version |
-|------------|------|---------|
-| https://cloudnative-pg.github.io/charts | cnpg-operator(cloudnative-pg) | >=0.23.0 |
 
 ## Installing the Chart
 
@@ -23,7 +17,7 @@ helm install <release_name> tobi/cnpg-cluster
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 1.7.1
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 2.0.0
 ```
 
 ### ArgoCD
@@ -34,7 +28,7 @@ helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster 
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 1.7.1
+  targetRevision: 2.0.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -47,7 +41,7 @@ sources:
 sources:
 - repoURL: ghcr.io/this-is-tobi/helm-charts
   chart: cnpg-cluster
-  targetRevision: 1.7.1
+  targetRevision: 2.0.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -62,7 +56,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 1.7.1
+  version: 2.0.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -73,7 +67,7 @@ dependencies:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 1.7.1
+  version: 2.0.0
   repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -425,7 +419,7 @@ backup-utils:
 | backup.endpointCA.secretName | string | `""` | The secret name containing S3 CA for cnpg backups, leave it empty to auto-generate the secret name. |
 | backup.endpointCA.value | string | `""` | The S3 certificate used for cnpg backups. Only needed if `backup.endpointCA.create` is set to `true`. |
 | backup.endpointURL | string | `""` | S3 endpoint for cnpg backups. |
-| backup.legacyMode | bool | `true` | Use legacy in-tree backup method instead of barman-cloud plugin (deprecated, will be removed in future CNPG versions). When `false` (recommended), uses the official barman-cloud plugin with ObjectStore CRD. When `true`, falls back to the deprecated in-tree barmanObjectStore configuration. |
+| backup.legacyMode | bool | `false` | Use legacy in-tree backup method instead of barman-cloud plugin (deprecated, will be removed in future CNPG versions). When `false` (recommended), uses the official barman-cloud plugin with ObjectStore CRD. When `true`, falls back to the deprecated in-tree barmanObjectStore configuration. |
 | backup.pluginExtraParameters | object | `{}` | Extra parameters to pass to the barman-cloud backup plugin (e.g. `serverName` to isolate WAL paths when reusing the same S3 bucket after a recovery). Only used when `backup.legacyMode` is set to `false`. |
 | backup.retentionPolicy | string | `"14d"` | Retention policy for cnpg backups recurrences. |
 | backup.s3Credentials.accessKeyId.key | string | `"accessKeyId"` | S3 accessKeyId kubernetes secret key used for cnpg backups. |
