@@ -1018,6 +1018,43 @@ entries:
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |
+        - kind: changed
+          description: Remove CNPG operator dependency.
+        - kind: changed
+          description: Change default backup method to barman-cloud plugin and keep option to use legacy in-tree backup method (deprecated).
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.29.0
+    created: "2026-04-16T13:43:39.794404265Z"
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: 3e4638047bdb3addf4f862fbf3bea3271afd393035a454366edd731e7a9f4433
+    home: https://cloudnative-pg.io
+    keywords:
+    - postgresql
+    - postgres
+    - cnpg
+    - cloudnative-pg
+    - database
+    - operator
+    - high-availability
+    - backup
+    - replication
+    - kubernetes
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-2.0.0/cnpg-cluster-2.0.0.tgz
+    version: 2.0.0
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |
         - kind: fixed
           description: Quote `backup.cron` in ScheduledBackup to prevent YAML parsing issues with leading `*` in cron expressions.
         - kind: changed
@@ -3106,4 +3143,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-03-31T11:27:25.369169563Z"
+generated: "2026-04-16T13:43:39.794788053Z"
