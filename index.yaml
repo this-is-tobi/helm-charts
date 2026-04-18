@@ -1054,6 +1054,41 @@ entries:
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |
+        - kind: fixed
+          description: Preserve newline before YAML document separator in pg-cluster-secrets template.
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.29.0
+    created: "2026-04-18T22:42:04.761459563Z"
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: 9228ecc5fa87a78160dae546a4da60954f5b6a2d5da30936ba674df2c9b46bd5
+    home: https://cloudnative-pg.io
+    keywords:
+    - postgresql
+    - postgres
+    - cnpg
+    - cloudnative-pg
+    - database
+    - operator
+    - high-availability
+    - backup
+    - replication
+    - kubernetes
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-2.0.1/cnpg-cluster-2.0.1.tgz
+    version: 2.0.1
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |
         - kind: changed
           description: Remove CNPG operator dependency.
         - kind: changed
@@ -3179,4 +3214,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-04-16T22:09:01.257583822Z"
+generated: "2026-04-18T22:42:04.761918213Z"
