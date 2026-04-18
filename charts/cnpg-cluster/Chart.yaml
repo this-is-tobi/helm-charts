@@ -1,7 +1,7 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 2.0.0
+version: 2.0.1
 appVersion: "1.29.0"
 description: A Helm Chart to deploy easily a CNPG cluster
 home: https://cloudnative-pg.io
@@ -10,10 +10,8 @@ annotations:
   artifacthub.io/category: database
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: changed
-      description: Remove CNPG operator dependency.
-    - kind: changed
-      description: Change default backup method to barman-cloud plugin and keep option to use legacy in-tree backup method (deprecated).
+    - kind: fixed
+      description: Preserve newline before YAML document separator in pg-cluster-secrets template.
 keywords:
 - postgresql
 - postgres
