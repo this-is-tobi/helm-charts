@@ -24,12 +24,15 @@ spec:
     pg_hba: {{- toYaml .Values.pgHba | nindent 6 }}
     {{- end }}
   enableSuperuserAccess: {{ .Values.enableSuperuserAccess }}
+  {{- $credMode := include "template.credentialsMode" . }}
+  {{- if ne $credMode "operator" }}
   superuserSecret:
-    {{- if eq .Values.credentials.existingSecrets.enabled false }}
+    {{- if eq $credMode "chart" }}
     name: {{ printf "%s-%s" (include "template.fullname" .) "admin" }}
     {{- else }}
     name: {{ .Values.credentials.existingSecrets.postgres.secretName }}
     {{- end }}
+  {{- end }}
   primaryUpdateStrategy: {{ .Values.primaryUpdateStrategy }}
   storage:
     size: {{ .Values.pvcSize.data }}
@@ -51,12 +54,14 @@ spec:
     initdb:
       database: {{ .Values.dbName | default (include "template.fullname" .) }}
       owner: {{ .Values.credentials.username | default (include "template.fullname" .) }}
+      {{- if ne $credMode "operator" }}
       secret:
-        {{- if eq .Values.credentials.existingSecrets.enabled false }}
+        {{- if eq $credMode "chart" }}
         name: {{ printf "%s-%s" (include "template.fullname" .) "app" }}
         {{- else }}
         name: {{ .Values.credentials.existingSecrets.app.secretName }}
         {{- end }}
+      {{- end }}
       {{- if .Values.initDb.extraArgs }}
       {{- toYaml .Values.initDb.extraArgs | nindent 6 }}
       {{- end }}
@@ -66,12 +71,14 @@ spec:
       source: {{ .Values.recovery.clusterName | default (include "template.fullname" .) }}
       database: {{ .Values.dbName | default (include "template.fullname" .) }}
       owner: {{ .Values.credentials.username | default (include "template.fullname" .) }}
+      {{- if ne $credMode "operator" }}
       secret:
-        {{- if eq .Values.credentials.existingSecrets.enabled false }}
+        {{- if eq $credMode "chart" }}
         name: {{ printf "%s-%s" (include "template.fullname" .) "app" }}
         {{- else }}
         name: {{ .Values.credentials.existingSecrets.app.secretName }}
         {{- end }}
+      {{- end }}
       {{- if .Values.recovery.extraArgs }}
       {{- toYaml .Values.recovery.extraArgs | nindent 6 }}
       {{- end }}
