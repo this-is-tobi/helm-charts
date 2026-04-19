@@ -111,6 +111,22 @@ Labels
 {{- end }}
 
 {{/*
+Determine credentials management mode:
+- "operator": CNPG operator auto-generates secrets (default, stable across upgrades)
+- "chart": Helm chart creates secrets from provided password values
+- "external": User-managed pre-existing secrets
+*/}}
+{{- define "template.credentialsMode" -}}
+{{- if .Values.credentials.existingSecrets.enabled -}}
+external
+{{- else if or .Values.credentials.password .Values.credentials.postgresPassword -}}
+chart
+{{- else -}}
+operator
+{{- end -}}
+{{- end -}}
+
+{{/*
 DEPRECATED: Legacy backup configuration using in-tree barmanObjectStore.
 This template will be removed in a future version when CloudNativePG drops support for the in-tree method.
 Only use this when backup.legacyMode is explicitly set to true.

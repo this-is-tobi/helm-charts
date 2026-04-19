@@ -1,7 +1,7 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 2.0.1
+version: 2.1.0
 appVersion: "1.29.0"
 description: A Helm Chart to deploy easily a CNPG cluster
 home: https://cloudnative-pg.io
@@ -10,6 +10,8 @@ annotations:
   artifacthub.io/category: database
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
+    - kind: changed
+      description: Let the CNPG operator manage credential secrets by default instead of generating them in the chart. This prevents password rotation on helm upgrade and works seamlessly with ArgoCD/GitOps.
     - kind: fixed
       description: Preserve newline before YAML document separator in pg-cluster-secrets template.
 keywords:

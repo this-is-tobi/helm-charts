@@ -36,10 +36,10 @@ credentials:
   # -- Username of the database user (it is used for the database owner - needed also if `credentials.existingSecrets.enabled` is set to `true`).
   # @section -- Database
   username: ""
-  # -- Password of the database user (leave empty to auto-generate the password).
+  # -- Password of the database user. When empty and `existingSecrets.enabled` is `false`, the CNPG operator auto-generates a stable secret (recommended). In chart-managed mode (when at least one password is set), empty passwords are resolved via `lookup` to reuse existing secrets — but `lookup` does not work with ArgoCD/GitOps, so set both passwords explicitly in that case.
   # @section -- Database
   password: ""
-  # -- Password of the postgres superuser (leave empty to auto-generate the password).
+  # -- Password of the postgres superuser. Same behavior as `credentials.password` — leave empty to let the CNPG operator manage it, or set explicitly for chart-managed mode.
   # @section -- Database
   postgresPassword: ""
   existingSecrets:
@@ -261,7 +261,7 @@ replica:
   # @section -- Replica mode
   extraArgs: {}
 infosSecret:
-  # -- Whether or not to create an infos secret containing database connection information (host, port, database name, username, password, and connection string). This secret can be used by applications or backup tools to connect to the database.
+  # -- Whether or not to create an infos secret containing database connection information (host, port, database name, username, password, and connection string). Only effective when `credentials.password` is set (chart-managed credentials). When credentials are operator-managed, use the operator-generated `<cluster>-app` secret directly.
   # @section -- Database
   create: false
   # -- Name of the secret to create (defaults to `<fullname>-infos`).
