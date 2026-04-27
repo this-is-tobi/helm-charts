@@ -766,6 +766,9 @@ servicename:
       # -- Metrics service labels.
       # @section -- Servicename
       labels: {}
+      # -- Metrics service port name.
+      # @section -- Servicename
+      portName: "metrics"
       # -- Metrics service port.
       # @section -- Servicename
       port: 9000

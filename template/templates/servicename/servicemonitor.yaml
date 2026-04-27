@@ -1,5 +1,5 @@
 {{- if and .Values.servicename.metrics.enabled .Values.servicename.metrics.serviceMonitor.enabled }}
-{{- $metricSvcPort := .Values.servicename.metrics.service.port -}}
+{{- $metricSvcPort := .Values.servicename.metrics.service.portName | default .Values.servicename.metrics.service.port -}}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -14,7 +14,7 @@ metadata:
 spec:
   endpoints:
   {{- range .Values.servicename.metrics.serviceMonitor.endpoints }}
-  - port: {{ $metricSvcPort | quote }}
+  - port: {{ $metricSvcPort }}
     path: {{ .path }}
     honorLabels: {{ .honorLabels }}
     {{- if and .basicAuth .basicAuth.username .basicAuth.password }}
@@ -46,5 +46,5 @@ spec:
     matchNames:
     - {{ .Release.Namespace | quote }}
   selector:
-    matchLabels: {{- include "helper.selectorLabels" (dict "root" . "componentName" "servicename") | nindent 6 }}
+    matchLabels: {{- include "helper.selectorLabels" (dict "root" . "componentName" "servicename-metrics") | nindent 6 }}
 {{- end }}
