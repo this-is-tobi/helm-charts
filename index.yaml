@@ -2818,6 +2818,49 @@ entries:
       artifacthub.io/category: security
       artifacthub.io/changes: |
         - kind: changed
+          description: "BREAKING: replace tls nested block with flat caCertSecretRef, caCertPath, and tlsServerName fields in VaultConnection"
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.3.0
+    created: "2026-05-02T00:18:46.264837433Z"
+    dependencies:
+    - alias: vso
+      condition: vso.enabled
+      name: vault-secrets-operator
+      repository: https://helm.releases.hashicorp.com
+      version: '>=1.0.0'
+    description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator
+      resources - sync static secrets, generate dynamic credentials, issue PKI certificates,
+      and configure Vault authentication.
+    digest: dbf082e81e88714c2161465be486b4ec274638d245b2397a2c2e7f1300254f09
+    keywords:
+    - vault
+    - secrets
+    - hashicorp
+    - vso
+    - vault-secrets-operator
+    - kubernetes
+    - security
+    - pki
+    - dynamic-secrets
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: vso-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator
+    - https://developer.hashicorp.com/vault/docs/platform/k8s/vso
+    - https://github.com/hashicorp/vault-secrets-operator
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-2.0.0/vso-utils-2.0.0.tgz
+    version: 2.0.0
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |
+        - kind: changed
           description: Upgraded vault-secrets-operator dependency to 1.3.0
       artifacthub.io/license: MIT
     apiVersion: v2
@@ -3251,4 +3294,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-04-19T17:45:24.933316437Z"
+generated: "2026-05-02T00:18:46.264985423Z"
