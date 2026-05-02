@@ -137,6 +137,7 @@ A Helm chart to deploy chartname.
 | servicename.metrics.service.annotations | object | `{}` | Metrics service annotations. |
 | servicename.metrics.service.labels | object | `{}` | Metrics service labels. |
 | servicename.metrics.service.port | int | `9000` | Metrics service port. |
+| servicename.metrics.service.portName | string | `"metrics"` | Metrics service port name. |
 | servicename.metrics.service.targetPort | int | `9000` | Metrics service target port. |
 | servicename.metrics.serviceMonitor.annotations | object | `{}` | Prometheus ServiceMonitor annotations. |
 | servicename.metrics.serviceMonitor.enabled | bool | `false` | Enable a prometheus ServiceMonitor. |
