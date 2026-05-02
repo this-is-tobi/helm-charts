@@ -287,10 +287,12 @@ vaultConnection: {}
   #   address: "https://vault.example.com:8200"
   #   # -- Headers to include in all Vault requests.
   #   headers: {}
-  #   # -- TLS configuration for Vault connection.
-  #   tls:
-  #     # -- CA certificate for verifying Vault server.
-  #     caCertSecretRef: "vault-ca-cert"
+  #   # -- Name of a Kubernetes Secret containing a PEM-encoded CA certificate chain (key: ca.crt).
+  #   caCertSecretRef: ""
+  #   # -- Path to a PEM CA cert file on the pod filesystem.
+  #   caCertPath: ""
+  #   # -- TLS server name to use for verification.
+  #   tlsServerName: ""
   #   # -- Skip TLS verification (not recommended for production).
   #   skipTLSVerify: false
   #   # -- Timeout for Vault requests.
