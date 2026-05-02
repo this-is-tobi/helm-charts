@@ -266,12 +266,9 @@
           "labels": { "type": "object" },
           "address": { "type": "string" },
           "headers": { "type": "object" },
-          "tls": {
-            "type": "object",
-            "properties": {
-              "caCertSecretRef": { "type": "string" }
-            }
-          },
+          "caCertSecretRef": { "type": "string" },
+          "caCertPath": { "type": "string" },
+          "tlsServerName": { "type": "string" },
           "skipTLSVerify": { "type": "boolean", "default": false },
           "timeout": { "type": "string", "default": "60s" }
         }

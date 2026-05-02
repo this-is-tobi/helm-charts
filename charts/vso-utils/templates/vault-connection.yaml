@@ -17,9 +17,14 @@ spec:
   headers:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- with $conn.tls }}
-  tls:
-    {{- toYaml . | nindent 4 }}
+  {{- with $conn.caCertSecretRef }}
+  caCertSecretRef: {{ . }}
+  {{- end }}
+  {{- with $conn.caCertPath }}
+  caCertPath: {{ . }}
+  {{- end }}
+  {{- with $conn.tlsServerName }}
+  tlsServerName: {{ . }}
   {{- end }}
   {{- if hasKey $conn "skipTLSVerify" }}
   skipTLSVerify: {{ $conn.skipTLSVerify }}
