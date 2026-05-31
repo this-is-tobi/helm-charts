@@ -63,7 +63,7 @@ backups: {}
   #   # -- Enable or disable this specific backup job.
   #   # @section -- Backups
   #   enabled: true
-  #   # -- Backup type determining which script to run. Valid values: `postgres`, `s3`, `qdrant`, `vault`.
+  #   # -- Backup type determining which script to run. Valid values: `postgres`, `mariadb`, `mongodb`, `etcd`, `s3`, `qdrant`, `vault`.
   #   # @section -- Backups
   #   type: "postgres"
   #   image:
@@ -205,6 +205,41 @@ backups: {}
   #     # -- Qdrant collection name to backup (leave empty to backup all collections).
   #     # @section -- Config - Qdrant
   #     QDRANT_COLLECTION: ""
+  #     ## MongoDB - Required only when type="mongodb"
+  #     # -- MongoDB server hostname or IP address (e.g., "mongodb.default.svc.cluster.local").
+  #     # @section -- Config - MongoDB
+  #     DB_HOST: ""
+  #     # -- MongoDB server port (default: "27017").
+  #     # @section -- Config - MongoDB
+  #     DB_PORT: ""
+  #     # -- MongoDB database name to backup.
+  #     # @section -- Config - MongoDB
+  #     DB_NAME: ""
+  #     # -- MongoDB username with backup/read permissions.
+  #     # @section -- Config - MongoDB
+  #     DB_USER: ""
+  #     # -- MongoDB user password.
+  #     # @section -- Config - MongoDB
+  #     DB_PASS: ""
+  #     # -- MongoDB authentication database (optional, default: "admin").
+  #     # @section -- Config - MongoDB
+  #     DB_AUTH_DB: ""
+  #     ## etcd - Required only when type="etcd"
+  #     # -- Comma-separated list of etcd endpoints (e.g., "https://etcd:2379").
+  #     # @section -- Config - etcd
+  #     ETCD_ENDPOINTS: ""
+  #     # -- Path to CA certificate file for TLS (optional).
+  #     # @section -- Config - etcd
+  #     ETCD_CACERT: ""
+  #     # -- Path to client certificate file for TLS (optional).
+  #     # @section -- Config - etcd
+  #     ETCD_CERT: ""
+  #     # -- Path to client key file for TLS (optional).
+  #     # @section -- Config - etcd
+  #     ETCD_KEY: ""
+  #     # -- Skip TLS verification ("true"/"false", default: "false", optional).
+  #     # @section -- Config - etcd
+  #     ETCD_INSECURE_SKIP_TLS_VERIFY: ""
   #     ## S3-to-S3 - Required only when type="s3" (backup from one S3 bucket to another)
   #     # -- Source S3 endpoint URL to backup from (e.g., "https://s3.us-west-2.amazonaws.com").
   #     # @section -- Config - S3
