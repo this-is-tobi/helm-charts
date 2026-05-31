@@ -5,6 +5,49 @@ entries:
       artifacthub.io/category: storage
       artifacthub.io/changes: |
         - kind: changed
+          description: Upgrade backup image to v1.3.0
+        - kind: added
+          description: Add MongoDB backup support
+        - kind: added
+          description: Add etcd backup support
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.3.0
+    created: "2026-05-31T17:56:12.582412684Z"
+    description: Production-ready Helm chart for automated backups of PostgreSQL,
+      MariaDB, MongoDB, etcd, Vault, Qdrant, and S3 buckets to S3-compatible storage
+      with configurable schedules and retention policies.
+    digest: 92414f25f6ff71463976a596e958ff1d43a2191399833299d1df0a1cfb14882d
+    keywords:
+    - backup
+    - postgresql
+    - mariadb
+    - mongodb
+    - etcd
+    - vault
+    - qdrant
+    - s3
+    - rclone
+    - cronjob
+    - kubernetes
+    - database
+    - snapshots
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: backup-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/this-is-tobi/tools
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-2.5.0/backup-utils-2.5.0.tgz
+    version: 2.5.0
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/changes: |
+        - kind: changed
           description: Upgrade backup image to v1.2.0
       artifacthub.io/license: MIT
     apiVersion: v2
@@ -3330,4 +3373,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-05-03T20:18:40.594245868Z"
+generated: "2026-05-31T17:56:12.584457894Z"
