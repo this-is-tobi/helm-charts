@@ -1,8 +1,8 @@
 apiVersion: v2
 name: backup-utils
 type: application
-version: 2.5.1
-appVersion: "1.3.1"
+version: 2.5.2
+appVersion: "1.3.2"
 description: Production-ready Helm chart for automated backups of PostgreSQL, MariaDB, MongoDB, etcd, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules and retention policies.
 deprecated: false
 annotations:
@@ -10,9 +10,9 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: changed
-      description: Upgrade backup image to v1.3.1
+      description: Upgrade backup image to v1.3.2
     - kind: fixed
-      description: Avoid rclone bucket creation by default, add option to create bucket
+      description: Remove wrong rclone flag in scripts
 keywords:
 - backup
 - postgresql

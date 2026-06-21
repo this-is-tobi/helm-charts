@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 2.5.1](https://img.shields.io/badge/Version-2.5.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.3.1](https://img.shields.io/badge/AppVersion-1.3.1-informational?style=flat-square)
+![Version: 2.5.2](https://img.shields.io/badge/Version-2.5.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.3.2](https://img.shields.io/badge/AppVersion-1.3.2-informational?style=flat-square)
 
 Production-ready Helm chart for automated backups of PostgreSQL, MariaDB, MongoDB, etcd, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules and retention policies.
 
@@ -52,7 +52,7 @@ helm install <release_name> tobi/backup-utils
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/backup-utils --version 2.5.1
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/backup-utils --version 2.5.2
 ```
 
 ### ArgoCD
@@ -68,7 +68,7 @@ spec:
   sources:
   - repoURL: https://this-is-tobi.github.io/helm-charts
     chart: backup-utils
-    targetRevision: 2.5.1
+    targetRevision: 2.5.2
     helm:
       releaseName: <release_name>
       values: |
@@ -97,7 +97,7 @@ spec:
   sources:
   - repoURL: ghcr.io/this-is-tobi/helm-charts
     chart: backup-utils
-    targetRevision: 2.5.1
+    targetRevision: 2.5.2
     helm:
       releaseName: <release_name>
       values: |
@@ -122,7 +122,7 @@ spec:
 # Chart.yaml
 dependencies:
 - name: backup-utils
-  version: 2.5.1
+  version: 2.5.2
   repository: https://this-is-tobi.github.io/helm-charts
   condition: backup-utils.enabled
 ```
@@ -132,7 +132,7 @@ dependencies:
 # Chart.yaml
 dependencies:
 - name: backup-utils
-  version: 2.5.1
+  version: 2.5.2
   repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: backup-utils.enabled
 ```
