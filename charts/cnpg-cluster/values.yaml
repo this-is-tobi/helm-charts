@@ -184,6 +184,9 @@ recovery:
     # recoveryTarget:
     #   backupID: 20250214T120000
     #   targetImmediate: true
+  # -- Extra spec fields merged into the recovery ObjectStore CR (e.g. `serverName`, `tags`, `historyTags`, `instanceSidecarConfiguration`). Only used when `backup.legacyMode` is set to `false` (See. https://cloudnative-pg.io/plugin-barman-cloud/docs/plugin-barman-cloud.v1/#objectstorespec).
+  # @section -- Recovery mode
+  extraSpec: {}
 replica:
   # -- S3 destination path used for replica mode (it should be set like `s3://<bucket_name>/<path>`).
   # @section -- Replica mode
@@ -260,6 +263,9 @@ replica:
   # -- Extra configuration of the initDb bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB).
   # @section -- Replica mode
   extraArgs: {}
+  # -- Extra spec fields merged into the replica ObjectStore CR (e.g. `serverName`, `tags`, `historyTags`, `instanceSidecarConfiguration`). Only used when `backup.legacyMode` is set to `false` (See. https://cloudnative-pg.io/plugin-barman-cloud/docs/plugin-barman-cloud.v1/#objectstorespec).
+  # @section -- Replica mode
+  extraSpec: {}
 infosSecret:
   # -- Whether or not to create an infos secret containing database connection information (host, port, database name, username, password, and connection string). Only effective when `credentials.password` is set (chart-managed credentials). When credentials are operator-managed, use the operator-generated `<cluster>-app` secret directly.
   # @section -- Database
@@ -358,12 +364,24 @@ backup:
   # -- Which compression algorithm should be used for cnpg backups (should be one of "gzip", "bzip2" or "snappy"), leave blank to disable compression.
   # @section -- Backup
   compression: ""
+  # -- Encryption algorithm for backups (e.g., AES256). Leave blank to disable encryption.
+  # @section -- Backup
+  encryption: ""
+  # -- Number of parallel backup jobs.
+  # @section -- Backup
+  jobs: 1
+  # -- Maximum parallel WAL processing during backup.
+  # @section -- Backup
+  maxParallel: 1
   # -- The cron rule used for cnpg backups. By default it runs every 6 hours.
   # @section -- Backup
   cron: "0 0 */6 * * *"
   # -- Retention policy for cnpg backups recurrences.
   # @section -- Backup
   retentionPolicy: "14d"
+  # -- Extra spec fields merged into the ObjectStore CR (e.g. `serverName`, `tags`, `historyTags`, `instanceSidecarConfiguration`) for fields not explicitly exposed by this chart. Only used when `backup.legacyMode` is set to `false` (See. https://cloudnative-pg.io/plugin-barman-cloud/docs/plugin-barman-cloud.v1/#objectstorespec).
+  # @section -- Backup
+  extraSpec: {}
 resources:
   requests:
     # -- Memory request for the database instance.
