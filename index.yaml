@@ -5,6 +5,45 @@ entries:
       artifacthub.io/category: storage
       artifacthub.io/changes: |
         - kind: changed
+          description: Upgrade backup image to v1.4.0
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.4.0
+    created: "2026-07-01T01:52:59.725172475Z"
+    description: Production-ready Helm chart for automated backups of PostgreSQL,
+      MariaDB, MongoDB, etcd, Vault, Qdrant, and S3 buckets to S3-compatible storage
+      with configurable schedules and retention policies.
+    digest: ea5c7c115c86181a7a367efbfd419d2fcc552bc3c16d3d4815e8fcbea24557d7
+    keywords:
+    - backup
+    - postgresql
+    - mariadb
+    - mongodb
+    - etcd
+    - vault
+    - qdrant
+    - s3
+    - rclone
+    - cronjob
+    - kubernetes
+    - database
+    - snapshots
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: backup-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/this-is-tobi/tools
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-2.5.4/backup-utils-2.5.4.tgz
+    version: 2.5.4
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/changes: |
+        - kind: changed
           description: Upgrade backup image to v1.3.4
       artifacthub.io/license: MIT
     apiVersion: v2
@@ -1251,6 +1290,45 @@ entries:
     - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-0.1.0/backup-utils-0.1.0.tgz
     version: 0.1.0
   cnpg-cluster:
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |
+        - kind: added
+          description: Add `backup.encryption`, `backup.jobs` and `backup.maxParallel` values to configure barman-cloud data/WAL backup encryption and parallelism (applies to both the barman-cloud plugin ObjectStore and the legacy in-tree `barmanObjectStore` configuration).
+        - kind: added
+          description: Add `backup.extraSpec`, `recovery.extraSpec` and `replica.extraSpec` values to merge extra fields (e.g. `serverName`, `tags`, `historyTags`, `instanceSidecarConfiguration`) into the barman-cloud plugin ObjectStore CRs that are not otherwise exposed by this chart.
+        - kind: fixed
+          description: Fix `backup.legacyMode` default in values.schema.json to match the chart's actual default of `false`.
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.29.0
+    created: "2026-07-01T01:52:59.851682289Z"
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: f5bce233552ea248e49e6dabd09689d18dfefc26c3c99df15b90ffa736b7d66f
+    home: https://cloudnative-pg.io
+    keywords:
+    - postgresql
+    - postgres
+    - cnpg
+    - cloudnative-pg
+    - database
+    - operator
+    - high-availability
+    - backup
+    - replication
+    - kubernetes
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-2.2.0/cnpg-cluster-2.2.0.tgz
+    version: 2.2.0
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |
@@ -3494,4 +3572,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-06-21T22:11:30.732781668Z"
+generated: "2026-07-01T01:52:59.8522544Z"
