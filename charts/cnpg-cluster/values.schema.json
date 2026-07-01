@@ -219,7 +219,7 @@
         },
         "legacyMode": {
           "type": "boolean",
-          "default": true
+          "default": false
         },
         "pluginExtraParameters": {
           "type": "object",
@@ -227,6 +227,72 @@
           "additionalProperties": {
             "type": "string"
           }
+        },
+        "endpointCA": {
+          "type": "object",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to create a Kubernetes secret for the S3 CA."
+            },
+            "secretName": {
+              "type": "string",
+              "description": "Name of the secret containing the S3 CA."
+            },
+            "key": {
+              "type": "string",
+              "description": "Key within the secret that holds the CA certificate."
+            }
+          }
+        },
+        "s3Credentials": {
+          "type": "object",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to create a Kubernetes secret for S3 credentials."
+            },
+            "secretName": {
+              "type": "string",
+              "description": "Name of the secret containing S3 credentials."
+            },
+            "accessKeyId": {
+              "type": "object",
+              "properties": {
+                "key": { "type": "string", "description": "Key in the secret for the access key ID." }
+              }
+            },
+            "secretAccessKey": {
+              "type": "object",
+              "properties": {
+                "key": { "type": "string", "description": "Key in the secret for the secret access key." }
+              }
+            },
+            "region": {
+              "type": "object",
+              "properties": {
+                "key": { "type": "string", "description": "Key in the secret for the region." }
+              }
+            }
+          }
+        },
+        "compression": {
+          "type": "string",
+          "description": "Compression algorithm for backups (gzip, bzip2, snappy). Empty disables compression."
+        },
+        "encryption": {
+          "type": "string",
+          "description": "Encryption algorithm for backups (e.g., AES256). Empty disables encryption."
+        },
+        "jobs": {
+          "type": "integer",
+          "description": "Number of parallel backup jobs."
+        },
+        "maxParallel": {
+          "type": "integer",
+          "description": "Maximum parallel WAL processing during backup."
         },
         "destinationPath": {
           "type": "string"
@@ -240,6 +306,10 @@
         "cron": {
           "type": "string",
           "description": "Cron expression for scheduled backups (quoted to handle leading `*`)."
+        },
+        "extraSpec": {
+          "type": "object",
+          "description": "Extra spec fields merged into the ObjectStore CR (e.g. serverName, tags, historyTags, instanceSidecarConfiguration)."
         }
       }
     },
@@ -251,6 +321,10 @@
         },
         "endpointURL": {
           "type": "string"
+        },
+        "extraSpec": {
+          "type": "object",
+          "description": "Extra spec fields merged into the recovery ObjectStore CR."
         }
       }
     },
@@ -282,6 +356,10 @@
           "type": "string",
           "enum": ["disable", "allow", "prefer", "require", "verify-ca", "verify-full"],
           "default": "prefer"
+        },
+        "extraSpec": {
+          "type": "object",
+          "description": "Extra spec fields merged into the replica ObjectStore CR."
         }
       }
     },

@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.29.0](https://img.shields.io/badge/AppVersion-1.29.0-informational?style=flat-square)
+![Version: 2.2.0](https://img.shields.io/badge/Version-2.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.29.0](https://img.shields.io/badge/AppVersion-1.29.0-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -17,7 +17,7 @@ helm install <release_name> tobi/cnpg-cluster
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 2.1.0
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 2.2.0
 ```
 
 ### ArgoCD
@@ -28,7 +28,7 @@ helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster 
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 2.1.0
+  targetRevision: 2.2.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -41,7 +41,7 @@ sources:
 sources:
 - repoURL: ghcr.io/this-is-tobi/helm-charts
   chart: cnpg-cluster
-  targetRevision: 2.1.0
+  targetRevision: 2.2.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -56,7 +56,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 2.1.0
+  version: 2.2.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -67,7 +67,7 @@ dependencies:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 2.1.0
+  version: 2.2.0
   repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -524,12 +524,16 @@ backup-utils:
 | backup.cron | string | `"0 0 */6 * * *"` | The cron rule used for cnpg backups. By default it runs every 6 hours. |
 | backup.destinationPath | string | `""` | S3 destination path for cnpg backups (it should be set like `s3://<bucket_name>/<path>`). |
 | backup.enabled | bool | `false` | Whether or not cnpg cluster backup should be enabled. |
+| backup.encryption | string | `""` | Encryption algorithm for backups (e.g., AES256). Leave blank to disable encryption. |
 | backup.endpointCA.create | bool | `false` | Whether or not to create S3 CA kubernetes secret used for cnpg backups. It will use `secretName`, `endpointCA.key` and `endpointCA.value` to create the secret. |
 | backup.endpointCA.key | string | `"ca.crt"` | The secret key containing S3 CA for cnpg backups. |
 | backup.endpointCA.secretName | string | `""` | The secret name containing S3 CA for cnpg backups, leave it empty to auto-generate the secret name. |
 | backup.endpointCA.value | string | `""` | The S3 certificate used for cnpg backups. Only needed if `backup.endpointCA.create` is set to `true`. |
 | backup.endpointURL | string | `""` | S3 endpoint for cnpg backups. |
+| backup.extraSpec | object | `{}` | Extra spec fields merged into the ObjectStore CR (e.g. `serverName`, `tags`, `historyTags`, `instanceSidecarConfiguration`) for fields not explicitly exposed by this chart. Only used when `backup.legacyMode` is set to `false` (See. https://cloudnative-pg.io/plugin-barman-cloud/docs/plugin-barman-cloud.v1/#objectstorespec). |
+| backup.jobs | int | `1` | Number of parallel backup jobs. |
 | backup.legacyMode | bool | `false` | Use legacy in-tree backup method instead of barman-cloud plugin (deprecated, will be removed in future CNPG versions). When `false` (recommended), uses the official barman-cloud plugin with ObjectStore CRD. When `true`, falls back to the deprecated in-tree barmanObjectStore configuration. |
+| backup.maxParallel | int | `1` | Maximum parallel WAL processing during backup. |
 | backup.pluginExtraParameters | object | `{}` | Extra parameters to pass to the barman-cloud backup plugin (e.g. `serverName` to isolate WAL paths when reusing the same S3 bucket after a recovery). Only used when `backup.legacyMode` is set to `false`. |
 | backup.retentionPolicy | string | `"14d"` | Retention policy for cnpg backups recurrences. |
 | backup.s3Credentials.accessKeyId.key | string | `"accessKeyId"` | S3 accessKeyId kubernetes secret key used for cnpg backups. |
@@ -634,6 +638,7 @@ backup-utils:
 | recovery.endpointCA.value | string | `""` | The S3 certificate used for recovery mode. Only needed if `recovery.endpointCA.create` is set to `true`. |
 | recovery.endpointURL | string | `""` | S3 endpoint used for recovery mode. |
 | recovery.extraArgs | object | `{}` | Extra configuration of the initDb bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB). |
+| recovery.extraSpec | object | `{}` | Extra spec fields merged into the recovery ObjectStore CR (e.g. `serverName`, `tags`, `historyTags`, `instanceSidecarConfiguration`). Only used when `backup.legacyMode` is set to `false` (See. https://cloudnative-pg.io/plugin-barman-cloud/docs/plugin-barman-cloud.v1/#objectstorespec). |
 | recovery.maxParallelWal | int | `8` | The number of parallel process that will be applied when applying wals. |
 | recovery.s3Credentials.accessKeyId.key | string | `"accessKeyId"` | S3 accessKeyId kubernetes secret key used for recovery mode. |
 | recovery.s3Credentials.accessKeyId.value | string | `""` | S3 accessKeyId value used for recovery mode. Only needed if `recovery.s3Credentials.create` is set to `true`. |
@@ -657,6 +662,7 @@ backup-utils:
 | replica.endpointCA.value | string | `""` | The S3 certificate used for replica mode. Only needed if `replica.endpointCA.create` is set to `true`. |
 | replica.endpointURL | string | `""` | S3 endpoint used for replica mode. |
 | replica.extraArgs | object | `{}` | Extra configuration of the initDb bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB). |
+| replica.extraSpec | object | `{}` | Extra spec fields merged into the replica ObjectStore CR (e.g. `serverName`, `tags`, `historyTags`, `instanceSidecarConfiguration`). Only used when `backup.legacyMode` is set to `false` (See. https://cloudnative-pg.io/plugin-barman-cloud/docs/plugin-barman-cloud.v1/#objectstorespec). |
 | replica.host | string | `""` | Primary cnpg cluster host used for replica mode. |
 | replica.maxParallelWal | int | `8` | The number of parallel process that will be applied when applying wals. |
 | replica.port | int | `5432` | Primary cnpg cluster port used for replica mode. |

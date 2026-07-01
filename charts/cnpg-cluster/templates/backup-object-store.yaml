@@ -26,11 +26,32 @@ spec:
       region:
         name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
         key: {{ .Values.backup.s3Credentials.region.key }}
-    {{- if .Values.backup.compression }}
+    {{- if or .Values.backup.compression .Values.backup.encryption .Values.backup.jobs }}
     data:
+      {{- if .Values.backup.compression }}
       compression: {{ .Values.backup.compression }}
+      {{- end }}
+      {{- if .Values.backup.encryption }}
+      encryption: {{ .Values.backup.encryption }}
+      {{- end }}
+      {{- if .Values.backup.jobs }}
+      jobs: {{ .Values.backup.jobs }}
+      {{- end }}
+    {{- end }}
+    {{- if or .Values.backup.compression .Values.backup.encryption .Values.backup.maxParallel }}
     wal:
+      {{- if .Values.backup.compression }}
       compression: {{ .Values.backup.compression }}
+      {{- end }}
+      {{- if .Values.backup.encryption }}
+      encryption: {{ .Values.backup.encryption }}
+      {{- end }}
+      {{- if .Values.backup.maxParallel }}
+      maxParallel: {{ .Values.backup.maxParallel }}
+      {{- end }}
     {{- end }}
   retentionPolicy: {{ .Values.backup.retentionPolicy }}
+  {{- with .Values.backup.extraSpec }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
 {{- end }}

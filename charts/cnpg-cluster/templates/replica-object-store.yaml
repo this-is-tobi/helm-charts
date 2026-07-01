@@ -26,4 +26,7 @@ spec:
       region:
         name: {{ .Values.replica.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-creds") }}
         key: {{ .Values.replica.s3Credentials.region.key }}
+  {{- with .Values.replica.extraSpec }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
 {{- end }}
