@@ -1,7 +1,7 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 2.2.0
+version: 2.2.1
 appVersion: "1.29.0"
 description: A Helm Chart to deploy easily a CNPG cluster
 home: https://cloudnative-pg.io
@@ -10,12 +10,8 @@ annotations:
   artifacthub.io/category: database
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: added
-      description: Add `backup.encryption`, `backup.jobs` and `backup.maxParallel` values to configure barman-cloud data/WAL backup encryption and parallelism (applies to both the barman-cloud plugin ObjectStore and the legacy in-tree `barmanObjectStore` configuration).
-    - kind: added
-      description: Add `backup.extraSpec`, `recovery.extraSpec` and `replica.extraSpec` values to merge extra fields (e.g. `serverName`, `tags`, `historyTags`, `instanceSidecarConfiguration`) into the barman-cloud plugin ObjectStore CRs that are not otherwise exposed by this chart.
     - kind: fixed
-      description: Fix `backup.legacyMode` default in values.schema.json to match the chart's actual default of `false`.
+      description: Remove podMonitor template that conflict with CNPG operator management.
 keywords:
 - postgresql
 - postgres
