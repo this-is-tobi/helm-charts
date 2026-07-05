@@ -1293,6 +1293,41 @@ entries:
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |
+        - kind: fixed
+          description: Remove podMonitor template that conflict with CNPG operator management.
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.29.0
+    created: "2026-07-05T23:44:39.290054313Z"
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: d503c3b0fcb4c4fa4d28072f834732dc22bd96bcd79fb314aea945dd8ad35f53
+    home: https://cloudnative-pg.io
+    keywords:
+    - postgresql
+    - postgres
+    - cnpg
+    - cloudnative-pg
+    - database
+    - operator
+    - high-availability
+    - backup
+    - replication
+    - kubernetes
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-2.2.1/cnpg-cluster-2.2.1.tgz
+    version: 2.2.1
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |
         - kind: added
           description: Add `backup.encryption`, `backup.jobs` and `backup.maxParallel` values to configure barman-cloud data/WAL backup encryption and parallelism (applies to both the barman-cloud plugin ObjectStore and the legacy in-tree `barmanObjectStore` configuration).
         - kind: added
@@ -3572,4 +3607,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-01T01:52:59.8522544Z"
+generated: "2026-07-05T23:44:39.290330062Z"
