@@ -7,6 +7,13 @@ description: A Helm chart to deploy chartname.
 # home: https://this-is-tobi.com
 deprecated: false
 annotations: {}
+#   artifacthub.io/category: storage
+#   artifacthub.io/license: MIT
+#   artifacthub.io/changes: |
+#     - kind: changed
+#       description: Upgrade backup image to v1.0.1
+#     - kind: fixed
+#       description: Remove podMonitor template that is natively handle by operator
 keywords: []
 dependencies: []
 # - name: cnpg-cluster

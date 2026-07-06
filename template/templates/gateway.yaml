@@ -12,7 +12,7 @@ metadata:
     {{- tpl (toYaml .Values.gateway.annotations) . | nindent 4 }}
   {{- end }}
 spec:
-  gatewayClassName: {{ .Values.gateway.className | required "global.gateway.className is required when creating a Gateway" }}
+  gatewayClassName: {{ .Values.gateway.className | required "gateway.className is required when creating a Gateway" }}
   {{- if .Values.gateway.addresses }}
   addresses:
   {{- toYaml .Values.gateway.addresses | nindent 2 }}

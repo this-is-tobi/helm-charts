@@ -1,0 +1,49 @@
+Release "{{ .Release.Name }}" has been deployed in namespace "{{ .Release.Namespace }}".
+
+================================================================================
+
+Check deployment status:
+  kubectl rollout status {{ .Values.servicename.deploymentType | lower }} {{ .Release.Name }}-servicename -n {{ .Release.Namespace }} -w
+
+View all resources:
+  kubectl get all -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+Follow logs in real-time:
+  kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ .Release.Name }}-servicename -f
+
+Port-forward to access the service locally:
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ .Release.Name }}-servicename 8080:{{ .Values.servicename.service.port }}
+  Access at: http://localhost:8080
+
+{{- if .Values.jobs }}
+
+Jobs status:
+  kubectl get jobs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+View specific job logs:
+  kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/component=<job-name> -f
+{{- end }}
+
+{{- if .Values.cronjobs }}
+
+CronJobs status:
+  kubectl get cronjobs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+View last CronJob run:
+  kubectl describe cronjob <cronjob-name> -n {{ .Release.Namespace }}
+{{- end }}
+
+{{- if .Values.servicename.ingress.enabled }}
+
+Ingress resources:
+  kubectl get ingress -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+{{- end }}
+
+{{- if .Values.servicename.metrics.enabled }}
+
+Metrics enabled (ServiceMonitor):
+  kubectl get servicemonitor -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+{{- end }}
+
+For more information and troubleshooting:
+  https://github.com/this-is-tobi/helm-charts/tree/main/template

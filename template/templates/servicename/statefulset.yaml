@@ -1,4 +1,4 @@
-{{- if .Values.servicename.statefulset }}
+{{- if eq .Values.servicename.deploymentType "StatefulSet" }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -13,7 +13,7 @@ spec:
   serviceName: {{ printf "%s-%s" (include "helper.fullname" .) "servicename" | trunc 63 | trimSuffix "-" }}
   template:
     metadata:
-      {{- if or .Values.servicename.podAnnotations .Values.servicename.secrets .Values.servicename.env .Values.global.env .Values.global.secrets }}
+      {{- if or .Values.servicename.podAnnotations .Values.servicename.envCm .Values.servicename.envSecret .Values.global.envCm .Values.global.envSecret }}
       annotations:
         {{- include "helper.checksum" (list $ "/servicename/configmap.yaml") | nindent 8 }}
         {{- include "helper.checksum" (list $ "/servicename/secret.yaml") | nindent 8 }}
@@ -26,12 +26,7 @@ spec:
         {{- toYaml .Values.servicename.podLabels | nindent 8 }}
         {{- end }}
     spec:
-      {{- if .Values.servicename.imagePullSecrets }}
-      imagePullSecrets:
-      {{- range .Values.servicename.imagePullSecrets }}
-      - name: {{ .name }}
-      {{- end }}
-      {{- end }}
+      {{- include "helper.imagePullSecrets" (dict "root" . "componentName" "servicename" "componentValues" .Values.servicename) | nindent 6 }}
       {{- if (get .Values "servicename").serviceAccount.enabled }}
       serviceAccountName: {{ .Values.servicename.serviceAccount.name | default (printf "%s-%s" (include "helper.fullname" .) "servicename" | trunc 63 | trimSuffix "-") }}
       {{- end }}
@@ -113,7 +108,7 @@ spec:
       tolerations: {{- toYaml .Values.servicename.tolerations | nindent 6 }}
       {{- end }}
       {{- if .Values.servicename.volumes }}
-      volumes: {{- toYaml .Values.servicename.volumes | nindent 6 }}
+      volumes: {{- tpl (toYaml .Values.servicename.volumes) . | nindent 6 }}
       {{- end }}
   {{- if .Values.servicename.volumeClaims }}
   volumeClaimTemplates: {{- toYaml .Values.servicename.volumeClaims | nindent 2 }}

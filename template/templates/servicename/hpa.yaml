@@ -7,7 +7,7 @@ metadata:
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
-    kind: Deployment
+    kind: {{ .Values.servicename.deploymentType }}
     name: {{ printf "%s-%s" (include "helper.fullname" .) "servicename" }}
   minReplicas: {{ .Values.servicename.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.servicename.autoscaling.maxReplicas }}

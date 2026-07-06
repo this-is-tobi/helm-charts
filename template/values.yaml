@@ -49,6 +49,17 @@ global:
   # -- Global Docker image registry
   # @section -- Global
   imageRegistry: ""
+  # -- Image credentials applied to every component in addition to any component-specific `imagePullSecrets`.
+  # @section -- Global
+  imagePullSecrets: []
+  # - name: "pullsecret-name-1"
+  #   create: false
+  # - name: "pullsecret-name-2"
+  #   create: true
+  #   registry: ""
+  #   username: ""
+  #   password: ""
+  #   email: ""
   # -- Globally shared ingress configuration.
   # @section -- Global
   ingress: {}
@@ -163,9 +174,10 @@ gateway:
 
 
 servicename:
-  # -- Should the app run as a StatefulSet instead of a Deployment.
+  # -- Workload kind to deploy the app as. One of "Deployment" or "StatefulSet". Use the
+  # top-level `jobs` / `cronjobs` maps for one-off or scheduled workloads.
   # @section -- Servicename
-  statefulset: false
+  deploymentType: "Deployment"
   # -- The number of application controller pods to run.
   # @section -- Servicename
   replicaCount: 1
@@ -367,7 +379,7 @@ servicename:
   # - secretRef:
   #     name: my-secret
   # -- Map or array of environment variables to inject into the app container (`valueFrom` supported).
-  # @section -- Global
+  # @section -- Servicename
   env: {}
     # A: "A"
     # B:
@@ -394,11 +406,11 @@ servicename:
     #       name: "my-secret"
     #       key: "C"
   # -- Map of environment variables to inject into a configmap loaded by the app container (`valueFrom` not supported).
-  # @section -- Global
+  # @section -- Servicename
   envCm: {}
     # D: "D"
   # -- Map of environment variables to inject into a secret loaded by the app container (`valueFrom` not supported).
-  # @section -- Global
+  # @section -- Servicename
   envSecret: {}
     # E: "E"
   probes:
@@ -828,6 +840,118 @@ servicename:
         # -- Prometheus ServiceMonitor tlsConfig.
         # @section -- Servicename
         tlsConfig: {}
+
+# -- Map of Jobs to create (e.g. one-off DB migrations, data seeding, archiving...). Each key
+# is used as the job name and as its `app.kubernetes.io/component` label. Every entry accepts
+# the fields documented in the commented example below.
+# @section -- General
+jobs: {}
+# migration:
+#   # -- Run this job as a Helm hook instead of a normal templated resource, so it executes
+#   # at a specific point in the release lifecycle (e.g. before serving traffic with the new
+#   # version). Leave disabled to have the job run like any other resource on every apply.
+#   hook:
+#     enabled: true
+#     types:
+#     - "post-install"
+#     - "post-upgrade"
+#     weight: 0
+#     deletePolicy: "before-hook-creation,hook-succeeded"
+#   image:
+#     registry: "docker.io"
+#     repository: "debian"
+#     pullPolicy: "IfNotPresent"
+#     tag: "9.9.9"
+#   imagePullSecrets: []
+#   # - name: "pullsecret-name-1"
+#   #   create: false
+#   serviceAccount:
+#     enabled: false
+#     create: false
+#     name: ""
+#     annotations: {}
+#     automountServiceAccountToken: false
+#   podAnnotations: {}
+#   podLabels: {}
+#   podSecurityContext:
+#     runAsNonRoot: true
+#     seccompProfile:
+#       type: "RuntimeDefault"
+#   securityContext:
+#     allowPrivilegeEscalation: false
+#     capabilities:
+#       drop: ["ALL"]
+#     readOnlyRootFilesystem: true
+#     runAsNonRoot: true
+#     runAsUser: 1000
+#   initContainers: []
+#   extraContainers: []
+#   command: []
+#   args: []
+#   # - "migrate"
+#   # - "--yes"
+#   envFrom: []
+#   env: {}
+#   envCm: {}
+#   envSecret: {}
+#   resources: {}
+#   volumes: []
+#   volumeMounts: []
+#   hostAliases: []
+#   nodeSelector: {}
+#   affinity: {}
+#   tolerations: []
+#   # -- Number of retries before the Job is considered failed.
+#   backoffLimit: 3
+#   # -- Number of seconds after which a finished Job (and its pods) are automatically cleaned up.
+#   ttlSecondsAfterFinished: 300
+#   # -- Number of seconds the pod can run before it is actively terminated.
+#   activeDeadlineSeconds: null
+#   # -- Desired number of successfully finished pods (leave unset for the default of 1).
+#   completions: null
+#   # -- Maximum number of pods the Job should run concurrently.
+#   parallelism: 1
+#   # -- Restart policy for the pod, must be "Never" or "OnFailure".
+#   restartPolicy: "Never"
+
+# -- Map of CronJobs to create (e.g. periodic archiving, cleanup, reports...). Each key is
+# used as the cronjob name and as its `app.kubernetes.io/component` label. Every entry accepts
+# the same fields as a `jobs` entry (see above, minus `hook`) plus the scheduling fields
+# documented in the commented example below.
+# @section -- General
+cronjobs: {}
+# archive:
+#   # -- Cron expression defining when the job should run (required).
+#   schedule: "0 2 * * *"
+#   # -- Timezone the schedule is evaluated in (defaults to the kube-controller-manager's).
+#   timeZone: ""
+#   # -- How to treat concurrent executions, one of "Allow", "Forbid" or "Replace".
+#   concurrencyPolicy: "Forbid"
+#   # -- Pause new scheduled executions without deleting the CronJob.
+#   suspend: false
+#   # -- Deadline (in seconds) for starting the job if it misses its scheduled time.
+#   startingDeadlineSeconds: 300
+#   # -- Number of successful finished jobs to keep.
+#   successfulJobsHistoryLimit: 3
+#   # -- Number of failed finished jobs to keep.
+#   failedJobsHistoryLimit: 1
+#   image:
+#     registry: "docker.io"
+#     repository: "debian"
+#     pullPolicy: "IfNotPresent"
+#     tag: "9.9.9"
+#   command: []
+#   args: []
+#   # - "archive"
+#   # - "--older-than=30d"
+#   envFrom: []
+#   env: {}
+#   envCm: {}
+#   envSecret: {}
+#   resources: {}
+#   volumes: []
+#   volumeMounts: []
+#   restartPolicy: "Never"
 
 # -- Add extra specs dynamically to this chart.
 # @section -- General
