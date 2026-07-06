@@ -11,8 +11,10 @@ A Helm chart to deploy chartname.
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | commonLabels | object | `{}` | Add labels to all the deployed resources |
+| cronjobs | object | `{}` | Map of CronJobs to create (e.g. periodic archiving, cleanup, reports...). Each key is used as the cronjob name and as its `app.kubernetes.io/component` label. Every entry accepts the same fields as a `jobs` entry (see above, minus `hook`) plus the scheduling fields documented in the commented example below. |
 | extraObjects | list | `[]` | Add extra specs dynamically to this chart. |
 | fullnameOverride | string | `""` | String to fully override the default application name. |
+| jobs | object | `{}` | Map of Jobs to create (e.g. one-off DB migrations, data seeding, archiving...). Each key is used as the job name and as its `app.kubernetes.io/component` label. Every entry accepts the fields documented in the commented example below. |
 | nameOverride | string | `""` | Provide a name in place of the default application name. |
 
 ### Global
@@ -23,6 +25,7 @@ A Helm chart to deploy chartname.
 | global.envCm | object | `{}` | Map of environment variables to inject into a configmap loaded by all containers (`valueFrom` not supported). |
 | global.envSecret | object | `{}` | Map of environment variables to inject into a secret loaded by all containers (`valueFrom` not supported). |
 | global.httpRoute | object | `{}` | Globally shared httproute configuration. |
+| global.imagePullSecrets | list | `[]` | Image credentials applied to every component in addition to any component-specific `imagePullSecrets`. |
 | global.imageRegistry | string | `""` | Global Docker image registry |
 | global.ingress | object | `{}` | Globally shared ingress configuration. |
 
@@ -51,6 +54,7 @@ A Helm chart to deploy chartname.
 | servicename.command | list | `[]` | Servicename container command. |
 | servicename.containerPort | int | `8080` | Servicename container port number. |
 | servicename.containerPortName | string | `"http"` | Servicename container port name. |
+| servicename.deploymentType | string | `"Deployment"` | Workload kind to deploy the app as. One of "Deployment" or "StatefulSet". Use the top-level `jobs` / `cronjobs` maps for one-off or scheduled workloads. |
 | servicename.env | object | `{}` | Map or array of environment variables to inject into the app container (`valueFrom` supported). |
 | servicename.envCm | object | `{}` | Map of environment variables to inject into a configmap loaded by the app container (`valueFrom` not supported). |
 | servicename.envFrom | list | `[]` | Servicename container env variables loaded from configmap or secret reference. |
@@ -67,7 +71,6 @@ A Helm chart to deploy chartname.
 | servicename.replicaCount | int | `1` | The number of application controller pods to run. |
 | servicename.revisionHistoryLimit | int | `10` | Revision history limit for the app. |
 | servicename.securityContext | object | `{}` | Toggle and define container-level security context. |
-| servicename.statefulset | bool | `false` | Should the app run as a StatefulSet instead of a Deployment. |
 | servicename.tolerations | list | `[]` | Default tolerations for app. |
 | servicename.volumeClaims | list | `[]` | List of volumeClaims to add. |
 | servicename.volumeMounts | list | `[]` | List of mounts to add (normally used with `volumes` or `volumeClaims`). |

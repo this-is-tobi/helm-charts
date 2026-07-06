@@ -1,0 +1,12 @@
+# Patterns to ignore when building packages.
+.git/
+.gitignore
+.DS_Store
+*.orig
+*.bak
+*.swp
+.vscode/
+
+# Chart development/test artifacts, not needed in the packaged chart.
+test-values.yaml
+README.md.gotmpl

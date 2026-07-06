@@ -1,0 +1,74 @@
+{{- range $name, $job := .Values.jobs }}
+{{- $serviceAccount := $job.serviceAccount | default dict }}
+{{- $hook := $job.hook | default dict }}
+---
+{{- if or $job.envCm $.Values.global.envCm }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ printf "%s-%s" (include "helper.fullname" $) $name }}
+  labels: {{- (include "helper.labels" (dict "root" $ "componentName" $name)) | nindent 4 }}
+data:
+  {{- if $.Values.global.envCm }}
+  {{- include "helper.env" $.Values.global.envCm | indent 2 }}
+  {{- end }}
+  {{- if $job.envCm }}
+  {{- include "helper.env" $job.envCm | indent 2 }}
+  {{- end }}
+---
+{{- end }}
+{{- if or $job.envSecret $.Values.global.envSecret }}
+kind: Secret
+apiVersion: v1
+metadata:
+  name: {{ printf "%s-%s" (include "helper.fullname" $) $name }}
+  labels: {{- (include "helper.labels" (dict "root" $ "componentName" $name)) | nindent 4 }}
+data:
+  {{- if $.Values.global.envSecret }}
+  {{- include "helper.secret" $.Values.global.envSecret | indent 2 }}
+  {{- end }}
+  {{- if $job.envSecret }}
+  {{- include "helper.secret" $job.envSecret | indent 2 }}
+  {{- end }}
+---
+{{- end }}
+{{- range $index, $value := $job.imagePullSecrets }}
+{{- if and $value.create $value.username $value.password }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "helper.imagePullSecretName" (dict "root" $ "componentName" $name "index" $index "value" $value) }}
+  labels: {{- (include "helper.labels" (dict "root" $ "componentName" $name)) | nindent 4 }}
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: {{ template "helper.imagePullSecret" dict "username" $value.username "password" $value.password "email" $value.email "registry" $value.registry }}
+---
+{{- end }}
+{{- end }}
+{{- if and $serviceAccount.enabled $serviceAccount.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $serviceAccount.name | default (printf "%s-%s" (include "helper.fullname" $) $name) }}
+  labels: {{- (include "helper.labels" (dict "root" $ "componentName" $name)) | nindent 4 }}
+  {{- if $serviceAccount.annotations }}
+  annotations:
+    {{- tpl (toYaml $serviceAccount.annotations) $ | nindent 4 }}
+  {{- end }}
+automountServiceAccountToken: {{ $serviceAccount.automountServiceAccountToken | default false }}
+---
+{{- end }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ printf "%s-%s" (include "helper.fullname" $) $name }}
+  labels: {{- (include "helper.labels" (dict "root" $ "componentName" $name)) | nindent 4 }}
+  {{- if $hook.enabled }}
+  annotations:
+    helm.sh/hook: {{ $hook.types | default (list "post-install" "post-upgrade") | join "," | quote }}
+    helm.sh/hook-weight: {{ $hook.weight | default 0 | quote }}
+    helm.sh/hook-delete-policy: {{ $hook.deletePolicy | default "before-hook-creation,hook-succeeded" | quote }}
+  {{- end }}
+spec:
+  {{- include "helper.job.spec" (dict "root" $ "name" $name "job" $job) | nindent 2 }}
+{{- end }}

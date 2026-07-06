@@ -1,0 +1,84 @@
+{{- range $name, $cronjob := .Values.cronjobs }}
+{{- $serviceAccount := $cronjob.serviceAccount | default dict }}
+---
+{{- if or $cronjob.envCm $.Values.global.envCm }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ printf "%s-%s" (include "helper.fullname" $) $name }}
+  labels: {{- (include "helper.labels" (dict "root" $ "componentName" $name)) | nindent 4 }}
+data:
+  {{- if $.Values.global.envCm }}
+  {{- include "helper.env" $.Values.global.envCm | indent 2 }}
+  {{- end }}
+  {{- if $cronjob.envCm }}
+  {{- include "helper.env" $cronjob.envCm | indent 2 }}
+  {{- end }}
+---
+{{- end }}
+{{- if or $cronjob.envSecret $.Values.global.envSecret }}
+kind: Secret
+apiVersion: v1
+metadata:
+  name: {{ printf "%s-%s" (include "helper.fullname" $) $name }}
+  labels: {{- (include "helper.labels" (dict "root" $ "componentName" $name)) | nindent 4 }}
+data:
+  {{- if $.Values.global.envSecret }}
+  {{- include "helper.secret" $.Values.global.envSecret | indent 2 }}
+  {{- end }}
+  {{- if $cronjob.envSecret }}
+  {{- include "helper.secret" $cronjob.envSecret | indent 2 }}
+  {{- end }}
+---
+{{- end }}
+{{- range $index, $value := $cronjob.imagePullSecrets }}
+{{- if and $value.create $value.username $value.password }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "helper.imagePullSecretName" (dict "root" $ "componentName" $name "index" $index "value" $value) }}
+  labels: {{- (include "helper.labels" (dict "root" $ "componentName" $name)) | nindent 4 }}
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: {{ template "helper.imagePullSecret" dict "username" $value.username "password" $value.password "email" $value.email "registry" $value.registry }}
+---
+{{- end }}
+{{- end }}
+{{- if and $serviceAccount.enabled $serviceAccount.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $serviceAccount.name | default (printf "%s-%s" (include "helper.fullname" $) $name) }}
+  labels: {{- (include "helper.labels" (dict "root" $ "componentName" $name)) | nindent 4 }}
+  {{- if $serviceAccount.annotations }}
+  annotations:
+    {{- tpl (toYaml $serviceAccount.annotations) $ | nindent 4 }}
+  {{- end }}
+automountServiceAccountToken: {{ $serviceAccount.automountServiceAccountToken | default false }}
+---
+{{- end }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ printf "%s-%s" (include "helper.fullname" $) $name }}
+  labels: {{- (include "helper.labels" (dict "root" $ "componentName" $name)) | nindent 4 }}
+spec:
+  schedule: {{ $cronjob.schedule | required (printf "cronjobs.%s.schedule is required" $name) | quote }}
+  {{- if $cronjob.timeZone }}
+  timeZone: {{ $cronjob.timeZone | quote }}
+  {{- end }}
+  concurrencyPolicy: {{ $cronjob.concurrencyPolicy | default "Allow" }}
+  {{- if kindIs "bool" $cronjob.suspend }}
+  suspend: {{ $cronjob.suspend }}
+  {{- end }}
+  {{- if $cronjob.startingDeadlineSeconds }}
+  startingDeadlineSeconds: {{ $cronjob.startingDeadlineSeconds }}
+  {{- end }}
+  successfulJobsHistoryLimit: {{ $cronjob.successfulJobsHistoryLimit | default 3 }}
+  failedJobsHistoryLimit: {{ $cronjob.failedJobsHistoryLimit | default 1 }}
+  jobTemplate:
+    metadata:
+      labels: {{- (include "helper.labels" (dict "root" $ "componentName" $name)) | nindent 8 }}
+    spec:
+      {{- include "helper.job.spec" (dict "root" $ "name" $name "job" $cronjob) | nindent 6 }}
+{{- end }}

@@ -6,37 +6,8 @@ fullnameOverride: "chart-test"
 global:
   env:
     GLOBAL_FOO: "GLOBAL_FOO"
-  secrets:
+  envSecret:
     GLOBAL_BAR: "GLOBAL_BAR"
-  # Gateway API test configuration
-  gateway:
-    create: true
-    name: "test-gateway"
-    className: "nginx"
-    annotations:
-      gateway/test: "true"
-    labels:
-      gateway/test: "true"
-    listeners:
-    - name: http
-      port: 80
-      protocol: HTTP
-      hostname: "*.example.com"
-      allowedRoutes:
-        namespaces:
-          from: Same
-    - name: https
-      port: 443
-      protocol: HTTPS
-      hostname: "*.example.com"
-      tls:
-        mode: Terminate
-        certificateRefs:
-        - kind: Secret
-          name: example-com-tls
-      allowedRoutes:
-        namespaces:
-          from: Same
   httpRoute:
     enabled: true
     annotations:
@@ -58,9 +29,40 @@ global:
         port: 80
 
 
+# Gateway API test configuration
+gateway:
+  create: true
+  name: "test-gateway"
+  className: "nginx"
+  annotations:
+    gateway/test: "true"
+  labels:
+    gateway/test: "true"
+  listeners:
+  - name: http
+    port: 80
+    protocol: HTTP
+    hostname: "*.example.com"
+    allowedRoutes:
+      namespaces:
+        from: Same
+  - name: https
+    port: 443
+    protocol: HTTPS
+    hostname: "*.example.com"
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - kind: Secret
+        name: example-com-tls
+    allowedRoutes:
+      namespaces:
+        from: Same
+
+
 # App configuration.
 servicename:
-  statefulset: true
+  deploymentType: "StatefulSet"
   replicaCount: 1
   image:
     repository: "docker.io/debian"
@@ -445,6 +447,76 @@ servicename:
           prometheus: kube-prometheus
         scheme: "http"
         tlsConfig: {}
+
+jobs:
+  migration:
+    hook:
+      enabled: true
+      types:
+      - "post-install"
+      - "post-upgrade"
+      weight: 0
+    image:
+      repository: "docker.io/debian"
+      pullPolicy: "Always"
+      tag: "9.9.9"
+    imagePullSecrets:
+    - name: "pullsecret-name-1"
+    serviceAccount:
+      enabled: true
+      create: true
+    podSecurityContext:
+      runAsNonRoot: true
+      seccompProfile:
+        type: "RuntimeDefault"
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+    command:
+    - "/bin/sh"
+    - "-c"
+    args:
+    - "echo migrating && sleep 1"
+    envCm:
+      MIGRATION_MODE: "upgrade"
+    envSecret:
+      MIGRATION_TOKEN: "test-token"
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "250m"
+        memory: "256Mi"
+    backoffLimit: 2
+    ttlSecondsAfterFinished: 120
+
+cronjobs:
+  archive:
+    schedule: "0 2 * * *"
+    concurrencyPolicy: "Forbid"
+    image:
+      repository: "docker.io/debian"
+      pullPolicy: "Always"
+      tag: "9.9.9"
+    command:
+    - "/bin/sh"
+    - "-c"
+    args:
+    - "echo archiving && sleep 1"
+    envCm:
+      ARCHIVE_OLDER_THAN: "30d"
+    resources:
+      requests:
+        cpu: "50m"
+        memory: "64Mi"
+      limits:
+        cpu: "100m"
+        memory: "128Mi"
 
 extraObjects:
 - apiVersion: v1

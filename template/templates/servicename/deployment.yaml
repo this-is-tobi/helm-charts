@@ -1,4 +1,4 @@
-{{- if not .Values.servicename.statefulset }}
+{{- if eq .Values.servicename.deploymentType "Deployment" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,7 +20,7 @@ spec:
     {{- end }}
   template:
     metadata:
-      {{- if or .Values.servicename.podAnnotations .Values.servicename.secrets .Values.servicename.env .Values.global.env .Values.global.secrets }}
+      {{- if or .Values.servicename.podAnnotations .Values.servicename.envCm .Values.servicename.envSecret .Values.global.envCm .Values.global.envSecret }}
       annotations:
         {{- include "helper.checksum" (list $ "/servicename/configmap.yaml") | nindent 8 }}
         {{- include "helper.checksum" (list $ "/servicename/secret.yaml") | nindent 8 }}
@@ -33,12 +33,7 @@ spec:
         {{- toYaml .Values.servicename.podLabels | nindent 8 }}
         {{- end }}
     spec:
-      {{- if .Values.servicename.imagePullSecrets }}
-      imagePullSecrets:
-      {{- range .Values.servicename.imagePullSecrets }}
-      - name: {{ .name }}
-      {{- end }}
-      {{- end }}
+      {{- include "helper.imagePullSecrets" (dict "root" . "componentName" "servicename" "componentValues" .Values.servicename) | nindent 6 }}
       {{- if (get .Values "servicename").serviceAccount.enabled }}
       serviceAccountName: {{ .Values.servicename.serviceAccount.name | default (printf "%s-%s" (include "helper.fullname" .) "servicename") }}
       {{- end }}
@@ -88,8 +83,8 @@ spec:
           {{- toYaml .Values.servicename.envFrom | nindent 8 }}
         {{- end }}
         {{- end }}
-        {{- if .Values.servicename.env }}
-        env: {{- include "helper.env.map-to-array" .Values.servicename.env | nindent 8 }}
+        {{- if or .Values.servicename.env .Values.global.env }}
+        env: {{- include "helper.componentEnv" (dict "root" . "componentEnv" .Values.servicename.env) | nindent 8 }}
         {{- end -}}
         {{- if .Values.servicename.probes.startupProbe }}
         startupProbe: {{- toYaml .Values.servicename.probes.startupProbe | nindent 10 }}
@@ -120,6 +115,6 @@ spec:
       tolerations: {{- toYaml .Values.servicename.tolerations | nindent 6 }}
       {{- end }}
       {{- if .Values.servicename.volumes }}
-      volumes: {{- toYaml .Values.servicename.volumes | nindent 6 }}
+      volumes: {{- tpl (toYaml .Values.servicename.volumes) . | nindent 6 }}
       {{- end }}
 {{- end }}
