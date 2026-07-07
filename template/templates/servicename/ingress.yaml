@@ -32,6 +32,7 @@ spec:
   - host: {{ .name | quote }}
     http:
       paths:
+      {{- range .paths }}
       - path: {{ .path | default "/" }}
         pathType: {{ .pathType | default "Prefix" }}
         backend:
@@ -45,5 +46,6 @@ spec:
             port:
               number: 80
           {{- end }}
+      {{- end }}
   {{- end }}
 {{- end }}

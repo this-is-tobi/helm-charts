@@ -77,17 +77,17 @@ servicename:
       ingress/foo: "bar"
     hosts:
     - name: "domain.local"
-      pathType: "Prefix"
-      path: "/"
-      backend:
-        serviceName: ""
-        portNumber: null
-    - name: "domain.local"
-      pathType: "Prefix"
-      path: "/api"
-      backend:
-        serviceName: "chart-test-api"
-        portNumber: 80
+      paths:
+      - pathType: "Prefix"
+        path: "/"
+        backend:
+          serviceName: ""
+          portNumber: null
+      - pathType: "Prefix"
+        path: "/api"
+        backend:
+          serviceName: "chart-test-api"
+          portNumber: 80
     tls:
     - secretName: domain.local-tls
       hosts:

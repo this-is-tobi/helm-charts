@@ -68,12 +68,18 @@ global:
     # annotations: {}
     # labels: {}
     # hosts:
-    # - backend:
-    #     serviceName: ""
-    #     portNumber: null
-    #   name: "domain.local"
-    #   pathType: "Prefix"
-    #   path: "/"
+    # - name: "domain.local"
+    #   paths:
+    #   - path: "/"
+    #     pathType: "Prefix"
+    #     backend:
+    #       serviceName: ""
+    #       portNumber: null
+    #   - path: "/api"
+    #     pathType: "Prefix"
+    #     backend:
+    #       serviceName: "my-api-service"
+    #       portNumber: 8080
     # tls:
     # - secretName: domain.local-tls
     #   hosts:
@@ -209,22 +215,26 @@ servicename:
     # @section -- Servicename
     labels: {}
     hosts:
-    - backend:
-        # -- Name of the backend service linked to the host record (leave empty to use the app service).
-        # @section -- Servicename
-        serviceName: ""
-        # -- Port used by the backend service linked to the host record (leave null to use the app service port).
-        # @section -- Servicename
-        portNumber: null
-      # -- Name of the host record.
+    - # -- Name of the host record.
       # @section -- Servicename
       name: "domain.local"
-      # -- Path type of the host record.
+      # -- Paths of the host record to manage routing (avoids repeating the same host for
+      # multiple paths/backends).
       # @section -- Servicename
-      pathType: "Prefix"
-      # -- Path of the host record to manage routing.
-      # @section -- Servicename
-      path: "/"
+      paths:
+      - # -- Path of the host record to manage routing.
+        # @section -- Servicename
+        path: "/"
+        # -- Path type of the host record.
+        # @section -- Servicename
+        pathType: "Prefix"
+        backend:
+          # -- Name of the backend service linked to the path (leave empty to use the app service).
+          # @section -- Servicename
+          serviceName: ""
+          # -- Port used by the backend service linked to the path (leave null to use the app service port).
+          # @section -- Servicename
+          portNumber: null
     # -- Enable TLS configuration.
     # @section -- Servicename
     tls: []

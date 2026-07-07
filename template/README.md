@@ -124,11 +124,12 @@ A Helm chart to deploy chartname.
 | servicename.ingress.annotations | object | `{}` | Additional ingress annotations. |
 | servicename.ingress.className | string | `""` | Defines which ingress controller will implement the resource. |
 | servicename.ingress.enabled | bool | `false` | Whether or not ingress should be enabled. |
-| servicename.ingress.hosts[0].backend.portNumber | string | `nil` | Port used by the backend service linked to the host record (leave null to use the app service port). |
-| servicename.ingress.hosts[0].backend.serviceName | string | `""` | Name of the backend service linked to the host record (leave empty to use the app service). |
 | servicename.ingress.hosts[0].name | string | `"domain.local"` | Name of the host record. |
-| servicename.ingress.hosts[0].path | string | `"/"` | Path of the host record to manage routing. |
-| servicename.ingress.hosts[0].pathType | string | `"Prefix"` | Path type of the host record. |
+| servicename.ingress.hosts[0].paths | list | `[{"backend":{"portNumber":null,"serviceName":""},"path":"/","pathType":"Prefix"}]` | Paths of the host record to manage routing (avoids repeating the same host for multiple paths/backends). |
+| servicename.ingress.hosts[0].paths[0].backend.portNumber | string | `nil` | Port used by the backend service linked to the path (leave null to use the app service port). |
+| servicename.ingress.hosts[0].paths[0].backend.serviceName | string | `""` | Name of the backend service linked to the path (leave empty to use the app service). |
+| servicename.ingress.hosts[0].paths[0].path | string | `"/"` | Path of the host record to manage routing. |
+| servicename.ingress.hosts[0].paths[0].pathType | string | `"Prefix"` | Path type of the host record. |
 | servicename.ingress.labels | object | `{}` | Additional ingress labels. |
 | servicename.ingress.tls | list | `[]` | Enable TLS configuration. |
 
