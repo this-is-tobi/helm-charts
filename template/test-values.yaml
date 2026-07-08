@@ -277,6 +277,10 @@ servicename:
     image:
       reference: quay.io/crio/artifact:v2
       pullPolicy: IfNotPresent
+  extraVolumes:
+  - name: certs
+    secret:
+      secretName: my-tls-cert
   volumeClaims:
   - metadata:
       name: app-volume
@@ -299,6 +303,10 @@ servicename:
     mountPath: /app/content
   - name: storage-volume
     mountPath: /app/storage
+  extraVolumeMounts:
+  - name: certs
+    mountPath: /etc/certs
+    readOnly: true
   service:
     type: "ClusterIP"
     port: 80
@@ -519,45 +527,47 @@ cronjobs:
         memory: "128Mi"
 
 extraObjects:
-- apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: my-configmap
-  data:
-    key: "{{ .Values.fullnameOverride }}"
-- |
-  apiVersion: v1
-  kind: Secret
-  metadata:
-    name: my-secret
-  type: Opaque
-  data:
-    password: {{ "secretpassword" | b64enc | quote }}
-- apiVersion: secrets.hashicorp.com/v1beta1
-  kind: VaultStaticSecret
-  metadata:
-    name: foo
-    labels:
-      foo/bar: "baz"
-    annotations:
-      foo/bar: "baz"
-  spec:
-    mount: "my-kv"
-    vaultAuthRef: "my-vault-auth"
-    path: "dev/foo"
-    version: 21
-    type: "kv-v2"
-    refreshAfter: "30s"
-    hmacSecretData: true
-    rolloutRestartTargets:
-    - kind: Deployment
-      name: servicename
-    destination:
-      create: true
-      overwrite: true
+  my-configmap:
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: my-configmap
+    data:
+      key: "{{ .Values.fullnameOverride }}"
+  my-secret: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: my-secret
+    type: Opaque
+    data:
+      password: {{ "secretpassword" | b64enc | quote }}
+  my-vault-secret:
+    apiVersion: secrets.hashicorp.com/v1beta1
+    kind: VaultStaticSecret
+    metadata:
+      name: foo
       labels:
         foo/bar: "baz"
       annotations:
         foo/bar: "baz"
-      name: foo
-      type: "Opaque"
+    spec:
+      mount: "my-kv"
+      vaultAuthRef: "my-vault-auth"
+      path: "dev/foo"
+      version: 21
+      type: "kv-v2"
+      refreshAfter: "30s"
+      hmacSecretData: true
+      rolloutRestartTargets:
+      - kind: Deployment
+        name: servicename
+      destination:
+        create: true
+        overwrite: true
+        labels:
+          foo/bar: "baz"
+        annotations:
+          foo/bar: "baz"
+        name: foo
+        type: "Opaque"

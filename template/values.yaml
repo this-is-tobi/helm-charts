@@ -10,6 +10,21 @@ fullnameOverride: ""
 commonLabels: {}
 
 global:
+  # -- List or map of `configMapRef`/`secretRef` entries to load into every container's
+  # `envFrom` (merged with each component's own `envFrom`, global entries first).
+  # @section -- Global
+  envFrom: []
+  # - configMapRef:
+  #     name: "my-config"
+  # - secretRef:
+  #     name: "my-secret"
+  #
+  # my-config:
+  #   configMapRef:
+  #     name: "my-config"
+  # my-secret:
+  #   secretRef:
+  #     name: "my-secret"
   # -- Map or array of environment variables to inject into all containers (`valueFrom` supported).
   # @section -- Global
   env: {}
@@ -330,7 +345,9 @@ servicename:
   # -- Labels for the app deployed pods.
   # @section -- Servicename
   podLabels: {}
-  # -- Toggle and define pod-level security context.
+  # -- Pod-level security context. Empty by default - fill in with your image's actual UID/GID
+  # (e.g. `runAsNonRoot`, `fsGroup`). Rendered via `toYaml`, so any `PodSecurityContext` field is
+  # accepted even though none is pre-populated here.
   # @section -- Servicename
   podSecurityContext: {}
     # fsGroup: 2000
@@ -355,7 +372,8 @@ servicename:
   #   volumeMounts:
   #     - mountPath: /my-volume/config
   #       name: config
-  # -- Servicename container port number.
+  # -- Servicename container port number. Set to `null`/`0` (and disable `service`/probes) for
+  # components that don't listen on any port (e.g. a queue consumer).
   # @section -- Servicename
   containerPort: &servicenameContainerPort 8080
   # -- Servicename container port name.
@@ -372,7 +390,10 @@ servicename:
   # -- Servicename container command args.
   # @section -- Servicename
   args: []
-  # -- Toggle and define container-level security context.
+  # -- Container-level security context. Empty by default - fill in with your image's actual
+  # UID/GID and hardening flags (e.g. `runAsUser`, `allowPrivilegeEscalation`,
+  # `readOnlyRootFilesystem`). Rendered via `toYaml`, so any `SecurityContext` field is accepted
+  # even though none is pre-populated here.
   # @section -- Servicename
   securityContext: {}
     # capabilities:
@@ -381,7 +402,8 @@ servicename:
     # readOnlyRootFilesystem: true
     # runAsNonRoot: true
     # runAsUser: 1000
-  # -- Servicename container env variables loaded from configmap or secret reference.
+  # -- Servicename container env variables loaded from configmap or secret reference. List or map
+  # (merged with `global.envFrom` above, global entries first); see `global.envFrom` for both forms.
   # @section -- Servicename
   envFrom: []
   # - configMapRef:
@@ -526,7 +548,9 @@ servicename:
   #   hostnames:
   #   - "foo.remote"
   #   - "bar.remote"
-  # -- List of volumes to add.
+  # -- List of volumes to add. Prefer this for volumes the chart itself always needs (e.g.
+  # security-hardening `emptyDir`s); use `extraVolumes` below for anything you add on top, so
+  # overriding one doesn't require repeating the other.
   # @section -- Servicename
   volumes: []
   # - name: config-volume
@@ -542,6 +566,13 @@ servicename:
   #   image:
   #     reference: quay.io/crio/artifact:v2
   #     pullPolicy: IfNotPresent
+  # -- Additional volumes to add, concatenated with `volumes` above at render time (e.g. to
+  # mount a cert or config from a values override without repeating the chart's own volumes).
+  # @section -- Servicename
+  extraVolumes: []
+  # - name: certs
+  #   secret:
+  #     secretName: my-tls-cert
   # -- List of volumeClaims to add.
   # @section -- Servicename
   volumeClaims: []
@@ -553,7 +584,12 @@ servicename:
   #     resources:
   #       requests:
   #         storage: 1Gi
-  # -- List of mounts to add (normally used with `volumes` or `volumeClaims`).
+  # -- Additional volumeClaims to add, concatenated with `volumeClaims` above at render time.
+  # @section -- Servicename
+  extraVolumeClaims: []
+  # -- List of mounts to add (normally used with `volumes` or `volumeClaims`). Prefer this for
+  # mounts the chart itself always needs; use `extraVolumeMounts` below for anything you add
+  # on top, so overriding one doesn't require repeating the other.
   # @section -- Servicename
   volumeMounts: []
   # - name: config-volume
@@ -568,7 +604,17 @@ servicename:
   #   mountPath: /app/content
   # - name: storage-volume
   #   mountPath: /app/storage
+  # -- Additional volumeMounts to add, concatenated with `volumeMounts` above at render time.
+  # @section -- Servicename
+  extraVolumeMounts: []
+  # - name: certs
+  #   mountPath: /etc/certs
+  #   readOnly: true
   service:
+    # -- Whether or not to create a Service for the app. Set to `false` for components that
+    # don't accept traffic (e.g. a queue consumer with no `containerPort`).
+    # @section -- Servicename
+    enabled: true
     # -- Type of service to create for the app.
     # @section -- Servicename
     type: "ClusterIP"
@@ -906,7 +952,9 @@ jobs: {}
 #   envSecret: {}
 #   resources: {}
 #   volumes: []
+#   extraVolumes: []
 #   volumeMounts: []
+#   extraVolumeMounts: []
 #   hostAliases: []
 #   nodeSelector: {}
 #   affinity: {}
@@ -963,16 +1011,20 @@ cronjobs: {}
 #   volumeMounts: []
 #   restartPolicy: "Never"
 
-# -- Add extra specs dynamically to this chart.
+# -- Map of extra specs to dynamically add to this chart. Each key is a unique, arbitrary name
+# for the object (only used so `-f` values files/overrides can add, override or remove a single
+# entry by key instead of the whole list - lists don't merge across values files in Helm).
 # @section -- General
-extraObjects: []
-# - apiVersion: v1
+extraObjects: {}
+# my-configmap:
+#   apiVersion: v1
 #   kind: ConfigMap
 #   metadata:
 #     name: my-configmap
 #   data:
 #     key: test
-# - apiVersion: secrets.hashicorp.com/v1beta1
+# my-vault-secret:
+#   apiVersion: secrets.hashicorp.com/v1beta1
 #   kind: VaultStaticSecret
 #   metadata:
 #     name: foo

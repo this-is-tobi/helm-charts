@@ -134,6 +134,48 @@ Parameters:
 
 
 {{/*
+Normalize an `envFrom` value (list of configMapRef/secretRef entries - the native Kubernetes
+shape - OR a map of arbitrary key -> single entry, so a single entry can be added/overridden/
+removed from a values override without repeating the whole list, same rationale as
+`extraObjects`) into a plain list.
+*/}}
+{{- define "helper.envFrom.map-to-array" -}}
+{{- if kindIs "map" . }}
+  {{- range $key, $val := . }}
+- {{- toYaml $val | nindent 2 }}
+  {{- end }}
+{{- else }}
+  {{- toYaml . }}
+{{- end }}
+{{- end }}
+
+
+{{/*
+Merge `global.envFrom` into a component's own `envFrom` before rendering the container envFrom
+array, so `global.envFrom` is actually injected into every component (mirrors `helper.componentEnv`
+for `env`). Both are independently normalized to a plain `- configMapRef/secretRef: ...` list
+first (regardless of whether they're written as a map or a list in values.yaml) and then
+concatenated, `global.envFrom` first: unlike `env`, Kubernetes doesn't dedupe `envFrom` entries
+by name, it merges every referenced source, with later sources winning only on individual KEY
+collisions - so this ordering (global first, component second) mirrors `env`'s precedence intent
+without needing entries to share a name.
+Parameters:
+- root: The root context.
+- componentEnvFrom: The component's own `envFrom` value (map or array), e.g. .Values.servicename.envFrom.
+*/}}
+{{- define "helper.componentEnvFrom" -}}
+{{- $globalEnvFrom := .root.Values.global.envFrom -}}
+{{- $componentEnvFrom := .componentEnvFrom -}}
+{{- if $globalEnvFrom }}
+{{- include "helper.envFrom.map-to-array" $globalEnvFrom }}
+{{- end }}
+{{ if $componentEnvFrom }}
+{{- include "helper.envFrom.map-to-array" $componentEnvFrom }}
+{{- end }}
+{{- end -}}
+
+
+{{/*
 Create configmap environment variables.
 */}}
 {{- define "helper.env" -}}
@@ -271,7 +313,7 @@ spec:
     - {{ . | quote }}
     {{- end }}
     {{- end }}
-    {{- if or $job.envCm $root.Values.global.envCm $job.envSecret $root.Values.global.envSecret $job.envFrom }}
+    {{- if or $job.envCm $root.Values.global.envCm $job.envSecret $root.Values.global.envSecret $job.envFrom $root.Values.global.envFrom }}
     envFrom:
     {{- if or $job.envCm $root.Values.global.envCm }}
     - configMapRef:
@@ -281,8 +323,8 @@ spec:
     - secretRef:
         name: {{ printf "%s-%s" (include "helper.fullname" $root) $name }}
     {{- end }}
-    {{- if $job.envFrom }}
-      {{- toYaml $job.envFrom | nindent 4 }}
+    {{- if or $job.envFrom $root.Values.global.envFrom }}
+      {{- include "helper.componentEnvFrom" (dict "root" $root "componentEnvFrom" $job.envFrom) | nindent 4 }}
     {{- end }}
     {{- end }}
     {{- if or $job.env $root.Values.global.env }}
@@ -291,8 +333,8 @@ spec:
     {{- if $job.resources }}
     resources: {{- toYaml $job.resources | nindent 6 }}
     {{- end }}
-    {{- if $job.volumeMounts }}
-    volumeMounts: {{- toYaml $job.volumeMounts | nindent 4 }}
+    {{- if or $job.volumeMounts $job.extraVolumeMounts }}
+    volumeMounts: {{- toYaml (concat (default (list) $job.volumeMounts) (default (list) $job.extraVolumeMounts)) | nindent 4 }}
     {{- end }}
   {{- if $job.extraContainers }}
     {{- tpl (toYaml $job.extraContainers) $root | nindent 2 }}
@@ -309,8 +351,129 @@ spec:
   {{- if $job.tolerations }}
   tolerations: {{- toYaml $job.tolerations | nindent 2 }}
   {{- end }}
-  {{- if $job.volumes }}
-  volumes: {{- tpl (toYaml $job.volumes) $root | nindent 2 }}
+  {{- if or $job.volumes $job.extraVolumes }}
+  volumes: {{- tpl (toYaml (concat (default (list) $job.volumes) (default (list) $job.extraVolumes))) $root | nindent 2 }}
+  {{- end }}
+{{- end -}}
+
+
+{{/*
+Render the pod template (metadata + spec) shared by a Deployment/StatefulSet component
+(e.g. `servicename`). Deployment and StatefulSet only differ in a handful of top-level
+spec fields (replicas vs. volumeClaimTemplates, serviceName, etc.) - the PodTemplateSpec
+they wrap is identical, so it's shared here to avoid maintaining it twice per component
+(mirrors `helper.job.podTemplate` above, shared between Job and CronJob).
+Parameters:
+- root: The root context.
+- name: The component name (e.g. "servicename"), used to derive its labels/CM/Secret/
+  ServiceAccount name and to locate its configmap.yaml/secret.yaml for checksums.
+- component: The component's values map (e.g. .Values.servicename).
+*/}}
+{{- define "helper.component.podTemplate" -}}
+{{- $root := .root -}}
+{{- $name := .name -}}
+{{- $component := .component -}}
+metadata:
+  {{- if or $component.podAnnotations $component.envCm $component.envSecret $root.Values.global.envCm $root.Values.global.envSecret }}
+  annotations:
+    {{- include "helper.checksum" (list $root (printf "/%s/configmap.yaml" $name)) | nindent 4 }}
+    {{- include "helper.checksum" (list $root (printf "/%s/secret.yaml" $name)) | nindent 4 }}
+    {{- if $component.podAnnotations }}
+    {{- toYaml $component.podAnnotations | nindent 4 }}
+    {{- end }}
+  {{- end }}
+  labels: {{- include "helper.labels" (dict "root" $root "componentName" $name) | nindent 4 }}
+    {{- if $component.podLabels }}
+    {{- toYaml $component.podLabels | nindent 4 }}
+    {{- end }}
+spec:
+  {{- include "helper.imagePullSecrets" (dict "root" $root "componentName" $name "componentValues" $component) | nindent 2 }}
+  {{- if $component.serviceAccount.enabled }}
+  serviceAccountName: {{ $component.serviceAccount.name | default (printf "%s-%s" (include "helper.fullname" $root) $name | trunc 63 | trimSuffix "-") }}
+  {{- end }}
+  {{- if $component.podSecurityContext }}
+  securityContext: {{- toYaml $component.podSecurityContext | nindent 4 }}
+  {{- end }}
+  {{- if $component.initContainers }}
+  initContainers: {{- tpl (toYaml $component.initContainers) $root | nindent 2 }}
+  {{- end }}
+  containers:
+  - name: {{ $name }}
+    {{- if $component.securityContext }}
+    securityContext: {{- toYaml $component.securityContext | nindent 6 }}
+    {{- end }}
+    image: "{{ $root.Values.global.imageRegistry | default $component.image.registry }}/{{ $component.image.repository }}:{{ $component.image.tag | default $root.Chart.AppVersion }}"
+    imagePullPolicy: {{ $component.image.pullPolicy }}
+    {{- if $component.command }}
+    command:
+    {{- range $component.command }}
+    - {{ . | quote }}
+    {{- end }}
+    {{- end }}
+    {{- if $component.args }}
+    args:
+    {{- range $component.args }}
+    - {{ . | quote }}
+    {{- end }}
+    {{- end }}
+    {{- if or $component.containerPort $component.extraPorts }}
+    ports:
+    {{- if $component.containerPort }}
+    - containerPort: {{ $component.containerPort }}
+      name: {{ $component.containerPortName | default "http" }}
+      protocol: TCP
+    {{- end }}
+    {{- if $component.extraPorts }}
+      {{- toYaml $component.extraPorts | nindent 4 }}
+    {{- end }}
+    {{- end }}
+    {{- if or $component.envCm $root.Values.global.envCm $component.envSecret $root.Values.global.envSecret $component.envFrom $root.Values.global.envFrom }}
+    envFrom:
+    {{- if or $component.envCm $root.Values.global.envCm }}
+    - configMapRef:
+        name: {{ printf "%s-%s" (include "helper.fullname" $root) $name }}
+    {{- end }}
+    {{- if or $component.envSecret $root.Values.global.envSecret }}
+    - secretRef:
+        name: {{ printf "%s-%s" (include "helper.fullname" $root) $name }}
+    {{- end }}
+    {{- if or $component.envFrom $root.Values.global.envFrom }}
+      {{- include "helper.componentEnvFrom" (dict "root" $root "componentEnvFrom" $component.envFrom) | nindent 4 }}
+    {{- end }}
+    {{- end }}
+    {{- if or $component.env $root.Values.global.env }}
+    env: {{- include "helper.componentEnv" (dict "root" $root "componentEnv" $component.env) | nindent 4 }}
+    {{- end }}
+    {{- if $component.probes.startupProbe }}
+    startupProbe: {{- toYaml $component.probes.startupProbe | nindent 6 }}
+    {{- end }}
+    {{- if $component.probes.readinessProbe }}
+    readinessProbe: {{- toYaml $component.probes.readinessProbe | nindent 6 }}
+    {{- end }}
+    {{- if $component.probes.livenessProbe }}
+    livenessProbe: {{- toYaml $component.probes.livenessProbe | nindent 6 }}
+    {{- end }}
+    resources: {{- toYaml $component.resources | nindent 6 }}
+    {{- if or $component.volumeMounts $component.extraVolumeMounts }}
+    volumeMounts: {{- toYaml (concat (default (list) $component.volumeMounts) (default (list) $component.extraVolumeMounts)) | nindent 4 }}
+    {{- end }}
+  {{- if $component.extraContainers }}
+    {{- tpl (toYaml $component.extraContainers) $root | nindent 2 }}
+  {{- end }}
+  {{- if $component.hostAliases }}
+  hostAliases: {{- toYaml $component.hostAliases | nindent 2 }}
+  {{- end }}
+  {{- if $component.nodeSelector }}
+  nodeSelector: {{- toYaml $component.nodeSelector | nindent 4 }}
+  {{- end }}
+  {{- if $component.affinity }}
+  affinity: {{- toYaml $component.affinity | nindent 4 }}
+  {{- end }}
+  {{- if $component.tolerations }}
+  tolerations: {{- toYaml $component.tolerations | nindent 2 }}
+  {{- end }}
+  {{- if or $component.volumes $component.extraVolumes }}
+  volumes: {{- tpl (toYaml (concat (default (list) $component.volumes) (default (list) $component.extraVolumes))) $root | nindent 2 }}
   {{- end }}
 {{- end -}}
 

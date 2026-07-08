@@ -1,4 +1,4 @@
-{{ range .Values.extraObjects }}
+{{ range $name, $obj := .Values.extraObjects }}
 ---
-{{ tpl (ternary . (toYaml .) (typeIs "string" .)) $ }}
+{{ tpl (ternary $obj (toYaml $obj) (typeIs "string" $obj)) $ }}
 {{ end }}

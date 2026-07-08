@@ -12,7 +12,7 @@ A Helm chart to deploy chartname.
 |-----|------|---------|-------------|
 | commonLabels | object | `{}` | Add labels to all the deployed resources |
 | cronjobs | object | `{}` | Map of CronJobs to create (e.g. periodic archiving, cleanup, reports...). Each key is used as the cronjob name and as its `app.kubernetes.io/component` label. Every entry accepts the same fields as a `jobs` entry (see above, minus `hook`) plus the scheduling fields documented in the commented example below. |
-| extraObjects | list | `[]` | Add extra specs dynamically to this chart. |
+| extraObjects | object | `{}` | Map of extra specs to dynamically add to this chart. Each key is a unique, arbitrary name for the object (only used so `-f` values files/overrides can add, override or remove a single entry by key instead of the whole list - lists don't merge across values files in Helm). |
 | fullnameOverride | string | `""` | String to fully override the default application name. |
 | jobs | object | `{}` | Map of Jobs to create (e.g. one-off DB migrations, data seeding, archiving...). Each key is used as the job name and as its `app.kubernetes.io/component` label. Every entry accepts the fields documented in the commented example below. |
 | nameOverride | string | `""` | Provide a name in place of the default application name. |
@@ -23,6 +23,7 @@ A Helm chart to deploy chartname.
 |-----|------|---------|-------------|
 | global.env | object | `{}` | Map or array of environment variables to inject into all containers (`valueFrom` supported). |
 | global.envCm | object | `{}` | Map of environment variables to inject into a configmap loaded by all containers (`valueFrom` not supported). |
+| global.envFrom | list | `[]` | List or map of `configMapRef`/`secretRef` entries to load into every container's `envFrom` (merged with each component's own `envFrom`, global entries first). |
 | global.envSecret | object | `{}` | Map of environment variables to inject into a secret loaded by all containers (`valueFrom` not supported). |
 | global.httpRoute | object | `{}` | Globally shared httproute configuration. |
 | global.imagePullSecrets | list | `[]` | Image credentials applied to every component in addition to any component-specific `imagePullSecrets`. |
@@ -52,29 +53,32 @@ A Helm chart to deploy chartname.
 | servicename.affinity | object | `{}` | Affinity used for app pod. |
 | servicename.args | list | `[]` | Servicename container command args. |
 | servicename.command | list | `[]` | Servicename container command. |
-| servicename.containerPort | int | `8080` | Servicename container port number. |
+| servicename.containerPort | int | `8080` | Servicename container port number. Set to `null`/`0` (and disable `service`/probes) for components that don't listen on any port (e.g. a queue consumer). |
 | servicename.containerPortName | string | `"http"` | Servicename container port name. |
 | servicename.deploymentType | string | `"Deployment"` | Workload kind to deploy the app as. One of "Deployment" or "StatefulSet". Use the top-level `jobs` / `cronjobs` maps for one-off or scheduled workloads. |
 | servicename.env | object | `{}` | Map or array of environment variables to inject into the app container (`valueFrom` supported). |
 | servicename.envCm | object | `{}` | Map of environment variables to inject into a configmap loaded by the app container (`valueFrom` not supported). |
-| servicename.envFrom | list | `[]` | Servicename container env variables loaded from configmap or secret reference. |
+| servicename.envFrom | list | `[]` | Servicename container env variables loaded from configmap or secret reference. List or map (merged with `global.envFrom` above, global entries first); see `global.envFrom` for both forms. |
 | servicename.envSecret | object | `{}` | Map of environment variables to inject into a secret loaded by the app container (`valueFrom` not supported). |
 | servicename.extraContainers | list | `[]` | Extra containers to add to the app pod as sidecars. |
 | servicename.extraPorts | list | `[]` | Servicename extra container ports. |
+| servicename.extraVolumeClaims | list | `[]` | Additional volumeClaims to add, concatenated with `volumeClaims` above at render time. |
+| servicename.extraVolumeMounts | list | `[]` | Additional volumeMounts to add, concatenated with `volumeMounts` above at render time. |
+| servicename.extraVolumes | list | `[]` | Additional volumes to add, concatenated with `volumes` above at render time (e.g. to mount a cert or config from a values override without repeating the chart's own volumes). |
 | servicename.hostAliases | list | `[]` | Host aliases that will be injected at pod-level into /etc/hosts. |
 | servicename.imagePullSecrets | list | `[]` | Image credentials configuration. |
 | servicename.initContainers | list | `[]` | Init containers to add to the app pod. |
 | servicename.nodeSelector | object | `{}` | Default node selector for app. |
 | servicename.podAnnotations | object | `{}` | Annotations for the app deployed pods. |
 | servicename.podLabels | object | `{}` | Labels for the app deployed pods. |
-| servicename.podSecurityContext | object | `{}` | Toggle and define pod-level security context. |
+| servicename.podSecurityContext | object | `{}` | Pod-level security context. Empty by default - fill in with your image's actual UID/GID (e.g. `runAsNonRoot`, `fsGroup`). Rendered via `toYaml`, so any `PodSecurityContext` field is accepted even though none is pre-populated here. |
 | servicename.replicaCount | int | `1` | The number of application controller pods to run. |
 | servicename.revisionHistoryLimit | int | `10` | Revision history limit for the app. |
-| servicename.securityContext | object | `{}` | Toggle and define container-level security context. |
+| servicename.securityContext | object | `{}` | Container-level security context. Empty by default - fill in with your image's actual UID/GID and hardening flags (e.g. `runAsUser`, `allowPrivilegeEscalation`, `readOnlyRootFilesystem`). Rendered via `toYaml`, so any `SecurityContext` field is accepted even though none is pre-populated here. |
 | servicename.tolerations | list | `[]` | Default tolerations for app. |
 | servicename.volumeClaims | list | `[]` | List of volumeClaims to add. |
-| servicename.volumeMounts | list | `[]` | List of mounts to add (normally used with `volumes` or `volumeClaims`). |
-| servicename.volumes | list | `[]` | List of volumes to add. |
+| servicename.volumeMounts | list | `[]` | List of mounts to add (normally used with `volumes` or `volumeClaims`). Prefer this for mounts the chart itself always needs; use `extraVolumeMounts` below for anything you add on top, so overriding one doesn't require repeating the other. |
+| servicename.volumes | list | `[]` | List of volumes to add. Prefer this for volumes the chart itself always needs (e.g. security-hardening `emptyDir`s); use `extraVolumes` below for anything you add on top, so overriding one doesn't require repeating the other. |
 
 #### Autoscaling
 
@@ -218,6 +222,7 @@ A Helm chart to deploy chartname.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| servicename.service.enabled | bool | `true` | Whether or not to create a Service for the app. Set to `false` for components that don't accept traffic (e.g. a queue consumer with no `containerPort`). |
 | servicename.service.extraPorts | list | `[]` | Extra service ports. |
 | servicename.service.nodePort | int | `31000` | Port used when type is `NodePort` to expose the service on the given node port. |
 | servicename.service.port | int | `80` | Port used by the service. |
