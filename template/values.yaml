@@ -1,3 +1,10 @@
+# -- Master switch for the whole chart. When `false`, every template renders nothing - use this
+# to keep a release/namespace registered with a deployment system (e.g. an ArgoCD Application
+# that always gets generated for every app/env combination) without actually deploying any
+# resource into it. Note this does NOT cover subchart dependencies added via `Chart.yaml` (e.g. a
+# bundled database/cache) - those still need their own `enabled: false` alongside this one.
+# @section -- General
+enabled: true
 # -- Provide a name in place of the default application name.
 # @section -- General
 nameOverride: ""

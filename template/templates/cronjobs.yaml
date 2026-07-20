@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 {{- range $name, $cronjob := .Values.cronjobs }}
 {{- $serviceAccount := $cronjob.serviceAccount | default dict }}
 ---
@@ -81,4 +82,5 @@ spec:
       labels: {{- (include "helper.labels" (dict "root" $ "componentName" $name)) | nindent 8 }}
     spec:
       {{- include "helper.job.spec" (dict "root" $ "name" $name "job" $cronjob) | nindent 6 }}
+{{- end }}
 {{- end }}

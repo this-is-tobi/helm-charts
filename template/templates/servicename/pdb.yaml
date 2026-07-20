@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 {{- if .Values.servicename.pdb.enabled }}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -18,4 +19,5 @@ spec:
   {{- end }}
   selector:
     matchLabels: {{- include "helper.selectorLabels" (dict "root" . "componentName" "servicename") | nindent 6 }}
+{{- end }}
 {{- end }}

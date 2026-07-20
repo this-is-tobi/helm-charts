@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 {{- if .Values.servicename.metrics.enabled }}
 apiVersion: v1
 kind: Service
@@ -18,4 +19,5 @@ spec:
     protocol: TCP
     name: {{ .Values.servicename.metrics.service.portName | default "metrics" }}
   selector: {{- include "helper.selectorLabels" (dict "root" . "componentName" "servicename") | nindent 4 }}
+{{- end }}
 {{- end }}

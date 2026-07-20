@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 {{- if eq .Values.servicename.deploymentType "Deployment" }}
 apiVersion: apps/v1
 kind: Deployment
@@ -20,4 +21,5 @@ spec:
     {{- end }}
   template:
     {{- include "helper.component.podTemplate" (dict "root" . "name" "servicename" "component" .Values.servicename) | nindent 4 }}
+{{- end }}
 {{- end }}

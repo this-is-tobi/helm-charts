@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 {{- if eq .Values.servicename.deploymentType "StatefulSet" }}
 apiVersion: apps/v1
 kind: StatefulSet
@@ -16,4 +17,5 @@ spec:
   {{- if or .Values.servicename.volumeClaims .Values.servicename.extraVolumeClaims }}
   volumeClaimTemplates: {{- toYaml (concat (default (list) .Values.servicename.volumeClaims) (default (list) .Values.servicename.extraVolumeClaims)) | nindent 2 }}
   {{- end }}
+{{- end }}
 {{- end }}

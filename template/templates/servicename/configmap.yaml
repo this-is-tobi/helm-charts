@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 {{- if or .Values.servicename.envCm .Values.global.envCm -}}
 kind: ConfigMap
 apiVersion: v1
@@ -12,3 +13,4 @@ data:
   {{- include "helper.env" .Values.servicename.envCm | indent 2 }}
   {{- end -}}
 {{- end -}}
+{{- end }}

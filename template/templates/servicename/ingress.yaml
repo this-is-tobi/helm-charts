@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 {{- if .Values.servicename.ingress.enabled -}}
 {{- $fullNameApp := printf "%s-%s" (include "helper.fullname" .) "servicename" -}}
 {{- $svcPortApp := .Values.servicename.service.port -}}
@@ -48,4 +49,5 @@ spec:
           {{- end }}
       {{- end }}
   {{- end }}
+{{- end }}
 {{- end }}
