@@ -1293,6 +1293,43 @@ entries:
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |
+        - kind: added
+          description: Add backup.dataAdditionalCommandArgs and backup.walAdditionalCommandArgs to pass extra arguments to barman-cloud-backup and barman-cloud-wal-archive (e.g. --min-chunk-size to avoid the S3 1000 multipart chunks limit).
+        - kind: added
+          description: Add backup/recovery/replica extraConfiguration values deep-merged into the barman object store configuration to support any field not explicitly exposed by the chart.
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.29.0
+    created: "2026-07-22T18:53:47.923535085Z"
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: 36cc59fa5e77be3ca4701317242b526ee70b5c583965c3c5da027235c093fbf9
+    home: https://cloudnative-pg.io
+    keywords:
+    - postgresql
+    - postgres
+    - cnpg
+    - cloudnative-pg
+    - database
+    - operator
+    - high-availability
+    - backup
+    - replication
+    - kubernetes
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-2.3.0/cnpg-cluster-2.3.0.tgz
+    version: 2.3.0
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |
         - kind: fixed
           description: Remove podMonitor template that conflict with CNPG operator management.
       artifacthub.io/license: MIT
@@ -3607,4 +3644,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-07-05T23:44:39.290330062Z"
+generated: "2026-07-22T18:53:47.923981766Z"
