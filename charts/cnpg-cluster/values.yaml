@@ -184,6 +184,9 @@ recovery:
     # recoveryTarget:
     #   backupID: 20250214T120000
     #   targetImmediate: true
+  # -- Extra fields deep-merged into the recovery barman object store configuration (plugin ObjectStore `spec.configuration` or legacy in-tree `barmanObjectStore`) for fields not explicitly exposed by this chart (e.g. `wal.maxParallel`, `wal.restoreAdditionalCommandArgs`). Provided fields take precedence over chart-rendered ones; lists are replaced, not merged (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BarmanObjectStoreConfiguration).
+  # @section -- Recovery mode
+  extraConfiguration: {}
   # -- Extra spec fields merged into the recovery ObjectStore CR (e.g. `serverName`, `tags`, `historyTags`, `instanceSidecarConfiguration`). Only used when `backup.legacyMode` is set to `false` (See. https://cloudnative-pg.io/plugin-barman-cloud/docs/plugin-barman-cloud.v1/#objectstorespec).
   # @section -- Recovery mode
   extraSpec: {}
@@ -263,6 +266,9 @@ replica:
   # -- Extra configuration of the initDb bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB).
   # @section -- Replica mode
   extraArgs: {}
+  # -- Extra fields deep-merged into the replica barman object store configuration (plugin ObjectStore `spec.configuration` or legacy in-tree `barmanObjectStore`) for fields not explicitly exposed by this chart (e.g. `wal.maxParallel`, `wal.restoreAdditionalCommandArgs`). Provided fields take precedence over chart-rendered ones; lists are replaced, not merged (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BarmanObjectStoreConfiguration).
+  # @section -- Replica mode
+  extraConfiguration: {}
   # -- Extra spec fields merged into the replica ObjectStore CR (e.g. `serverName`, `tags`, `historyTags`, `instanceSidecarConfiguration`). Only used when `backup.legacyMode` is set to `false` (See. https://cloudnative-pg.io/plugin-barman-cloud/docs/plugin-barman-cloud.v1/#objectstorespec).
   # @section -- Replica mode
   extraSpec: {}
@@ -373,12 +379,21 @@ backup:
   # -- Maximum parallel WAL processing during backup.
   # @section -- Backup
   maxParallel: 1
+  # -- Additional command line arguments passed to `barman-cloud-backup` (e.g. `["--min-chunk-size=100MB"]` to stay under the S3 limit of 1000 multipart upload chunks on large backups).
+  # @section -- Backup
+  dataAdditionalCommandArgs: []
+  # -- Additional command line arguments passed to `barman-cloud-wal-archive` (e.g. `["--read-timeout=60"]`).
+  # @section -- Backup
+  walAdditionalCommandArgs: []
   # -- The cron rule used for cnpg backups. By default it runs every 6 hours.
   # @section -- Backup
   cron: "0 0 */6 * * *"
   # -- Retention policy for cnpg backups recurrences.
   # @section -- Backup
   retentionPolicy: "14d"
+  # -- Extra fields deep-merged into the barman object store configuration (plugin ObjectStore `spec.configuration` or legacy in-tree `barmanObjectStore`) for fields not explicitly exposed by this chart (e.g. `tags`, `historyTags`, `data.immediateCheckpoint`, `wal.restoreAdditionalCommandArgs`, `azureCredentials`). Provided fields take precedence over chart-rendered ones; lists are replaced, not merged (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BarmanObjectStoreConfiguration).
+  # @section -- Backup
+  extraConfiguration: {}
   # -- Extra spec fields merged into the ObjectStore CR (e.g. `serverName`, `tags`, `historyTags`, `instanceSidecarConfiguration`) for fields not explicitly exposed by this chart. Only used when `backup.legacyMode` is set to `false` (See. https://cloudnative-pg.io/plugin-barman-cloud/docs/plugin-barman-cloud.v1/#objectstorespec).
   # @section -- Backup
   extraSpec: {}

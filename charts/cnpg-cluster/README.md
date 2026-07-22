@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 2.2.1](https://img.shields.io/badge/Version-2.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.29.0](https://img.shields.io/badge/AppVersion-1.29.0-informational?style=flat-square)
+![Version: 2.3.0](https://img.shields.io/badge/Version-2.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.29.0](https://img.shields.io/badge/AppVersion-1.29.0-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -17,7 +17,7 @@ helm install <release_name> tobi/cnpg-cluster
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 2.2.1
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 2.3.0
 ```
 
 ### ArgoCD
@@ -28,7 +28,7 @@ helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster 
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 2.2.1
+  targetRevision: 2.3.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -41,7 +41,7 @@ sources:
 sources:
 - repoURL: ghcr.io/this-is-tobi/helm-charts
   chart: cnpg-cluster
-  targetRevision: 2.2.1
+  targetRevision: 2.3.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -56,7 +56,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 2.2.1
+  version: 2.3.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -67,7 +67,7 @@ dependencies:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 2.2.1
+  version: 2.3.0
   repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -522,6 +522,7 @@ backup-utils:
 |-----|------|---------|-------------|
 | backup.compression | string | `""` | Which compression algorithm should be used for cnpg backups (should be one of "gzip", "bzip2" or "snappy"), leave blank to disable compression. |
 | backup.cron | string | `"0 0 */6 * * *"` | The cron rule used for cnpg backups. By default it runs every 6 hours. |
+| backup.dataAdditionalCommandArgs | list | `[]` | Additional command line arguments passed to `barman-cloud-backup` (e.g. `["--min-chunk-size=100MB"]` to stay under the S3 limit of 1000 multipart upload chunks on large backups). |
 | backup.destinationPath | string | `""` | S3 destination path for cnpg backups (it should be set like `s3://<bucket_name>/<path>`). |
 | backup.enabled | bool | `false` | Whether or not cnpg cluster backup should be enabled. |
 | backup.encryption | string | `""` | Encryption algorithm for backups (e.g., AES256). Leave blank to disable encryption. |
@@ -530,6 +531,7 @@ backup-utils:
 | backup.endpointCA.secretName | string | `""` | The secret name containing S3 CA for cnpg backups, leave it empty to auto-generate the secret name. |
 | backup.endpointCA.value | string | `""` | The S3 certificate used for cnpg backups. Only needed if `backup.endpointCA.create` is set to `true`. |
 | backup.endpointURL | string | `""` | S3 endpoint for cnpg backups. |
+| backup.extraConfiguration | object | `{}` | Extra fields deep-merged into the barman object store configuration (plugin ObjectStore `spec.configuration` or legacy in-tree `barmanObjectStore`) for fields not explicitly exposed by this chart (e.g. `tags`, `historyTags`, `data.immediateCheckpoint`, `wal.restoreAdditionalCommandArgs`, `azureCredentials`). Provided fields take precedence over chart-rendered ones; lists are replaced, not merged (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BarmanObjectStoreConfiguration). |
 | backup.extraSpec | object | `{}` | Extra spec fields merged into the ObjectStore CR (e.g. `serverName`, `tags`, `historyTags`, `instanceSidecarConfiguration`) for fields not explicitly exposed by this chart. Only used when `backup.legacyMode` is set to `false` (See. https://cloudnative-pg.io/plugin-barman-cloud/docs/plugin-barman-cloud.v1/#objectstorespec). |
 | backup.jobs | int | `1` | Number of parallel backup jobs. |
 | backup.legacyMode | bool | `false` | Use legacy in-tree backup method instead of barman-cloud plugin (deprecated, will be removed in future CNPG versions). When `false` (recommended), uses the official barman-cloud plugin with ObjectStore CRD. When `true`, falls back to the deprecated in-tree barmanObjectStore configuration. |
@@ -544,6 +546,7 @@ backup-utils:
 | backup.s3Credentials.secretAccessKey.key | string | `"secretAccessKey"` | S3 secretAccessKey kubernetes secret key used for cnpg backups. |
 | backup.s3Credentials.secretAccessKey.value | string | `""` | S3 secretAccessKey value used for cnpg backups. Only needed if `backup.s3Credentials.create` is set to `true`. |
 | backup.s3Credentials.secretName | string | `""` | S3 kubernetes secret name used for cnpg backups, leave it empty to auto-generate the secret name. |
+| backup.walAdditionalCommandArgs | list | `[]` | Additional command line arguments passed to `barman-cloud-wal-archive` (e.g. `["--read-timeout=60"]`). |
 
 ### Database
 
@@ -638,6 +641,7 @@ backup-utils:
 | recovery.endpointCA.value | string | `""` | The S3 certificate used for recovery mode. Only needed if `recovery.endpointCA.create` is set to `true`. |
 | recovery.endpointURL | string | `""` | S3 endpoint used for recovery mode. |
 | recovery.extraArgs | object | `{}` | Extra configuration of the initDb bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB). |
+| recovery.extraConfiguration | object | `{}` | Extra fields deep-merged into the recovery barman object store configuration (plugin ObjectStore `spec.configuration` or legacy in-tree `barmanObjectStore`) for fields not explicitly exposed by this chart (e.g. `wal.maxParallel`, `wal.restoreAdditionalCommandArgs`). Provided fields take precedence over chart-rendered ones; lists are replaced, not merged (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BarmanObjectStoreConfiguration). |
 | recovery.extraSpec | object | `{}` | Extra spec fields merged into the recovery ObjectStore CR (e.g. `serverName`, `tags`, `historyTags`, `instanceSidecarConfiguration`). Only used when `backup.legacyMode` is set to `false` (See. https://cloudnative-pg.io/plugin-barman-cloud/docs/plugin-barman-cloud.v1/#objectstorespec). |
 | recovery.maxParallelWal | int | `8` | The number of parallel process that will be applied when applying wals. |
 | recovery.s3Credentials.accessKeyId.key | string | `"accessKeyId"` | S3 accessKeyId kubernetes secret key used for recovery mode. |
@@ -662,6 +666,7 @@ backup-utils:
 | replica.endpointCA.value | string | `""` | The S3 certificate used for replica mode. Only needed if `replica.endpointCA.create` is set to `true`. |
 | replica.endpointURL | string | `""` | S3 endpoint used for replica mode. |
 | replica.extraArgs | object | `{}` | Extra configuration of the initDb bootstrap process (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB). |
+| replica.extraConfiguration | object | `{}` | Extra fields deep-merged into the replica barman object store configuration (plugin ObjectStore `spec.configuration` or legacy in-tree `barmanObjectStore`) for fields not explicitly exposed by this chart (e.g. `wal.maxParallel`, `wal.restoreAdditionalCommandArgs`). Provided fields take precedence over chart-rendered ones; lists are replaced, not merged (See. https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BarmanObjectStoreConfiguration). |
 | replica.extraSpec | object | `{}` | Extra spec fields merged into the replica ObjectStore CR (e.g. `serverName`, `tags`, `historyTags`, `instanceSidecarConfiguration`). Only used when `backup.legacyMode` is set to `false` (See. https://cloudnative-pg.io/plugin-barman-cloud/docs/plugin-barman-cloud.v1/#objectstorespec). |
 | replica.host | string | `""` | Primary cnpg cluster host used for replica mode. |
 | replica.maxParallelWal | int | `8` | The number of parallel process that will be applied when applying wals. |
