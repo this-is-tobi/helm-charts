@@ -8,24 +8,7 @@ metadata:
   annotations: {{- toYaml .Values.annotations | nindent 4 }}
   {{- end }}
 spec:
-  configuration:
-    destinationPath: {{ .Values.replica.destinationPath }}
-    endpointURL: {{ .Values.replica.endpointURL }}
-    {{- if or .Values.replica.endpointCA.create .Values.replica.endpointCA.secretName }}
-    endpointCA:
-      name: {{ .Values.replica.endpointCA.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-ca") }}
-      key: {{ .Values.replica.endpointCA.key }}
-    {{- end }}
-    s3Credentials:
-      accessKeyId:
-        name: {{ .Values.replica.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-creds") }}
-        key: {{ .Values.replica.s3Credentials.accessKeyId.key }}
-      secretAccessKey:
-        name: {{ .Values.replica.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-creds") }}
-        key: {{ .Values.replica.s3Credentials.secretAccessKey.key }}
-      region:
-        name: {{ .Values.replica.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "replica-creds") }}
-        key: {{ .Values.replica.s3Credentials.region.key }}
+  configuration: {{- include "template.mergedStoreConfiguration" (list . "template.replica.storeConfiguration" .Values.replica.extraConfiguration) | nindent 4 }}
   {{- with .Values.replica.extraSpec }}
   {{- toYaml . | nindent 2 }}
   {{- end }}

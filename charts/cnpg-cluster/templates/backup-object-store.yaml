@@ -8,48 +8,7 @@ metadata:
   annotations: {{- toYaml .Values.annotations | nindent 4 }}
   {{- end }}
 spec:
-  configuration:
-    destinationPath: {{ .Values.backup.destinationPath }}
-    endpointURL: {{ .Values.backup.endpointURL }}
-    {{- if or .Values.backup.endpointCA.create .Values.backup.endpointCA.secretName }}
-    endpointCA:
-      name: {{ .Values.backup.endpointCA.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-ca") }}
-      key: {{ .Values.backup.endpointCA.key }}
-    {{- end }}
-    s3Credentials:
-      accessKeyId:
-        name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
-        key: {{ .Values.backup.s3Credentials.accessKeyId.key }}
-      secretAccessKey:
-        name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
-        key: {{ .Values.backup.s3Credentials.secretAccessKey.key }}
-      region:
-        name: {{ .Values.backup.s3Credentials.secretName | default (printf "%s-%s" (include "template.fullname" .) "backup-creds") }}
-        key: {{ .Values.backup.s3Credentials.region.key }}
-    {{- if or .Values.backup.compression .Values.backup.encryption .Values.backup.jobs }}
-    data:
-      {{- if .Values.backup.compression }}
-      compression: {{ .Values.backup.compression }}
-      {{- end }}
-      {{- if .Values.backup.encryption }}
-      encryption: {{ .Values.backup.encryption }}
-      {{- end }}
-      {{- if .Values.backup.jobs }}
-      jobs: {{ .Values.backup.jobs }}
-      {{- end }}
-    {{- end }}
-    {{- if or .Values.backup.compression .Values.backup.encryption .Values.backup.maxParallel }}
-    wal:
-      {{- if .Values.backup.compression }}
-      compression: {{ .Values.backup.compression }}
-      {{- end }}
-      {{- if .Values.backup.encryption }}
-      encryption: {{ .Values.backup.encryption }}
-      {{- end }}
-      {{- if .Values.backup.maxParallel }}
-      maxParallel: {{ .Values.backup.maxParallel }}
-      {{- end }}
-    {{- end }}
+  configuration: {{- include "template.mergedStoreConfiguration" (list . "template.backup.storeConfiguration" .Values.backup.extraConfiguration) | nindent 4 }}
   retentionPolicy: {{ .Values.backup.retentionPolicy }}
   {{- with .Values.backup.extraSpec }}
   {{- toYaml . | nindent 2 }}

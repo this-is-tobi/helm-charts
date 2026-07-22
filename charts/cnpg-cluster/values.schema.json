@@ -294,6 +294,20 @@
           "type": "integer",
           "description": "Maximum parallel WAL processing during backup."
         },
+        "dataAdditionalCommandArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Additional command line arguments passed to barman-cloud-backup."
+        },
+        "walAdditionalCommandArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Additional command line arguments passed to barman-cloud-wal-archive."
+        },
         "destinationPath": {
           "type": "string"
         },
@@ -306,6 +320,10 @@
         "cron": {
           "type": "string",
           "description": "Cron expression for scheduled backups (quoted to handle leading `*`)."
+        },
+        "extraConfiguration": {
+          "type": "object",
+          "description": "Extra fields deep-merged into the barman object store configuration (plugin ObjectStore spec.configuration or legacy in-tree barmanObjectStore)."
         },
         "extraSpec": {
           "type": "object",
@@ -321,6 +339,10 @@
         },
         "endpointURL": {
           "type": "string"
+        },
+        "extraConfiguration": {
+          "type": "object",
+          "description": "Extra fields deep-merged into the recovery barman object store configuration (plugin ObjectStore spec.configuration or legacy in-tree barmanObjectStore)."
         },
         "extraSpec": {
           "type": "object",
@@ -356,6 +378,10 @@
           "type": "string",
           "enum": ["disable", "allow", "prefer", "require", "verify-ca", "verify-full"],
           "default": "prefer"
+        },
+        "extraConfiguration": {
+          "type": "object",
+          "description": "Extra fields deep-merged into the replica barman object store configuration (plugin ObjectStore spec.configuration or legacy in-tree barmanObjectStore)."
         },
         "extraSpec": {
           "type": "object",

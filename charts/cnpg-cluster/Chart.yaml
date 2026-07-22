@@ -1,7 +1,7 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 2.2.1
+version: 2.3.0
 appVersion: "1.29.0"
 description: A Helm Chart to deploy easily a CNPG cluster
 home: https://cloudnative-pg.io
@@ -10,8 +10,10 @@ annotations:
   artifacthub.io/category: database
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: fixed
-      description: Remove podMonitor template that conflict with CNPG operator management.
+    - kind: added
+      description: Add backup.dataAdditionalCommandArgs and backup.walAdditionalCommandArgs to pass extra arguments to barman-cloud-backup and barman-cloud-wal-archive (e.g. --min-chunk-size to avoid the S3 1000 multipart chunks limit).
+    - kind: added
+      description: Add backup/recovery/replica extraConfiguration values deep-merged into the barman object store configuration to support any field not explicitly exposed by the chart.
 keywords:
 - postgresql
 - postgres
