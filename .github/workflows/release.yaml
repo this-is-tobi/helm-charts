@@ -82,27 +82,53 @@ jobs:
 
       - name: Publish and sign charts to OCI registry
         if: steps.chart-releaser.outputs.changed_charts != ''
+        env:
+          COSIGN_EXPERIMENTAL: 1
+          OCI_REPO: oci://ghcr.io/${{ github.repository }}
         run: |
-          # Only process charts that were actually released
-          for chart_package in .cr-release-packages/*.tgz; do
-            if [ ! -f "$chart_package" ]; then
-              echo "No charts to publish"
-              continue
-            fi
-            
+          set -euo pipefail
+
+          # nullglob so an unmatched pattern yields an empty array rather than
+          # the literal glob string. The previous `[ ! -f ... ] && continue`
+          # form turned that into a green run that published nothing, even
+          # though this step only runs when chart-releaser reported changed
+          # charts - so an empty set is an anomaly, not something to skip past.
+          shopt -s nullglob
+          chart_packages=(.cr-release-packages/*.tgz)
+
+          if [ ${#chart_packages[@]} -eq 0 ]; then
+            echo "::error::chart-releaser reported changed charts but produced no package in .cr-release-packages"
+            exit 1
+          fi
+
+          for chart_package in "${chart_packages[@]}"; do
             chart_file=$(basename "$chart_package")
-            chart_name="${chart_file%-*}"
-            
+
             # Push to GHCR (skip if already exists)
             echo "Publishing ${chart_file} to OCI registry..."
-            if output=$(helm push "$chart_package" oci://ghcr.io/${{ github.repository }} 2>&1); then
+            if output=$(helm push "$chart_package" "$OCI_REPO" 2>&1); then
               echo "$output"
-              digest=$(echo "$output" | grep "Digest:" | awk '{print $2}')
-              
-              # Sign the OCI artifact with Cosign
-              echo "Signing OCI artifact with digest: ${digest}"
-              cosign sign --yes "ghcr.io/${{ github.repository }}/${chart_name}@${digest}"
-              
+
+              # Read the reference and digest back from helm's own output
+              # rather than rebuilding them from the file name: stripping the
+              # version with `${chart_file%-*}` breaks on any prerelease
+              # version, where the last dash belongs to the identifier
+              # (my-chart-1.2.3-rc.1.tgz would have signed 'my-chart-1.2.3').
+              reference=$(printf '%s\n' "$output" | awk '/^Pushed:/ { print $2 }')
+              digest=$(printf '%s\n' "$output" | awk '/^Digest:/ { print $2 }')
+
+              # An unsigned chart must never be reported as signed. Without
+              # this the empty-digest case reached `cosign sign ...@` and the
+              # loop still printed the success line, because a failing cosign
+              # was not fatal either.
+              if [ -z "$reference" ] || [ -z "$digest" ]; then
+                echo "::error::could not read the reference and digest of ${chart_file} back from helm push"
+                exit 1
+              fi
+
+              echo "Signing ${reference%:*}@${digest}"
+              cosign sign --yes "${reference%:*}@${digest}"
+
               echo "✓ Published and signed ${chart_file}"
             elif echo "$output" | grep -q "already exists\|409"; then
               echo "⊘ ${chart_file} already exists in OCI registry, skipping"
@@ -112,5 +138,3 @@ jobs:
               exit 1
             fi
           done
-        env:
-          COSIGN_EXPERIMENTAL: 1
