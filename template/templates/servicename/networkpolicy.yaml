@@ -3,15 +3,19 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ printf "%s-%s" (include "helper.fullname" .) "servicename" }}
+  name: {{ include "helper.componentFullname" (dict "root" . "componentName" "servicename") }}
   labels: {{- (include "helper.labels" (dict "root" . "componentName" "servicename")) | nindent 4 }}
-  {{- if .Values.servicename.pdb.labels }}
-    {{- toYaml .Values.servicename.pdb.labels | nindent 4 }}
+  {{- if .Values.servicename.networkPolicy.labels }}
+    {{- toYaml .Values.servicename.networkPolicy.labels | nindent 4 }}
   {{- end }}
-  {{- if .Values.servicename.pdb.annotations }}
-  annotations: {{- toYaml .Values.servicename.pdb.annotations | nindent 4 }}
+  {{- if .Values.servicename.networkPolicy.annotations }}
+  annotations: {{- toYaml .Values.servicename.networkPolicy.annotations | nindent 4 }}
   {{- end }}
 spec:
+  {{- /* Required: an omitted podSelector defaults to `{}`, which would apply these rules to EVERY
+  pod in the release namespace instead of just this component's pods. */}}
+  podSelector:
+    matchLabels: {{- include "helper.selectorLabels" (dict "root" . "componentName" "servicename") | nindent 6 }}
   policyTypes: {{- toYaml .Values.servicename.networkPolicy.policyTypes | nindent 2 }}
   {{- with .Values.servicename.networkPolicy.ingress }}
   ingress: {{- toYaml . | nindent 2 }}

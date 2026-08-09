@@ -1,15 +1,18 @@
 {{- if .Values.enabled }}
-{{- if .Values.servicename.autoscaling.enabled }}
+{{- /* DaemonSet is excluded on purpose: it has no scale subresource, so an HPA targeting one is
+rejected by the API server. `helper.component.validate` already fails on that combination - this
+guard just keeps the template honest if the validation is ever relaxed. */ -}}
+{{- if and .Values.servicename.autoscaling.enabled (ne .Values.servicename.deploymentType "DaemonSet") }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ printf "%s-%s" (include "helper.fullname" .) "servicename" }}
+  name: {{ include "helper.componentFullname" (dict "root" . "componentName" "servicename") }}
   labels: {{- (include "helper.labels" (dict "root" . "componentName" "servicename")) | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: {{ .Values.servicename.deploymentType }}
-    name: {{ printf "%s-%s" (include "helper.fullname" .) "servicename" }}
+    name: {{ include "helper.componentFullname" (dict "root" . "componentName" "servicename") }}
   minReplicas: {{ .Values.servicename.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.servicename.autoscaling.maxReplicas }}
   metrics:

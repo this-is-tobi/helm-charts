@@ -1,24 +1,17 @@
 {{- if .Values.enabled }}
-{{- if eq .Values.servicename.deploymentType "Deployment" }}
+{{- if eq .Values.servicename.deploymentType "DaemonSet" }}
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: {{ include "helper.componentFullname" (dict "root" . "componentName" "servicename") }}
   labels: {{- (include "helper.labels" (dict "root" . "componentName" "servicename")) | nindent 4 }}
 spec:
-  {{- if not .Values.servicename.autoscaling.enabled }}
-  replicas: {{ .Values.servicename.replicaCount }}
-  {{- end }}
   revisionHistoryLimit: {{ .Values.servicename.revisionHistoryLimit | default 10 }}
   selector:
     matchLabels: {{- include "helper.selectorLabels" (dict "root" . "componentName" "servicename") | nindent 6 }}
-  strategy:
-    type: {{ .Values.servicename.strategy.type }}
-    {{- if eq .Values.servicename.strategy.type "RollingUpdate" }}
-    rollingUpdate:
-      maxUnavailable: {{ .Values.servicename.strategy.rollingUpdate.maxUnavailable }}
-      maxSurge: {{ .Values.servicename.strategy.rollingUpdate.maxSurge }}
-    {{- end }}
+  {{- with .Values.servicename.updateStrategy }}
+  updateStrategy: {{- toYaml . | nindent 4 }}
+  {{- end }}
   template:
     {{- include "helper.component.podTemplate" (dict "root" . "name" "servicename" "component" .Values.servicename) | nindent 4 }}
 {{- end }}

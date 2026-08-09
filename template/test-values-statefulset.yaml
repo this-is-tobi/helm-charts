@@ -1,0 +1,36 @@
+# StatefulSet overlay for test-values.yaml - apply both, in order:
+#   helm template rel . -f test-values.yaml -f test-values-statefulset.yaml
+# Only holds what differs from the base fixture: the workload kind, the values that are
+# StatefulSet-only (volumeClaims -> volumeClaimTemplates) and the update strategy shape a
+# StatefulSet takes (`partition`, no `maxSurge`).
+servicename:
+  deploymentType: "StatefulSet"
+  updateStrategy:
+    type: "RollingUpdate"
+    rollingUpdate:
+      partition: 0
+  volumeClaims:
+  - metadata:
+      name: app-volume
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "my-storage-class"
+      resources:
+        requests:
+          storage: 1Gi
+  extraVolumeClaims:
+  - metadata:
+      name: wal-volume
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 2Gi
+  extraVolumeMounts:
+  - name: certs
+    mountPath: /etc/certs
+    readOnly: true
+  - name: app-volume
+    mountPath: /app/storage
+  - name: wal-volume
+    mountPath: /app/wal

@@ -82,44 +82,71 @@ global:
   #   username: ""
   #   password: ""
   #   email: ""
-  # -- Globally shared ingress configuration.
-  # @section -- Global
-  ingress: {}
-    # enabled: false
-    # className: ""
-    # annotations: {}
-    # labels: {}
-    # hosts:
+  ## Chart-level Ingress, for fanning several components (or several charts) behind one hostname.
+  ## Unlike `servicename.ingress` it has no default backend, so every path must name the service
+  ## it routes to - rendering would otherwise point at a Service that does not exist.
+  ingress:
+    # -- Whether or not the chart-level ingress should be enabled.
+    # @section -- Global
+    enabled: false
+    # -- Defines which ingress controller will implement the resource.
+    # @section -- Global
+    className: ""
+    # -- Additional ingress annotations.
+    # @section -- Global
+    annotations: {}
+    # -- Additional ingress labels.
+    # @section -- Global
+    labels: {}
+    # -- Hosts and paths served by the chart-level ingress. Each path's `backend.serviceName` is
+    # required (see above); `backend.portNumber` defaults to 80.
+    # @section -- Global
+    hosts: []
     # - name: "domain.local"
     #   paths:
     #   - path: "/"
     #     pathType: "Prefix"
     #     backend:
-    #       serviceName: ""
-    #       portNumber: null
+    #       serviceName: "my-web-service"
+    #       portNumber: 80
     #   - path: "/api"
     #     pathType: "Prefix"
     #     backend:
     #       serviceName: "my-api-service"
     #       portNumber: 8080
-    # tls:
+    # -- TLS configuration for the chart-level ingress.
+    # @section -- Global
+    tls: []
     # - secretName: domain.local-tls
     #   hosts:
     #   - domain.local
-  # -- Globally shared httproute configuration.
-  # @section -- Global
-  httpRoute: {}
-    # enabled: false
-    # annotations: {}
-    # labels: {}
-    # parentRefs: []
+  ## Chart-level Gateway API HTTPRoute, same rationale as `global.ingress` above: `rules` and their
+  ## `backendRefs[].name` are required because there is no default backend to fall back to.
+  httpRoute:
+    # -- Whether or not the chart-level HTTPRoute should be enabled.
+    # @section -- Global
+    enabled: false
+    # -- Additional HTTPRoute annotations.
+    # @section -- Global
+    annotations: {}
+    # -- Additional HTTPRoute labels.
+    # @section -- Global
+    labels: {}
+    # -- Parent references (Gateways) to attach the HTTPRoute to.
+    # @section -- Global
+    parentRefs: []
     # - name: my-gateway
     #   namespace: gateway-namespace
     #   sectionName: https
-    # hostnames: []
+    # -- Hostnames for the HTTPRoute to match.
+    # @section -- Global
+    hostnames: []
     # - "example.com"
     # - "*.example.com"
-    # rules: []
+    # -- Routing rules for the HTTPRoute. Required when `enabled` is true, and every `backendRefs`
+    # entry must carry a `name`.
+    # @section -- Global
+    rules: []
     # - matches:
     #   - path:
     #       type: PathPrefix
@@ -139,16 +166,10 @@ global:
     #       add:
     #       - name: "x-custom-header"
     #         value: "my-value"
-    #   - type: RequestRedirect
-    #     requestRedirect:
-    #       scheme: https
-    #       port: 443
     #   backendRefs:
     #   - name: my-service
     #     port: 80
     #     weight: 100
-    #   hosts:
-    #   - domain.local
 
 ## Gateway API configuration (alternative to Ingress)
 ## Ref: https://gateway-api.sigs.k8s.io/
@@ -202,11 +223,16 @@ gateway:
 
 
 servicename:
-  # -- Workload kind to deploy the app as. One of "Deployment" or "StatefulSet". Use the
-  # top-level `jobs` / `cronjobs` maps for one-off or scheduled workloads.
+  # -- Workload kind to deploy the app as. One of "Deployment", "StatefulSet" or "DaemonSet"
+  # (validated at render time - an unknown value fails instead of producing a release with no
+  # workload). Use the top-level `jobs` / `cronjobs` maps for one-off or scheduled workloads.
+  # Some values only apply to certain kinds: `replicaCount`/`autoscaling` and `strategy` are
+  # Deployment-only (`autoscaling` also works on a StatefulSet), `volumeClaims`/`extraVolumeClaims`
+  # are StatefulSet-only, and `updateStrategy` covers StatefulSet and DaemonSet.
   # @section -- Servicename
   deploymentType: "Deployment"
-  # -- The number of application controller pods to run.
+  # -- The number of application controller pods to run. Ignored when `deploymentType` is
+  # "DaemonSet" (one pod per node) or when `autoscaling.enabled` is true.
   # @section -- Servicename
   replicaCount: 1
   image:
@@ -223,6 +249,11 @@ servicename:
     # @section -- Servicename
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
+    # -- Image digest (`sha256:...`). When set it takes precedence over `tag`, pinning the exact
+    # image content so the same release can never resolve to a different build - preferred over a
+    # mutable tag for anything you deploy to production.
+    # @section -- Servicename
+    digest: ""
   ingress:
     # -- Whether or not ingress should be enabled.
     # @section -- Servicename
@@ -346,18 +377,41 @@ servicename:
     #   - name: my-grpc-service
     #     port: 50051
     #     weight: 100
+  # -- Mount the ServiceAccount token into the app pods. Defaults to false so a compromised
+  # container holds no API credentials; the API server does not need the token unless the app
+  # actually talks to the Kubernetes API. Applied at pod level so it holds even when
+  # `serviceAccount.name` points at an SA that automounts.
+  # @section -- Servicename
+  automountServiceAccountToken: false
+  # -- Inject the legacy `{SVC}_SERVICE_HOST`/`_PORT` environment variables for every Service in the
+  # namespace. Defaults to false: the variables are rarely used, leak the namespace's topology into
+  # every container, and can collide with the app's own configuration. Set to true only for an app
+  # that genuinely reads them.
+  # @section -- Servicename
+  enableServiceLinks: false
   # -- Annotations for the app deployed pods.
   # @section -- Servicename
   podAnnotations: {}
   # -- Labels for the app deployed pods.
   # @section -- Servicename
   podLabels: {}
-  # -- Pod-level security context. Empty by default - fill in with your image's actual UID/GID
-  # (e.g. `runAsNonRoot`, `fsGroup`). Rendered via `toYaml`, so any `PodSecurityContext` field is
-  # accepted even though none is pre-populated here.
+  # -- Pod-level security context. Defaults to a hardened baseline that satisfies the `restricted`
+  # Pod Security Standard. Rendered via `toYaml`, so any `PodSecurityContext` field is accepted.
+  # Adjust the UID/GID to whatever your image actually ships with - `runAsNonRoot` makes the
+  # kubelet refuse to start a container that would run as root, which is the intended failure mode
+  # rather than something to switch off. Set to `null` to omit the block entirely.
   # @section -- Servicename
-  podSecurityContext: {}
-    # fsGroup: 2000
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    # Owns mounted volumes so a non-root container can still write to them.
+    fsGroup: 1000
+    # Only chown volume contents when the top-level dir doesn't already match, which avoids
+    # re-chowning large volumes on every start.
+    fsGroupChangePolicy: "OnRootMismatch"
+    seccompProfile:
+      type: "RuntimeDefault"
   # -- Init containers to add to the app pod.
   # @section -- Servicename
   initContainers: []
@@ -397,18 +451,23 @@ servicename:
   # -- Servicename container command args.
   # @section -- Servicename
   args: []
-  # -- Container-level security context. Empty by default - fill in with your image's actual
-  # UID/GID and hardening flags (e.g. `runAsUser`, `allowPrivilegeEscalation`,
-  # `readOnlyRootFilesystem`). Rendered via `toYaml`, so any `SecurityContext` field is accepted
-  # even though none is pre-populated here.
+  # -- Container-level security context. Defaults to a hardened baseline that satisfies the
+  # `restricted` Pod Security Standard: no privilege escalation, no capabilities, immutable root
+  # filesystem. Rendered via `toYaml`, so any `SecurityContext` field is accepted. Note
+  # `readOnlyRootFilesystem` requires the app to write only to mounted volumes - the default
+  # `volumes`/`volumeMounts` below provide an `emptyDir` on /tmp for that reason. Set to `null` to
+  # omit the block entirely.
   # @section -- Servicename
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    capabilities:
+      drop:
+      - "ALL"
   # -- Servicename container env variables loaded from configmap or secret reference. List or map
   # (merged with `global.envFrom` above, global entries first); see `global.envFrom` for both forms.
   # @section -- Servicename
@@ -448,10 +507,18 @@ servicename:
   # @section -- Servicename
   envCm: {}
     # D: "D"
-  # -- Map of environment variables to inject into a secret loaded by the app container (`valueFrom` not supported).
+  # -- Map of environment variables to inject into a secret loaded by the app container (`valueFrom`
+  # not supported). Values placed here are stored in plain text in the values file AND in the Helm
+  # release secret, so use it for non-sensitive-but-secret-shaped config only. For real credentials
+  # prefer referencing a Secret you manage elsewhere via `envFrom`, or have an operator materialise
+  # it (see the `VaultStaticSecret` example under `extraObjects`).
   # @section -- Servicename
   envSecret: {}
     # E: "E"
+  ## Each probe is rendered verbatim via `toYaml`, so any `Probe` field (`exec`, `tcpSocket`,
+  ## `grpc`...) is accepted, not just the `httpGet` shown here. To DISABLE a probe, set it to
+  ## `null` - `{}` does not work, because Helm deep-merges values files and would merge these
+  ## defaults straight back in.
   probes:
     startupProbe:
       httpGet:
@@ -522,8 +589,12 @@ servicename:
       # -- Number of seconds after which the probe times out.
       # @section -- Servicename
       timeoutSeconds: 5
+  ## Deployment-only. StatefulSet and DaemonSet use `updateStrategy` below - their update
+  ## strategies are a different API shape (no `Recreate`, and different `rollingUpdate` fields),
+  ## so they are kept as separate values rather than one block that means three different things.
   strategy:
     # -- Strategy type used to replace old Pods by new ones, can be `Recreate` or `RollingUpdate`.
+    # Only applied when `deploymentType` is "Deployment".
     # @section -- Servicename
     type: "RollingUpdate"
     rollingUpdate:
@@ -533,6 +604,22 @@ servicename:
       # -- The maximum number of pods that can be scheduled above the desired number of pods.
       # @section -- Servicename
       maxSurge: 1
+  # -- Update strategy applied when `deploymentType` is "StatefulSet" or "DaemonSet" (ignored for
+  # a Deployment, which uses `strategy` above). Rendered verbatim via `toYaml`, so it takes the
+  # native `StatefulSetUpdateStrategy`/`DaemonSetUpdateStrategy` shape of the selected kind; left
+  # empty, Kubernetes applies its own default (`RollingUpdate` for both).
+  # @section -- Servicename
+  updateStrategy: {}
+  # StatefulSet:
+  #   type: "RollingUpdate"        # RollingUpdate or OnDelete
+  #   rollingUpdate:
+  #     partition: 0
+  #     maxUnavailable: 1
+  # DaemonSet:
+  #   type: "RollingUpdate"        # RollingUpdate or OnDelete
+  #   rollingUpdate:
+  #     maxUnavailable: 1
+  #     maxSurge: 0
   # -- Image credentials configuration.
   # @section -- Servicename
   imagePullSecrets: []
@@ -544,6 +631,48 @@ servicename:
   #   username: ""
   #   password: ""
   #   email: ""
+  ## Node-level pod settings. Mostly relevant when `deploymentType` is "DaemonSet" (node agents,
+  ## log/metric collectors), but valid for every kind.
+  # -- Share the host network namespace. Container ports then bind directly on the node, so they
+  # must not collide with anything else running there.
+  # @section -- Servicename
+  hostNetwork: false
+  # -- Share the host PID namespace (lets the container see and signal host processes).
+  # @section -- Servicename
+  hostPID: false
+  # -- Pod DNS policy. Left empty, it defaults to `ClusterFirstWithHostNet` when `hostNetwork` is
+  # true (otherwise a hostNetwork pod silently stops resolving cluster DNS) and to the Kubernetes
+  # default `ClusterFirst` when it isn't.
+  # @section -- Servicename
+  # @default -- `""` (`ClusterFirstWithHostNet` when `hostNetwork` is true)
+  dnsPolicy: ""
+  # -- Pod DNS configuration, merged with `dnsPolicy` by the kubelet.
+  # @section -- Servicename
+  dnsConfig: {}
+    # nameservers:
+    # - "1.1.1.1"
+    # options:
+    # - name: "ndots"
+    #   value: "2"
+    # searches:
+    # - "my.dns.search.suffix"
+  # -- PriorityClass to schedule the pods with (e.g. `system-node-critical` for a node agent that
+  # must not be evicted under pressure).
+  # @section -- Servicename
+  priorityClassName: ""
+  # -- (int) Grace period, in seconds, given to the pod to shut down cleanly before it is killed.
+  # @section -- Servicename
+  # @default -- `null` (Kubernetes default of 30)
+  terminationGracePeriodSeconds: null
+  # -- Topology spread constraints used to spread the pods across failure domains.
+  # @section -- Servicename
+  topologySpreadConstraints: []
+  # - maxSkew: 1
+  #   topologyKey: "topology.kubernetes.io/zone"
+  #   whenUnsatisfiable: "ScheduleAnyway"
+  #   labelSelector:
+  #     matchLabels:
+  #       app.kubernetes.io/name: "chartname-servicename"
   # -- Host aliases that will be injected at pod-level into /etc/hosts.
   # @section -- Servicename
   hostAliases: []
@@ -557,9 +686,14 @@ servicename:
   #   - "bar.remote"
   # -- List of volumes to add. Prefer this for volumes the chart itself always needs (e.g.
   # security-hardening `emptyDir`s); use `extraVolumes` below for anything you add on top, so
-  # overriding one doesn't require repeating the other.
+  # overriding one doesn't require repeating the other. Defaults to a `/tmp` `emptyDir`, which is
+  # what makes the default `securityContext.readOnlyRootFilesystem: true` usable - drop it only if
+  # you also relax that. Helm replaces lists wholesale rather than merging them, so overriding this
+  # key means restating the entries you want to keep.
   # @section -- Servicename
-  volumes: []
+  volumes:
+  - name: "tmp"
+    emptyDir: {}
   # - name: config-volume
   #   configMap:
   #     name: log-config
@@ -580,7 +714,9 @@ servicename:
   # - name: certs
   #   secret:
   #     secretName: my-tls-cert
-  # -- List of volumeClaims to add.
+  # -- List of volumeClaims to add, rendered as the StatefulSet's `volumeClaimTemplates`. Requires
+  # `deploymentType: "StatefulSet"` - setting it on a Deployment or DaemonSet fails at render time
+  # rather than being silently dropped (use `volumes`/`extraVolumes` there instead).
   # @section -- Servicename
   volumeClaims: []
   # - metadata:
@@ -596,9 +732,12 @@ servicename:
   extraVolumeClaims: []
   # -- List of mounts to add (normally used with `volumes` or `volumeClaims`). Prefer this for
   # mounts the chart itself always needs; use `extraVolumeMounts` below for anything you add
-  # on top, so overriding one doesn't require repeating the other.
+  # on top, so overriding one doesn't require repeating the other. Defaults to the `/tmp` mount
+  # backing the hardened `readOnlyRootFilesystem` default (see `volumes` above).
   # @section -- Servicename
-  volumeMounts: []
+  volumeMounts:
+  - name: "tmp"
+    mountPath: "/tmp"
   # - name: config-volume
   #   mountPath: /app/config
   #   subPath: config
@@ -628,9 +767,12 @@ servicename:
     # -- Port used by the service.
     # @section -- Servicename
     port: 80
-    # -- Port used when type is `NodePort` to expose the service on the given node port.
+    # -- (int) Port used when type is `NodePort` to expose the service on the given node port. Left
+    # empty, Kubernetes allocates one from the configured node-port range, which avoids two
+    # releases of this chart colliding on the same hardcoded port.
     # @section -- Servicename
-    nodePort: 31000
+    # @default -- `null` (allocated by Kubernetes)
+    nodePort: null
     # -- Port name used by the service.
     # @section -- Servicename
     portName: "http"
@@ -788,17 +930,25 @@ servicename:
     # -- Annotations to be added to app pdb.
     # @section -- Servicename
     annotations: {}
-    # -- Number of pods that are available after eviction as number or percentage (eg.: 50%).
+    # -- Number of pods that are available after eviction as number or percentage (eg.: 50%). One
+    # of `minAvailable` / `maxUnavailable` must be set when `pdb.enabled` is true - a budget of 0
+    # is the same as having no budget at all, so leaving both empty fails at render time.
     # @section -- Servicename
-    # @default -- `""` (defaults to 0 if not specified)
     minAvailable: ""
     # -- Number of pods that are unavailable after eviction as number or percentage (eg.: 50%). Has higher precedence over `servicename.pdb.minAvailable`.
     # @section -- Servicename
     maxUnavailable: ""
   networkPolicy:
-    # -- Create NetworkPolicy object for the app.
+    # -- Create NetworkPolicy object for the app. The policy always selects this component's pods
+    # only (via its selector labels), never the whole namespace.
     # @section -- Servicename
     create: false
+    # -- Labels to be added to the app NetworkPolicy.
+    # @section -- Servicename
+    labels: {}
+    # -- Annotations to be added to the app NetworkPolicy.
+    # @section -- Servicename
+    annotations: {}
     # -- Policy types used in the NetworkPolicy object.
     # @section -- Servicename
     policyTypes:
@@ -835,6 +985,9 @@ servicename:
     # @section -- Servicename
     enabled: false
     service:
+      # -- Type of metrics service to create.
+      # @section -- Servicename
+      type: "ClusterIP"
       # -- Metrics service annotations.
       # @section -- Servicename
       annotations: {}
@@ -925,6 +1078,8 @@ jobs: {}
 #     repository: "debian"
 #     pullPolicy: "IfNotPresent"
 #     tag: "9.9.9"
+#     # Takes precedence over `tag` when set - prefer it for anything production-facing.
+#     digest: ""
 #   imagePullSecrets: []
 #   # - name: "pullsecret-name-1"
 #   #   create: false
@@ -936,17 +1091,25 @@ jobs: {}
 #     automountServiceAccountToken: false
 #   podAnnotations: {}
 #   podLabels: {}
+#   # Job pods get no implicit security context - unlike the `servicename` component there are no
+#   # chart defaults to inherit, so declare the same hardened baseline on every entry you add.
 #   podSecurityContext:
 #     runAsNonRoot: true
+#     runAsUser: 1000
+#     runAsGroup: 1000
+#     fsGroup: 1000
+#     fsGroupChangePolicy: "OnRootMismatch"
 #     seccompProfile:
 #       type: "RuntimeDefault"
 #   securityContext:
 #     allowPrivilegeEscalation: false
-#     capabilities:
-#       drop: ["ALL"]
+#     privileged: false
 #     readOnlyRootFilesystem: true
 #     runAsNonRoot: true
 #     runAsUser: 1000
+#     runAsGroup: 1000
+#     capabilities:
+#       drop: ["ALL"]
 #   initContainers: []
 #   extraContainers: []
 #   command: []

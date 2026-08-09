@@ -3,15 +3,19 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ printf "%s-%s" (include "helper.fullname" .) "servicename" | trunc 63 | trimSuffix "-" }}
+  name: {{ include "helper.componentFullname" (dict "root" . "componentName" "servicename") }}
   labels: {{- include "helper.labels" (dict "root" . "componentName" "servicename") | nindent 4 }}
 spec:
   {{- if not .Values.servicename.autoscaling.enabled }}
   replicas: {{ .Values.servicename.replicaCount }}
   {{- end }}
+  revisionHistoryLimit: {{ .Values.servicename.revisionHistoryLimit | default 10 }}
   selector:
     matchLabels: {{- include "helper.selectorLabels" (dict "root" . "componentName" "servicename") | nindent 6 }}
-  serviceName: {{ printf "%s-%s" (include "helper.fullname" .) "servicename" | trunc 63 | trimSuffix "-" }}
+  serviceName: {{ include "helper.componentFullname" (dict "root" . "componentName" "servicename") }}
+  {{- with .Values.servicename.updateStrategy }}
+  updateStrategy: {{- toYaml . | nindent 4 }}
+  {{- end }}
   template:
     {{- include "helper.component.podTemplate" (dict "root" . "name" "servicename" "component" .Values.servicename) | nindent 4 }}
   {{- if or .Values.servicename.volumeClaims .Values.servicename.extraVolumeClaims }}

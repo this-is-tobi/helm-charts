@@ -1,9 +1,12 @@
 {{- if .Values.enabled }}
-{{- if and .Values.servicename.service.enabled (or (eq .Values.servicename.deploymentType "Deployment") (eq .Values.servicename.deploymentType "StatefulSet")) }}
+{{- /* Not gated on `deploymentType`: every supported kind (Deployment/StatefulSet/DaemonSet) can
+sit behind a Service, and `service.enabled` is the switch for components that take no traffic.
+This matches metrics.yaml, which is gated the same way. */ -}}
+{{- if .Values.servicename.service.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ printf "%s-%s" (include "helper.fullname" .) "servicename" }}
+  name: {{ include "helper.componentFullname" (dict "root" . "componentName" "servicename") }}
   labels: {{- (include "helper.labels" (dict "root" . "componentName" "servicename")) | nindent 4 }}
 spec:
   type: {{ .Values.servicename.service.type | default "ClusterIP" }}
@@ -11,7 +14,7 @@ spec:
   - port: {{ .Values.servicename.service.port | default 80 }}
     targetPort: {{ .Values.servicename.containerPortName | default .Values.servicename.containerPort | default 8080 }}
     protocol: {{ .Values.servicename.service.protocol | default "TCP" }}
-    {{- if eq .Values.servicename.service.type "NodePort" }}
+    {{- if and (eq .Values.servicename.service.type "NodePort") .Values.servicename.service.nodePort }}
     nodePort: {{ .Values.servicename.service.nodePort }}
     {{- end }}
     name: {{ .Values.servicename.service.portName | default "http" }}
