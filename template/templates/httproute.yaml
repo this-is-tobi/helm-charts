@@ -1,6 +1,5 @@
 {{- if .Values.enabled }}
 {{- if .Values.global.httpRoute.enabled -}}
-{{- $fullNameApp := printf "%s-%s" (include "helper.fullname" .) "global" -}}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -80,7 +79,7 @@ spec:
     {{- if .backendRefs }}
     backendRefs:
     {{- range .backendRefs }}
-    - name: {{ .name | default $fullNameApp }}
+    - name: {{ .name | required "global.httpRoute.rules[].backendRefs[].name is required: the chart-level HTTPRoute has no default backend service (use servicename.httpRoute to route to this chart's own service)" }}
       port: {{ .port | default 80 }}
       {{- if .weight }}
       weight: {{ .weight }}
@@ -96,21 +95,11 @@ spec:
       {{- end }}
     {{- end }}
     {{- else }}
-    backendRefs:
-    - name: {{ $fullNameApp }}
-      port: 80
+    {{- fail "global.httpRoute.rules[].backendRefs is required: the chart-level HTTPRoute has no default backend service (use servicename.httpRoute to route to this chart's own service)" }}
     {{- end }}
   {{- end }}
   {{- else }}
-  {{/* Default rule when no rules specified */}}
-  rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: "/"
-    backendRefs:
-    - name: {{ $fullNameApp }}
-      port: 80
+  {{- fail "global.httpRoute.rules is required when global.httpRoute.enabled is true: the chart-level HTTPRoute has no default backend service to build a catch-all rule from (use servicename.httpRoute to route to this chart's own service)" }}
   {{- end }}
 {{- end }}
 {{- end }}

@@ -4,6 +4,9 @@ type: application
 version: 0.1.0
 appVersion: "0.1.0"
 description: A Helm chart to deploy chartname.
+# Floor set by the core APIs the chart renders (autoscaling/v2, policy/v1). The Gateway API
+# resources additionally need the gateway.networking.k8s.io CRDs installed in the cluster.
+kubeVersion: ">=1.25.0-0"
 # home: https://this-is-tobi.com
 deprecated: false
 annotations: {}

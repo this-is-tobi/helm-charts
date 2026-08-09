@@ -8,5 +8,5 @@
 .vscode/
 
 # Chart development/test artifacts, not needed in the packaged chart.
-test-values.yaml
+test-values*.yaml
 README.md.gotmpl

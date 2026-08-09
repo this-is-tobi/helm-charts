@@ -1,0 +1,10 @@
+{{- /*
+Values validation only - this template intentionally renders no resource. It exists so
+`helper.component.validate` runs on every `helm template`/`helm lint`/`helm install`, including
+for combinations where the workload templates themselves would render nothing (e.g. an unknown
+`deploymentType`, which would otherwise silently produce a release with no workload at all).
+Add one `include` line per component when you add components to this chart.
+*/ -}}
+{{- if .Values.enabled }}
+{{- include "helper.component.validate" (dict "name" "servicename" "component" .Values.servicename) }}
+{{- end }}

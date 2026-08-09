@@ -1,3 +1,9 @@
+# Base test fixture: exercises as many values as possible against the default "Deployment"
+# workload kind. The other two kinds are layered on top of this file as overlays, so the shared
+# configuration is only maintained once:
+#   helm template rel . -f test-values.yaml
+#   helm template rel . -f test-values.yaml -f test-values-statefulset.yaml
+#   helm template rel . -f test-values.yaml -f test-values-daemonset.yaml
 nameOverride: ""
 fullnameOverride: "chart-test"
 
@@ -62,7 +68,7 @@ gateway:
 
 # App configuration.
 servicename:
-  deploymentType: "StatefulSet"
+  deploymentType: "Deployment"
   replicaCount: 1
   image:
     repository: "docker.io/debian"
@@ -187,54 +193,53 @@ servicename:
       name: my-config
   - secretRef:
       name: my-secret
+  # Map form. The list form is equally supported and is exercised by the `jobs.migration` entry
+  # below - it is used there rather than here because values.yaml defaults this key to a map, and
+  # overriding a map with a list makes Helm log a "cannot overwrite table with non table" warning
+  # even though the result is correct.
   env:
-    - name: "A"
-      value: "A"
-    - name: "B"
+    A: "A"
+    B:
       valueFrom:
         configMapKeyRef:
           name: "my-config"
           key: "B"
-    - name: "C"
+    C:
       valueFrom:
         secretKeyRef:
           name: "my-secret"
           key: "C"
-    # A: "A"
-    # B:
-    #   valueFrom:
-    #     configMapKeyRef:
-    #       name: "my-config"
-    #       key: "B"
-    # C:
-    #   valueFrom:
-    #     secretKeyRef:
-    #       name: "my-secret"
-    #       key: "C"
   envCm:
     D: "D"
+    # envCm/envSecret values are run through `tpl` against the root context, and must come out
+    # without the YAML quoting `toYaml` would otherwise bake into the value.
+    TEMPLATED: "{{ .Release.Name }}-servicename.{{ .Release.Namespace }}.svc.cluster.local"
   envSecret:
     E: "E"
+    TEMPLATED_SECRET: "{{ .Release.Namespace }}"
   probes:
-    healthcheck:
-      path: "/healthz"
-      port: 8081
     startupProbe:
-      enabled: true
+      httpGet:
+        path: "/healthz"
+        port: 8080
       initialDelaySeconds: 0
       successThreshold: 1
       failureThreshold: 10
       periodSeconds: 10
       timeoutSeconds: 5
     readinessProbe:
-      enabled: true
+      httpGet:
+        path: "/healthz"
+        port: 8080
       initialDelaySeconds: 15
       successThreshold: 2
       failureThreshold: 2
       periodSeconds: 10
       timeoutSeconds: 5
     livenessProbe:
-      enabled: true
+      httpGet:
+        path: "/healthz"
+        port: 8080
       initialDelaySeconds: 30
       successThreshold: 1
       failureThreshold: 3
@@ -245,6 +250,19 @@ servicename:
     rollingUpdate:
       maxUnavailable: 3
       maxSurge: 2
+  priorityClassName: "system-cluster-critical"
+  terminationGracePeriodSeconds: 60
+  dnsConfig:
+    options:
+    - name: "ndots"
+      value: "2"
+  topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: "topology.kubernetes.io/zone"
+    whenUnsatisfiable: "ScheduleAnyway"
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: "chart-test-servicename"
   imagePullSecrets:
   - name: "pullsecret-name-1"
     create: false
@@ -264,6 +282,10 @@ servicename:
     - "foo.remote"
     - "bar.remote"
   volumes:
+  # Kept from the chart defaults: Helm replaces lists wholesale, so overriding `volumes` without
+  # restating this would silently drop the /tmp mount that readOnlyRootFilesystem needs.
+  - name: "tmp"
+    emptyDir: {}
   - name: config-volume
     configMap:
       name: log-config
@@ -281,16 +303,9 @@ servicename:
   - name: certs
     secret:
       secretName: my-tls-cert
-  volumeClaims:
-  - metadata:
-      name: app-volume
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      storageClassName: "my-storage-class"
-      resources:
-        requests:
-          storage: 1Gi
   volumeMounts:
+  - name: "tmp"
+    mountPath: "/tmp"
   - name: config-volume
     mountPath: /app/config
     subPath: config
@@ -301,8 +316,6 @@ servicename:
     mountPath: /app/cache
   - name: image-volume
     mountPath: /app/content
-  - name: storage-volume
-    mountPath: /app/storage
   extraVolumeMounts:
   - name: certs
     mountPath: /etc/certs
@@ -405,6 +418,13 @@ servicename:
         - patch
   networkPolicy:
     create: true
+    labels:
+      netpol/foo: "bar"
+    annotations:
+      netpol/foo: "bar"
+    policyTypes:
+    - Ingress
+    - Egress
     ingress:
     - from:
       - ipBlock:
@@ -430,11 +450,15 @@ servicename:
         endPort: 32768
   pdb:
     enabled: true
+    minAvailable: 1
   metrics:
     enabled: true
     service:
-      annotations: {}
-      labels: {}
+      type: "ClusterIP"
+      annotations:
+        metrics-svc/foo: "bar"
+      labels:
+        metrics-svc/foo: "bar"
       targetPort: 9090
     serviceMonitor:
       enabled: true
@@ -465,7 +489,7 @@ jobs:
       - "post-upgrade"
       weight: 0
     image:
-      repository: "docker.io/debian"
+      repository: "debian"
       pullPolicy: "Always"
       tag: "9.9.9"
     imagePullSecrets:
@@ -493,6 +517,26 @@ jobs:
       MIGRATION_MODE: "upgrade"
     envSecret:
       MIGRATION_TOKEN: "test-token"
+    # List form of `env` (the map form is exercised by `servicename.env` above).
+    env:
+    - name: "A"
+      value: "A"
+    - name: "B"
+      valueFrom:
+        configMapKeyRef:
+          name: "my-config"
+          key: "B"
+    - name: "C"
+      valueFrom:
+        secretKeyRef:
+          name: "my-secret"
+          key: "C"
+    # List form of `envFrom`.
+    envFrom:
+    - configMapRef:
+        name: "my-config"
+    - secretRef:
+        name: "my-secret"
     resources:
       requests:
         cpu: "100m"
@@ -508,7 +552,7 @@ cronjobs:
     schedule: "0 2 * * *"
     concurrencyPolicy: "Forbid"
     image:
-      repository: "docker.io/debian"
+      repository: "debian"
       pullPolicy: "Always"
       tag: "9.9.9"
     command:

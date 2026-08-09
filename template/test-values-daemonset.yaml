@@ -1,0 +1,60 @@
+# DaemonSet overlay for test-values.yaml - apply both, in order:
+#   helm template rel . -f test-values.yaml -f test-values-daemonset.yaml
+# Only holds what differs from the base fixture. Reshapes the component into the node-agent it
+# would realistically be as a DaemonSet: host namespaces, a node-critical priority class, a
+# hostPath mount, control-plane tolerations, and none of the replica-oriented values (autoscaling
+# is switched off here because a DaemonSet has no scale subresource - leaving it on is a
+# render-time error, which is itself what this overlay proves).
+servicename:
+  deploymentType: "DaemonSet"
+
+  updateStrategy:
+    type: "RollingUpdate"
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 0
+
+  autoscaling:
+    enabled: false
+
+  hostNetwork: true
+  hostPID: true
+  priorityClassName: "system-node-critical"
+  terminationGracePeriodSeconds: 30
+  # Left empty on purpose: the chart must default it to ClusterFirstWithHostNet because
+  # hostNetwork is true.
+  dnsPolicy: ""
+
+  # A node agent scrapes the host rather than serving traffic.
+  service:
+    enabled: false
+  ingress:
+    enabled: false
+  httpRoute:
+    enabled: false
+  grpcRoute:
+    enabled: false
+  # `null`, not `{}` - Helm deep-merges values, so an empty map would just merge the chart's own
+  # probe defaults straight back in. Only an explicit null removes the key.
+  probes:
+    startupProbe: null
+    readinessProbe: null
+    livenessProbe: null
+
+  extraVolumes:
+  - name: host-root
+    hostPath:
+      path: "/"
+      type: "Directory"
+  extraVolumeMounts:
+  - name: host-root
+    mountPath: "/host"
+    readOnly: true
+    mountPropagation: "HostToContainer"
+
+  # A DaemonSet already runs everywhere, so it tolerates the control-plane taints instead of
+  # being scheduled by replica count.
+  tolerations:
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Exists"
+    effect: "NoSchedule"

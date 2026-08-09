@@ -1,6 +1,6 @@
 {{- if .Values.enabled }}
 {{- if .Values.global.ingress.enabled -}}
-{{- $fullNameApp := printf "%s-%s" (include "helper.fullname" .) "global" -}}
+{{- $fullNameApp := include "helper.componentFullname" (dict "root" . "componentName" "global") -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -24,7 +24,7 @@ spec:
     {{- range .hosts }}
     - {{ . | quote }}
     {{- end }}
-    secretName: {{ .secretName | quote | default (printf "%s-%s" $fullNameApp "tls") }}
+    secretName: {{ .secretName | default (printf "%s-%s" $fullNameApp "tls") | quote }}
   {{- end }}
   {{- end }}
   rules:
@@ -37,14 +37,15 @@ spec:
         pathType: {{ .pathType | default "Prefix" }}
         backend:
           service:
-          {{- if .backend }}
-            name: {{ .backend.serviceName | default $fullNameApp }}
+          {{- /* Unlike `servicename.ingress`, this chart-level Ingress fans out to whichever
+          component Services the user names, so there is no sensible default backend - refusing to
+          render beats emitting a rule that points at a Service the chart never creates. */}}
+          {{- if and .backend .backend.serviceName }}
+            name: {{ .backend.serviceName }}
             port:
               number: {{ .backend.portNumber | default 80 }}
           {{- else }}
-            name: {{ $fullNameApp }}
-            port:
-              number: 80
+            {{- fail "global.ingress.hosts[].paths[].backend.serviceName is required: the chart-level ingress has no default backend service (use servicename.ingress to route to this chart's own service)" }}
           {{- end }}
       {{- end }}
   {{- end }}

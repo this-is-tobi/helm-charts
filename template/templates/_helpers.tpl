@@ -34,6 +34,47 @@ Create chart name and version as used by the chart label.
 
 
 {{/*
+Fully qualified name of a component's resources (`<release fullname>-<component>`), truncated to
+the 63-char DNS limit so a long release name can't produce a name the API server rejects. Used by
+every component template so the workload, its Service/ConfigMap/Secret/ServiceAccount/RBAC objects
+and the selector labels always derive the exact same name.
+Parameters:
+- root: The root context.
+- componentName: The component name (e.g. "servicename").
+*/}}
+{{- define "helper.componentFullname" -}}
+{{- printf "%s-%s" (include "helper.fullname" .root) .componentName | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+
+{{/*
+Build a container image reference from a component's or job's `image` map. Shared by both pod
+templates so every container in the chart resolves its image the same way:
+- `global.imageRegistry` overrides the per-image `registry`, and an empty registry is omitted
+  entirely rather than rendering a leading "/" (which would be an invalid reference);
+- `digest` wins over `tag`, pinning the exact image content - a tag can be repointed at a different
+  build, a digest cannot, so this is the form to prefer for production releases;
+- `tag` falls back to the chart's appVersion, matching the usual Helm convention.
+Parameters:
+- root: The root context.
+- image: The `image` map (registry/repository/tag/digest).
+- context: Name used in the error message when `repository` is missing (e.g. "servicename").
+*/}}
+{{- define "helper.image" -}}
+{{- $root := .root -}}
+{{- $image := .image | default dict -}}
+{{- $registry := $root.Values.global.imageRegistry | default $image.registry -}}
+{{- $repository := $image.repository | required (printf "%s is missing image.repository" .context) -}}
+{{- $ref := ternary (printf "%s/%s" $registry $repository) $repository (not (empty $registry)) -}}
+{{- if $image.digest -}}
+{{- printf "%s@%s" $ref $image.digest -}}
+{{- else -}}
+{{- printf "%s:%s" $ref ($image.tag | default $root.Chart.AppVersion | toString) -}}
+{{- end -}}
+{{- end -}}
+
+
+{{/*
 Create image pull secret.
 */}}
 {{- define "helper.imagePullSecret" }}
@@ -176,21 +217,37 @@ Parameters:
 
 
 {{/*
-Create configmap environment variables.
+Render a map of environment variables as ConfigMap `data` entries. Each value is run through `tpl`
+against the ROOT context, so a value can reference `.Release`/`.Values` (e.g. deriving a hostname
+or connection string from the release name). Two details matter here:
+- the root context is passed explicitly, because inside the `range` below `.` is the individual
+  value, and templating against that fails with "can't evaluate field Release in type string";
+- values go through `toString`, not `toYaml`: `toYaml` adds the quotes YAML needs around a value
+  like `{{ .Release.Name }}-x` (it starts with `{`) and those quotes then end up inside the
+  rendered ConfigMap value.
+Parameters:
+- root: The root context.
+- data: The map of variables (e.g. .Values.servicename.envCm).
 */}}
 {{- define "helper.env" -}}
-{{ range $key, $val := . }}
-{{ $key }}: {{ tpl (toYaml $val) . | quote }}
+{{- $root := .root -}}
+{{ range $key, $val := .data }}
+{{ $key }}: {{ tpl (toString $val) $root | quote }}
 {{- end }}
 {{- end }}
 
 
 {{/*
-Create secret environment variables.
+Render a map of environment variables as Secret `data` entries (base64-encoded). Same `tpl`
+semantics as `helper.env` above.
+Parameters:
+- root: The root context.
+- data: The map of variables (e.g. .Values.servicename.envSecret).
 */}}
 {{- define "helper.secret" -}}
-{{ range $key, $val := . }}
-{{ $key }}: {{ tpl (toYaml $val) . | b64enc | quote }}
+{{- $root := .root -}}
+{{ range $key, $val := .data }}
+{{ $key }}: {{ tpl (toString $val) $root | b64enc | quote }}
 {{- end }}
 {{- end }}
 
@@ -234,9 +291,9 @@ Parameters:
 - $componentName: The name of the component for which the selector labels are being generated.
 */}}
 {{- define "helper.selectorLabels" -}}
-{{- $root := .root | default $ -}}
+{{- $root := .root -}}
 {{- $componentName := .componentName | default "app" -}}
-app.kubernetes.io/name: {{ printf "%s-%s" (include "helper.fullname" $root) $componentName | trunc 63 | trimSuffix "-" }}
+app.kubernetes.io/name: {{ include "helper.componentFullname" (dict "root" $root "componentName" $componentName) }}
 app.kubernetes.io/instance: {{ $root.Release.Name | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 
@@ -257,6 +314,42 @@ app.kubernetes.io/component: {{ $componentName }}
 
 
 {{/*
+Fail fast on values that would otherwise render an empty, silently-ignored or API-rejected
+manifest. Called from templates/validation.yaml (which renders nothing itself) so a typo is
+reported at `helm template`/`helm install` time with a readable message, rather than showing up
+as a missing workload or an API server error.
+Parameters:
+- name: The component name (e.g. "servicename"), used to prefix the error messages.
+- component: The component's values map (e.g. .Values.servicename).
+*/}}
+{{- define "helper.component.validate" -}}
+{{- $name := .name -}}
+{{- $component := .component -}}
+{{- $kinds := list "Deployment" "StatefulSet" "DaemonSet" -}}
+{{- if not (has $component.deploymentType $kinds) -}}
+{{- fail (printf "%s.deploymentType must be one of [%s], got %q" $name (join " " $kinds) (toString $component.deploymentType)) -}}
+{{- end -}}
+{{- if and (ne $component.deploymentType "StatefulSet") (or $component.volumeClaims $component.extraVolumeClaims) -}}
+{{- fail (printf "%s.volumeClaims/extraVolumeClaims require deploymentType \"StatefulSet\" (got %q) - only a StatefulSet has volumeClaimTemplates; use volumes/extraVolumes instead" $name $component.deploymentType) -}}
+{{- end -}}
+{{- if and (eq $component.deploymentType "DaemonSet") $component.autoscaling.enabled -}}
+{{- fail (printf "%s.autoscaling.enabled requires deploymentType \"Deployment\" or \"StatefulSet\" - a DaemonSet has no scale subresource and already runs one pod per node" $name) -}}
+{{- end -}}
+{{- if and $component.autoscaling.enabled (not $component.autoscaling.targetCPUUtilizationPercentage) (not $component.autoscaling.targetMemoryUtilizationPercentage) -}}
+{{- fail (printf "%s.autoscaling needs targetCPUUtilizationPercentage and/or targetMemoryUtilizationPercentage - an HPA with no metric never scales" $name) -}}
+{{- end -}}
+{{- if and $component.image.digest (not (regexMatch "^[a-z0-9]+:[a-fA-F0-9]{32,}$" $component.image.digest)) -}}
+{{- fail (printf "%s.image.digest must be a full digest such as \"sha256:<hex>\", got %q" $name (toString $component.image.digest)) -}}
+{{- end -}}
+{{- /* Compared as strings so a deliberate `0` counts as set: `maxUnavailable: 0` blocks every
+voluntary eviction, and `toString` maps only the two unset forms (nil and "") to "". */ -}}
+{{- if and $component.pdb.enabled (eq (toString $component.pdb.minAvailable) "") (eq (toString $component.pdb.maxUnavailable) "") -}}
+{{- fail (printf "%s.pdb needs minAvailable or maxUnavailable when enabled - a budget with neither set does not restrict evictions at all" $name) -}}
+{{- end -}}
+{{- end -}}
+
+
+{{/*
 Render the pod template (metadata + spec) shared by a `jobs` and `cronjobs` entry.
 Both Job and CronJob wrap the exact same PodTemplateSpec, so this is shared to avoid
 duplicating it between templates/jobs.yaml and templates/cronjobs.yaml.
@@ -272,11 +365,8 @@ Parameters:
 {{- $image := $job.image | default dict -}}
 {{- $serviceAccount := $job.serviceAccount | default dict -}}
 metadata:
-  {{- if or $job.podAnnotations $job.envCm $job.envSecret $root.Values.global.envCm $root.Values.global.envSecret }}
-  annotations:
-    {{- if $job.podAnnotations }}
-    {{- toYaml $job.podAnnotations | nindent 4 }}
-    {{- end }}
+  {{- if $job.podAnnotations }}
+  annotations: {{- toYaml $job.podAnnotations | nindent 4 }}
   {{- end }}
   labels: {{- include "helper.labels" (dict "root" $root "componentName" $name) | nindent 4 }}
     {{- if $job.podLabels }}
@@ -284,9 +374,9 @@ metadata:
     {{- end }}
 spec:
   restartPolicy: {{ $job.restartPolicy | default "Never" }}
-  {{- include "helper.imagePullSecrets" (dict "root" $root "componentName" $name "componentValues" $job) | nindent 2 }}
+  {{- with include "helper.imagePullSecrets" (dict "root" $root "componentName" $name "componentValues" $job) }}{{ . | nindent 2 }}{{ end }}
   {{- if $serviceAccount.enabled }}
-  serviceAccountName: {{ $serviceAccount.name | default (printf "%s-%s" (include "helper.fullname" $root) $name) }}
+  serviceAccountName: {{ $serviceAccount.name | default (include "helper.componentFullname" (dict "root" $root "componentName" $name)) }}
   {{- end }}
   {{- if $job.podSecurityContext }}
   securityContext: {{- toYaml $job.podSecurityContext | nindent 4 }}
@@ -299,7 +389,7 @@ spec:
     {{- if $job.securityContext }}
     securityContext: {{- toYaml $job.securityContext | nindent 6 }}
     {{- end }}
-    image: "{{ $root.Values.global.imageRegistry | default $image.registry }}/{{ $image.repository | required (printf "jobs/cronjobs %q is missing image.repository" $name) }}:{{ $image.tag | default $root.Chart.AppVersion }}"
+    image: {{ include "helper.image" (dict "root" $root "image" $image "context" (printf "jobs/cronjobs %q" $name)) | quote }}
     imagePullPolicy: {{ $image.pullPolicy | default "IfNotPresent" }}
     {{- if $job.command }}
     command:
@@ -317,11 +407,11 @@ spec:
     envFrom:
     {{- if or $job.envCm $root.Values.global.envCm }}
     - configMapRef:
-        name: {{ printf "%s-%s" (include "helper.fullname" $root) $name }}
+        name: {{ include "helper.componentFullname" (dict "root" $root "componentName" $name) }}
     {{- end }}
     {{- if or $job.envSecret $root.Values.global.envSecret }}
     - secretRef:
-        name: {{ printf "%s-%s" (include "helper.fullname" $root) $name }}
+        name: {{ include "helper.componentFullname" (dict "root" $root "componentName" $name) }}
     {{- end }}
     {{- if or $job.envFrom $root.Values.global.envFrom }}
       {{- include "helper.componentEnvFrom" (dict "root" $root "componentEnvFrom" $job.envFrom) | nindent 4 }}
@@ -358,10 +448,10 @@ spec:
 
 
 {{/*
-Render the pod template (metadata + spec) shared by a Deployment/StatefulSet component
-(e.g. `servicename`). Deployment and StatefulSet only differ in a handful of top-level
-spec fields (replicas vs. volumeClaimTemplates, serviceName, etc.) - the PodTemplateSpec
-they wrap is identical, so it's shared here to avoid maintaining it twice per component
+Render the pod template (metadata + spec) shared by a Deployment/StatefulSet/DaemonSet component
+(e.g. `servicename`). The three kinds only differ in a handful of top-level spec fields (replicas,
+volumeClaimTemplates, serviceName, strategy vs. updateStrategy, etc.) - the PodTemplateSpec they
+wrap is identical, so it's shared here to avoid maintaining it three times per component
 (mirrors `helper.job.podTemplate` above, shared between Job and CronJob).
 Parameters:
 - root: The root context.
@@ -387,9 +477,37 @@ metadata:
     {{- toYaml $component.podLabels | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "helper.imagePullSecrets" (dict "root" $root "componentName" $name "componentValues" $component) | nindent 2 }}
+  {{- with include "helper.imagePullSecrets" (dict "root" $root "componentName" $name "componentValues" $component) }}{{ . | nindent 2 }}{{ end }}
   {{- if $component.serviceAccount.enabled }}
-  serviceAccountName: {{ $component.serviceAccount.name | default (printf "%s-%s" (include "helper.fullname" $root) $name | trunc 63 | trimSuffix "-") }}
+  serviceAccountName: {{ $component.serviceAccount.name | default (include "helper.componentFullname" (dict "root" $root "componentName" $name)) }}
+  {{- end }}
+  {{- if kindIs "bool" $component.automountServiceAccountToken }}
+  automountServiceAccountToken: {{ $component.automountServiceAccountToken }}
+  {{- end }}
+  {{- if kindIs "bool" $component.enableServiceLinks }}
+  enableServiceLinks: {{ $component.enableServiceLinks }}
+  {{- end }}
+  {{- if $component.priorityClassName }}
+  priorityClassName: {{ $component.priorityClassName }}
+  {{- end }}
+  {{- if $component.hostNetwork }}
+  hostNetwork: true
+  {{- end }}
+  {{- if $component.hostPID }}
+  hostPID: true
+  {{- end }}
+  {{- /* hostNetwork pods keep resolving cluster DNS only with ClusterFirstWithHostNet, so default
+  to it rather than letting the pod silently fall back to the node's resolver. */ -}}
+  {{- if $component.dnsPolicy }}
+  dnsPolicy: {{ $component.dnsPolicy }}
+  {{- else if $component.hostNetwork }}
+  dnsPolicy: ClusterFirstWithHostNet
+  {{- end }}
+  {{- if $component.dnsConfig }}
+  dnsConfig: {{- toYaml $component.dnsConfig | nindent 4 }}
+  {{- end }}
+  {{- if $component.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ $component.terminationGracePeriodSeconds }}
   {{- end }}
   {{- if $component.podSecurityContext }}
   securityContext: {{- toYaml $component.podSecurityContext | nindent 4 }}
@@ -402,7 +520,7 @@ spec:
     {{- if $component.securityContext }}
     securityContext: {{- toYaml $component.securityContext | nindent 6 }}
     {{- end }}
-    image: "{{ $root.Values.global.imageRegistry | default $component.image.registry }}/{{ $component.image.repository }}:{{ $component.image.tag | default $root.Chart.AppVersion }}"
+    image: {{ include "helper.image" (dict "root" $root "image" $component.image "context" $name) | quote }}
     imagePullPolicy: {{ $component.image.pullPolicy }}
     {{- if $component.command }}
     command:
@@ -431,11 +549,11 @@ spec:
     envFrom:
     {{- if or $component.envCm $root.Values.global.envCm }}
     - configMapRef:
-        name: {{ printf "%s-%s" (include "helper.fullname" $root) $name }}
+        name: {{ include "helper.componentFullname" (dict "root" $root "componentName" $name) }}
     {{- end }}
     {{- if or $component.envSecret $root.Values.global.envSecret }}
     - secretRef:
-        name: {{ printf "%s-%s" (include "helper.fullname" $root) $name }}
+        name: {{ include "helper.componentFullname" (dict "root" $root "componentName" $name) }}
     {{- end }}
     {{- if or $component.envFrom $root.Values.global.envFrom }}
       {{- include "helper.componentEnvFrom" (dict "root" $root "componentEnvFrom" $component.envFrom) | nindent 4 }}
@@ -468,6 +586,9 @@ spec:
   {{- end }}
   {{- if $component.affinity }}
   affinity: {{- toYaml $component.affinity | nindent 4 }}
+  {{- end }}
+  {{- if $component.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- toYaml $component.topologySpreadConstraints | nindent 2 }}
   {{- end }}
   {{- if $component.tolerations }}
   tolerations: {{- toYaml $component.tolerations | nindent 2 }}

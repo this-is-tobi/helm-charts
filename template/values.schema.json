@@ -1,0 +1,396 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "chartname values",
+  "description": "Type and enum validation for this chart's values. Deliberately permissive: every object allows additionalProperties and nothing is `required`, so adding values, adding subchart dependencies or renaming the `servicename` component never turns into a hard install failure - it only drops that block out of validation. Combination rules that JSON Schema cannot express (which values apply to which deploymentType) are enforced at render time by `helper.component.validate` in templates/_helpers.tpl instead. When you rename the `servicename` component, rename it here too or its block stops being validated.",
+  "type": "object",
+  "additionalProperties": true,
+  "definitions": {
+    "serviceType": {
+      "type": "string",
+      "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"]
+    },
+    "pullPolicy": {
+      "type": "string",
+      "enum": ["Always", "IfNotPresent", "Never"]
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "registry": { "type": "string" },
+        "repository": { "type": "string" },
+        "pullPolicy": { "$ref": "#/definitions/pullPolicy" },
+        "tag": { "type": ["string", "number"] },
+        "digest": {
+          "description": "Full content digest, e.g. sha256:<hex>. Takes precedence over tag.",
+          "type": "string",
+          "pattern": "^$|^[a-z0-9]+:[a-fA-F0-9]{32,}$"
+        }
+      }
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "name": { "type": "string" },
+          "create": { "type": "boolean" },
+          "registry": { "type": "string" },
+          "username": { "type": "string" },
+          "password": { "type": "string" },
+          "email": { "type": "string" }
+        }
+      }
+    },
+    "envMapOrList": {
+      "description": "Accepted as a map of NAME -> value/valueFrom, or as a native list of env entries.",
+      "type": ["object", "array", "null"]
+    },
+    "envFromMapOrList": {
+      "description": "Accepted as a native list of configMapRef/secretRef entries, or as a map of arbitrary key -> single entry so overrides can address one entry by key.",
+      "type": ["object", "array", "null"]
+    },
+    "serviceAccount": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "create": { "type": "boolean" },
+        "name": { "type": "string" },
+        "annotations": { "type": "object" },
+        "automountServiceAccountToken": { "type": "boolean" }
+      }
+    },
+    "workloadComponent": {
+      "description": "A Deployment/StatefulSet/DaemonSet component of this chart (e.g. `servicename`).",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "deploymentType": {
+          "type": "string",
+          "enum": ["Deployment", "StatefulSet", "DaemonSet"]
+        },
+        "replicaCount": { "type": "integer", "minimum": 0 },
+        "revisionHistoryLimit": { "type": "integer", "minimum": 0 },
+        "image": { "$ref": "#/definitions/image" },
+        "imagePullSecrets": { "$ref": "#/definitions/imagePullSecrets" },
+        "command": { "type": "array" },
+        "args": { "type": "array" },
+        "containerPort": { "type": ["integer", "null"] },
+        "containerPortName": { "type": "string" },
+        "extraPorts": { "type": "array" },
+        "env": { "$ref": "#/definitions/envMapOrList" },
+        "envFrom": { "$ref": "#/definitions/envFromMapOrList" },
+        "envCm": { "type": ["object", "null"] },
+        "envSecret": { "type": ["object", "null"] },
+        "podAnnotations": { "type": "object" },
+        "podLabels": { "type": "object" },
+        "automountServiceAccountToken": { "type": "boolean" },
+        "enableServiceLinks": { "type": "boolean" },
+        "podSecurityContext": { "type": ["object", "null"] },
+        "securityContext": { "type": ["object", "null"] },
+        "initContainers": { "type": "array" },
+        "extraContainers": { "type": "array" },
+        "resources": { "type": "object" },
+        "hostNetwork": { "type": "boolean" },
+        "hostPID": { "type": "boolean" },
+        "dnsPolicy": {
+          "type": "string",
+          "enum": ["", "ClusterFirst", "ClusterFirstWithHostNet", "Default", "None"]
+        },
+        "dnsConfig": { "type": "object" },
+        "priorityClassName": { "type": "string" },
+        "terminationGracePeriodSeconds": { "type": ["integer", "null"], "minimum": 0 },
+        "topologySpreadConstraints": { "type": "array" },
+        "hostAliases": { "type": "array" },
+        "nodeSelector": { "type": "object" },
+        "tolerations": { "type": "array" },
+        "affinity": { "type": "object" },
+        "volumes": { "type": "array" },
+        "extraVolumes": { "type": "array" },
+        "volumeClaims": { "type": "array" },
+        "extraVolumeClaims": { "type": "array" },
+        "volumeMounts": { "type": "array" },
+        "extraVolumeMounts": { "type": "array" },
+        "serviceAccount": { "$ref": "#/definitions/serviceAccount" },
+        "strategy": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "type": { "type": "string", "enum": ["Recreate", "RollingUpdate"] },
+            "rollingUpdate": { "type": "object" }
+          }
+        },
+        "updateStrategy": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "type": { "type": "string", "enum": ["RollingUpdate", "OnDelete"] },
+            "rollingUpdate": { "type": "object" }
+          }
+        },
+        "probes": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "startupProbe": { "type": ["object", "null"] },
+            "readinessProbe": { "type": ["object", "null"] },
+            "livenessProbe": { "type": ["object", "null"] }
+          }
+        },
+        "service": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "type": { "$ref": "#/definitions/serviceType" },
+            "port": { "type": "integer" },
+            "nodePort": { "type": ["integer", "null"] },
+            "portName": { "type": "string" },
+            "protocol": { "type": "string", "enum": ["TCP", "UDP", "SCTP"] },
+            "extraPorts": { "type": "array" }
+          }
+        },
+        "autoscaling": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "minReplicas": { "type": "integer", "minimum": 1 },
+            "maxReplicas": { "type": "integer", "minimum": 1 },
+            "targetCPUUtilizationPercentage": { "type": ["integer", "null"] },
+            "targetMemoryUtilizationPercentage": { "type": ["integer", "null"] }
+          }
+        },
+        "pdb": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "labels": { "type": "object" },
+            "annotations": { "type": "object" },
+            "minAvailable": { "type": ["string", "integer"] },
+            "maxUnavailable": { "type": ["string", "integer"] }
+          }
+        },
+        "networkPolicy": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "create": { "type": "boolean" },
+            "labels": { "type": "object" },
+            "annotations": { "type": "object" },
+            "policyTypes": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["Ingress", "Egress"] }
+            },
+            "ingress": { "type": "array" },
+            "egress": { "type": "array" }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "className": { "type": "string" },
+            "annotations": { "type": "object" },
+            "labels": { "type": "object" },
+            "tls": { "type": "array" },
+            "hosts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                  "name": { "type": "string" },
+                  "paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "path": { "type": "string" },
+                        "pathType": {
+                          "type": "string",
+                          "enum": ["Exact", "Prefix", "ImplementationSpecific"]
+                        },
+                        "backend": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "properties": {
+                            "serviceName": { "type": "string" },
+                            "portNumber": { "type": ["integer", "null"] }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "httpRoute": { "$ref": "#/definitions/route" },
+        "grpcRoute": { "$ref": "#/definitions/route" },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "service": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "type": { "$ref": "#/definitions/serviceType" },
+                "annotations": { "type": "object" },
+                "labels": { "type": "object" },
+                "portName": { "type": "string" },
+                "port": { "type": "integer" },
+                "targetPort": { "type": ["integer", "string"] }
+              }
+            },
+            "serviceMonitor": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "labels": { "type": "object" },
+                "annotations": { "type": "object" },
+                "endpoints": { "type": "array" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "route": {
+      "description": "Gateway API HTTPRoute/GRPCRoute configuration.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "annotations": { "type": "object" },
+        "labels": { "type": "object" },
+        "parentRefs": { "type": "array" },
+        "hostnames": { "type": "array", "items": { "type": "string" } },
+        "rules": { "type": "array" }
+      }
+    },
+    "batchEntry": {
+      "description": "A `jobs` or `cronjobs` entry. Scheduling fields only apply to cronjobs.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "image": { "$ref": "#/definitions/image" },
+        "imagePullSecrets": { "$ref": "#/definitions/imagePullSecrets" },
+        "serviceAccount": { "$ref": "#/definitions/serviceAccount" },
+        "env": { "$ref": "#/definitions/envMapOrList" },
+        "envFrom": { "$ref": "#/definitions/envFromMapOrList" },
+        "envCm": { "type": ["object", "null"] },
+        "envSecret": { "type": ["object", "null"] },
+        "command": { "type": "array" },
+        "args": { "type": "array" },
+        "restartPolicy": { "type": "string", "enum": ["Never", "OnFailure"] },
+        "backoffLimit": { "type": ["integer", "null"], "minimum": 0 },
+        "completions": { "type": ["integer", "null"], "minimum": 1 },
+        "parallelism": { "type": ["integer", "null"], "minimum": 1 },
+        "activeDeadlineSeconds": { "type": ["integer", "null"], "minimum": 1 },
+        "ttlSecondsAfterFinished": { "type": ["integer", "null"], "minimum": 0 },
+        "hook": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "types": { "type": "array", "items": { "type": "string" } },
+            "weight": { "type": "integer" },
+            "deletePolicy": { "type": "string" }
+          }
+        },
+        "schedule": { "type": "string" },
+        "timeZone": { "type": "string" },
+        "concurrencyPolicy": { "type": "string", "enum": ["Allow", "Forbid", "Replace"] },
+        "suspend": { "type": "boolean" },
+        "startingDeadlineSeconds": { "type": ["integer", "null"], "minimum": 0 },
+        "successfulJobsHistoryLimit": { "type": "integer", "minimum": 0 },
+        "failedJobsHistoryLimit": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "properties": {
+    "enabled": { "type": "boolean" },
+    "nameOverride": { "type": "string" },
+    "fullnameOverride": { "type": "string" },
+    "commonLabels": { "type": "object" },
+    "global": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "imageRegistry": { "type": "string" },
+        "imagePullSecrets": { "$ref": "#/definitions/imagePullSecrets" },
+        "env": { "$ref": "#/definitions/envMapOrList" },
+        "envFrom": { "$ref": "#/definitions/envFromMapOrList" },
+        "envCm": { "type": ["object", "null"] },
+        "envSecret": { "type": ["object", "null"] },
+        "ingress": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "className": { "type": "string" },
+            "annotations": { "type": "object" },
+            "labels": { "type": "object" },
+            "hosts": { "type": "array" },
+            "tls": { "type": "array" }
+          }
+        },
+        "httpRoute": { "$ref": "#/definitions/route" }
+      }
+    },
+    "gateway": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "create": { "type": "boolean" },
+        "name": { "type": "string" },
+        "className": { "type": "string" },
+        "annotations": { "type": "object" },
+        "labels": { "type": "object" },
+        "addresses": { "type": "array" },
+        "listeners": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "name": { "type": "string" },
+              "port": { "type": "integer" },
+              "protocol": {
+                "type": "string",
+                "enum": ["HTTP", "HTTPS", "TLS", "TCP", "UDP"]
+              },
+              "hostname": { "type": "string" },
+              "tls": { "type": "object" },
+              "allowedRoutes": { "type": "object" }
+            }
+          }
+        }
+      }
+    },
+    "servicename": { "$ref": "#/definitions/workloadComponent" },
+    "jobs": {
+      "type": ["object", "null"],
+      "additionalProperties": { "$ref": "#/definitions/batchEntry" }
+    },
+    "cronjobs": {
+      "type": ["object", "null"],
+      "additionalProperties": { "$ref": "#/definitions/batchEntry" }
+    },
+    "extraObjects": {
+      "description": "Map of arbitrary name -> manifest (object, or a string to be run through `tpl`).",
+      "type": ["object", "null"],
+      "additionalProperties": { "type": ["object", "string"] }
+    }
+  }
+}

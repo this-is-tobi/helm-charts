@@ -1,19 +1,26 @@
+{{- $servicename := include "helper.componentFullname" (dict "root" . "componentName" "servicename") -}}
 Release "{{ .Release.Name }}" has been deployed in namespace "{{ .Release.Namespace }}".
 
 ================================================================================
+{{- if not .Values.enabled }}
 
-Check deployment status:
-  kubectl rollout status {{ .Values.servicename.deploymentType | lower }} {{ .Release.Name }}-servicename -n {{ .Release.Namespace }} -w
+NOTE: `enabled` is false, so this release intentionally contains no resource.
+{{- else }}
+
+Check rollout status:
+  kubectl rollout status {{ .Values.servicename.deploymentType | lower }}/{{ $servicename }} -n {{ .Release.Namespace }} -w
 
 View all resources:
   kubectl get all -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
 
 Follow logs in real-time:
-  kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ .Release.Name }}-servicename -f
+  kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ $servicename }} -f
+{{- if .Values.servicename.service.enabled }}
 
 Port-forward to access the service locally:
-  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ .Release.Name }}-servicename 8080:{{ .Values.servicename.service.port }}
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ $servicename }} 8080:{{ .Values.servicename.service.port }}
   Access at: http://localhost:8080
+{{- end }}
 
 {{- if .Values.jobs }}
 
@@ -43,6 +50,7 @@ Ingress resources:
 
 Metrics enabled (ServiceMonitor):
   kubectl get servicemonitor -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+{{- end }}
 {{- end }}
 
 For more information and troubleshooting:
