@@ -9,6 +9,7 @@ on:
       - ready_for_review
     paths:
       - 'charts/**'
+      - 'template/**'
   workflow_dispatch:
 
 jobs:
@@ -47,6 +48,23 @@ jobs:
 
       - name: Run chart-testing (install)
         run: ct install --config ./ci/configs/chart-testing.yaml
+
+  lint-template:
+    if: ${{ !github.event.pull_request.draft }}
+    name: Lint and render template chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checks-out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      # The scaffold chart is intentionally left out of chart-testing (it ships no maintainers and
+      # is never released), so it gets its own render + schema-validation pass here instead of
+      # going unchecked.
+      - name: Run template chart checks
+        run: ./ci/scripts/test-template.sh
 
   lint-docs:
     if: ${{ !github.event.pull_request.draft }}
