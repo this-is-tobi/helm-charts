@@ -44,6 +44,9 @@ vaultStaticSecrets: {}
   #   type: "kv-v2"
   #   # -- Refresh interval in duration notation (e.g., "30s", "5m", "1h").
   #   refreshAfter: "1h"
+  #   # -- Sync as soon as Vault emits an event for the secret (requires Vault event notifications).
+  #   syncConfig:
+  #     instantUpdates: true
   #   # -- Enable HMAC computation for drift detection. Recommended for production.
   #   hmacSecretData: true
   #   # -- Rollout restart targets for applications that don't support dynamic secret reloading.
@@ -120,7 +123,15 @@ vaultDynamicSecrets: {}
   #   renewalPercent: 67
   #   # -- Revoke secret from Vault when VaultDynamicSecret is deleted.
   #   revoke: true
-  #   # -- Enable HMAC computation for drift detection.
+  #   # -- Set when syncing credentials Vault rotates on a schedule (static roles).
+  #   allowStaticCreds: false
+  #   # -- Resync period, only needed for engines that return no lease TTL (e.g. "24h").
+  #   refreshAfter: "24h"
+  #   # -- HTTP method for the Vault request ("GET", "POST", "PUT"); defaults to GET, or PUT when params are set.
+  #   requestHTTPMethod: "GET"
+  #   # -- Sync as soon as Vault emits an event for the secret (engines supporting Vault events).
+  #   syncConfig:
+  #     instantUpdates: true
   #   # -- Rollout restart targets for secret rotation.
   #   rolloutRestartTargets: []
   #   # - kind: Deployment
@@ -185,7 +196,12 @@ vaultPKISecrets: {}
   #   excludeCNFromSans: false
   #   # -- Private key format ("rsa", "ec", "ed25519").
   #   privateKeyFormat: "rsa"
-  #   # -- Enable HMAC computation.
+  #   # -- Issue from a specific PKI issuer (name or ID) instead of the mount's default.
+  #   issuerRef: ""
+  #   # -- Certificate expiry as an RFC 3339 date, instead of a TTL.
+  #   notAfter: ""
+  #   # -- User ID (UID) Subject values to put on the certificate.
+  #   userIDs: []
   #   # -- Rollout restart targets for certificate rotation.
   #   rolloutRestartTargets: []
   #   # - kind: Deployment
@@ -217,6 +233,11 @@ vaultAuth: {}
   #   method: "kubernetes"
   #   mount: "kubernetes"
   #   vaultConnectionRef: "default"
+  #   # -- Namespaces allowed to use this VaultAuth (["*"] for all); unset means its own namespace only.
+  #   allowedNamespaces: []
+  #   # -- Inherit shared auth settings from a VaultAuthGlobal.
+  #   # vaultAuthGlobalRef:
+  #   #   name: "default-global"
   #   kubernetes:
   #     role: "my-app-role"
   #     serviceAccount: "default"

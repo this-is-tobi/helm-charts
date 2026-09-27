@@ -21,6 +21,9 @@ vaultAuth:
       serviceAccount: "default"
       audiences:
       - "vault"
+    allowedNamespaces:
+    - default
+    - app
 
   appRole:
     method: appRole
@@ -29,6 +32,9 @@ vaultAuth:
     appRole:
       roleId: "my-role-id"
       secretRef: "approle-secret"
+    vaultAuthGlobalRef:
+      name: default-global
+      allowDefault: false
 
 # Static KV secrets
 vaultStaticSecrets:
@@ -39,6 +45,8 @@ vaultStaticSecrets:
     path: app/config
     type: kv-v2
     refreshAfter: 1h
+    syncConfig:
+      instantUpdates: true
     hmacSecretData: true
     destination:
       name: app-config
@@ -100,6 +108,11 @@ vaultDynamicSecrets:
     path: creds/postgres-role
     renewalPercent: 67
     revoke: true
+    allowStaticCreds: false
+    refreshAfter: 24h
+    requestHTTPMethod: GET
+    syncConfig:
+      instantUpdates: true
     rolloutRestartTargets:
     - kind: Deployment
       name: api-server
@@ -154,6 +167,10 @@ vaultPKISecrets:
     expiryOffset: "24h"
     revoke: true
     privateKeyFormat: rsa
+    issuerRef: service-issuer
+    notAfter: "2027-12-31T23:59:59Z"
+    userIDs:
+    - svc-account
     rolloutRestartTargets:
     - kind: Deployment
       name: myservice

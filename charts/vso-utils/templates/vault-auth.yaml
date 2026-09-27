@@ -48,6 +48,14 @@ spec:
   {{- with $auth.vaultConnectionRef }}
   vaultConnectionRef: {{ . }}
   {{- end }}
+  {{- with $auth.vaultAuthGlobalRef }}
+  vaultAuthGlobalRef:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $auth.allowedNamespaces }}
+  allowedNamespaces:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with $auth.storageEncryption }}
   storageEncryption:
     {{- toYaml . | nindent 4 }}
