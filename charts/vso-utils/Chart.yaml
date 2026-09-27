@@ -13,6 +13,8 @@ annotations:
       description: Upgrade vault-secrets-operator dependency to 1.6.0
     - kind: fixed
       description: Stop rendering hmacSecretData on VaultDynamicSecret and VaultPKISecret, which do not declare it (rejected under strict or server-side apply)
+    - kind: fixed
+      description: Honour false for revoke, hmacSecretData and destination.create (always rendered true before)
     - kind: changed
       description: "Upstream breaking (VSO 1.5.0): VaultAuth appRole.secretIDPath is removed, use appRole.secretRef"
     - kind: removed
