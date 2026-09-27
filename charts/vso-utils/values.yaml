@@ -7,10 +7,10 @@ fullnameOverride: ""
 extraObjects: []
 
 # Configuration for Vault Secret Operator resources.
-# Each top-level key under the resource maps (vaultStaticSecrets, vaultDynamicSecrets, etc.) 
+# Each top-level key under the resource maps (vaultStaticSecrets, vaultDynamicSecrets, etc.)
 # represents one resource instance with the specified configuration.
 #
-# Example: 
+# Example:
 #   vaultStaticSecrets:
 #     myAppConfig:  # <- Resource instance name
 #       mount: secret
@@ -31,7 +31,7 @@ vaultStaticSecrets: {}
   #   namespace: ""
   #   # -- Mount path of the secrets engine in Vault (required).
   #   mount: "secret"
-  #   # -- VaultAuth reference, can be prefixed with namespace (e.g., "namespaceA/vaultAuthRefB"). 
+  #   # -- VaultAuth reference, can be prefixed with namespace (e.g., "namespaceA/vaultAuthRefB").
   #   # If not specified, the default VaultAuth in the operator's namespace is used (required).
   #   vaultAuthRef: "default"
   #   # -- Path to the secret in Vault (required).
@@ -227,7 +227,7 @@ vaultPKISecrets: {}
 # See: https://developer.hashicorp.com/vault/docs/platform/k8s/vso/api-reference#vaultauth
 vaultAuth: {}
   # Example configurations:
-  # 
+  #
   # Kubernetes auth method:
   # default:
   #   method: "kubernetes"
@@ -323,4 +323,3 @@ vaultConnection: {}
 vso:
   # -- Enable deployment of Vault Secrets Operator.
   enabled: false
-
