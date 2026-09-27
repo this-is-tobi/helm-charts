@@ -35,6 +35,7 @@
           "version": { "type": ["integer", "null"] },
           "type": { "type": "string", "enum": ["kv-v1", "kv-v2"], "default": "kv-v2" },
           "refreshAfter": { "type": "string" },
+          "syncConfig": { "type": "object", "properties": { "instantUpdates": { "type": "boolean" } } },
           "hmacSecretData": { "type": "boolean", "default": true },
           "rolloutRestartTargets": {
             "type": "array",
@@ -78,6 +79,10 @@
           "params": { "type": "object" },
           "renewalPercent": { "type": "integer", "default": 67 },
           "revoke": { "type": "boolean", "default": true },
+          "allowStaticCreds": { "type": "boolean" },
+          "refreshAfter": { "type": "string" },
+          "requestHTTPMethod": { "type": "string", "enum": ["GET", "POST", "PUT"] },
+          "syncConfig": { "type": "object", "properties": { "instantUpdates": { "type": "boolean" } } },
           "rolloutRestartTargets": {
             "type": "array",
             "items": {
@@ -129,6 +134,9 @@
           "ttl": { "type": "string", "default": "720h" },
           "excludeCNFromSans": { "type": "boolean", "default": false },
           "privateKeyFormat": { "type": "string", "enum": ["rsa", "ec", "ed25519"], "default": "rsa" },
+          "issuerRef": { "type": "string" },
+          "notAfter": { "type": "string" },
+          "userIDs": { "type": "array", "items": { "type": "string" } },
           "rolloutRestartTargets": {
             "type": "array",
             "items": {
@@ -244,6 +252,8 @@
           },
           "headers": { "type": "object" },
           "vaultConnectionRef": { "type": "string" },
+          "allowedNamespaces": { "type": "array", "items": { "type": "string" } },
+          "vaultAuthGlobalRef": { "type": "object" },
           "storageEncryption": { "type": "object" },
           "vaultAuthGlobalRef": { "type": "object" },
           "allowedNamespaces": { 

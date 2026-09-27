@@ -11,6 +11,8 @@ annotations:
   artifacthub.io/changes: |
     - kind: changed
       description: Upgrade vault-secrets-operator dependency to 1.6.0
+    - kind: added
+      description: "Render syncConfig (instant event-driven updates) on static and dynamic secrets, allowStaticCreds, refreshAfter and requestHTTPMethod on dynamic secrets, issuerRef, notAfter and userIDs on PKI secrets, allowedNamespaces and vaultAuthGlobalRef on VaultAuth"
     - kind: fixed
       description: Stop rendering hmacSecretData on VaultDynamicSecret and VaultPKISecret, which do not declare it (rejected under strict or server-side apply)
     - kind: fixed
