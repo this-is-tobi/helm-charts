@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "suc.fullname" . }}-env
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "suc.labels" . | nindent 4 }}
+data:
+  SYSTEM_UPGRADE_CONTROLLER_DEBUG: {{ .Values.controller.debug | quote }}
+  SYSTEM_UPGRADE_CONTROLLER_LEADER_ELECT: {{ .Values.controller.leaderElect | quote }}
+  SYSTEM_UPGRADE_CONTROLLER_THREADS: {{ .Values.controller.threads | quote }}
+  SYSTEM_UPGRADE_PLAN_POLLING_INTERVAL: {{ .Values.controller.planPollingInterval | quote }}
+  SYSTEM_UPGRADE_JOB_ACTIVE_DEADLINE_SECONDS: {{ .Values.controller.job.activeDeadlineSeconds | quote }}
+  SYSTEM_UPGRADE_JOB_BACKOFF_LIMIT: {{ .Values.controller.job.backoffLimit | quote }}
+  SYSTEM_UPGRADE_JOB_IMAGE_PULL_POLICY: {{ .Values.controller.job.imagePullPolicy | quote }}
+  SYSTEM_UPGRADE_JOB_KUBECTL_IMAGE: {{ .Values.controller.job.kubectlImage | quote }}
+  SYSTEM_UPGRADE_JOB_PRIVILEGED: {{ .Values.controller.job.privileged | quote }}
+  SYSTEM_UPGRADE_JOB_TTL_SECONDS_AFTER_FINISH: {{ .Values.controller.job.ttlSecondsAfterFinish | quote }}

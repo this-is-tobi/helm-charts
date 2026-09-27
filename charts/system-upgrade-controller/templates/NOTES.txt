@@ -1,0 +1,20 @@
+system-upgrade-controller {{ .Chart.AppVersion }} is installed in namespace {{ .Release.Namespace }}.
+
+Check the controller and the Plans:
+
+  kubectl -n {{ .Release.Namespace }} get deploy {{ include "suc.fullname" . }}
+  kubectl -n {{ .Release.Namespace }} get plans.upgrade.cattle.io
+  kubectl -n {{ .Release.Namespace }} get jobs -l upgrade.cattle.io/controller={{ include "suc.controllerName" . }}
+{{- $plans := (include "suc.plans" . | fromYaml).plans }}
+{{- if not $plans }}
+
+No Plan is enabled, so no node will be upgraded. Enable the k3s preset with
+`--set k3s.enabled=true --set k3s.version=<version>`, or define entries under `plans`.
+{{- end }}
+{{- if not .Values.namespace.create }}
+
+The upgrade Jobs are privileged (they replace host binaries). If Pod Security Admission is
+enforced, label the namespace:
+
+  kubectl label namespace {{ .Release.Namespace }} pod-security.kubernetes.io/enforce=privileged
+{{- end }}
