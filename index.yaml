@@ -3270,6 +3270,59 @@ entries:
       artifacthub.io/category: security
       artifacthub.io/changes: |
         - kind: changed
+          description: Upgrade vault-secrets-operator dependency to 1.6.0
+        - kind: added
+          description: "Render syncConfig (instant event-driven updates) on static and dynamic secrets, allowStaticCreds, refreshAfter and requestHTTPMethod on dynamic secrets, issuerRef, notAfter and userIDs on PKI secrets, allowedNamespaces and vaultAuthGlobalRef on VaultAuth"
+        - kind: fixed
+          description: Stop rendering hmacSecretData on VaultDynamicSecret and VaultPKISecret, which do not declare it (rejected under strict or server-side apply)
+        - kind: fixed
+          description: Honour false for revoke, hmacSecretData and destination.create (always rendered true before)
+        - kind: changed
+          description: "Upstream breaking (VSO 1.5.0): VaultAuth appRole.secretIDPath is removed, use appRole.secretRef"
+        - kind: removed
+          description: "Upstream breaking (VSO 1.6.0): HCP Vault Secrets support (HCPAuth, HCPVaultSecretsApp CRDs) is removed from the bundled operator"
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.6.0
+    created: "2026-09-27T23:58:47.579046123Z"
+    dependencies:
+    - alias: vso
+      condition: vso.enabled
+      name: vault-secrets-operator
+      repository: https://helm.releases.hashicorp.com
+      version: '>=1.0.0'
+    description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator
+      resources - sync static secrets, generate dynamic credentials, issue PKI certificates,
+      and configure Vault authentication.
+    digest: fee305b2339cad3ce78fdffc1e07090c5e8b58af1a67554ca2ab3c757d5194d9
+    keywords:
+    - vault
+    - secrets
+    - hashicorp
+    - vso
+    - vault-secrets-operator
+    - kubernetes
+    - security
+    - pki
+    - dynamic-secrets
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: vso-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator
+    - https://developer.hashicorp.com/vault/docs/platform/k8s/vso
+    - https://github.com/hashicorp/vault-secrets-operator
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-2.1.0/vso-utils-2.1.0.tgz
+    version: 2.1.0
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |
+        - kind: changed
           description: "BREAKING: replace tls nested block with flat caCertSecretRef, caCertPath, and tlsServerName fields in VaultConnection"
       artifacthub.io/license: MIT
     apiVersion: v2
@@ -3746,4 +3799,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-09-27T23:46:10.471689284Z"
+generated: "2026-09-27T23:58:47.579339452Z"
