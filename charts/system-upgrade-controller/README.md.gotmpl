@@ -1,0 +1,177 @@
+{{ template "chart.header" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.kubeVersionLine" . }}
+
+## Overview
+
+The [system-upgrade-controller](https://github.com/rancher/system-upgrade-controller) (SUC) upgrades nodes from inside the cluster: each `Plan` selects nodes and runs an upgrade Job on them, a few at a time, cordoning (and optionally draining) each node first. Upstream only publishes raw manifests; this chart packages them with safe defaults.
+
+- **Plug and play**: the defaults deploy the controller, its CRD and RBAC, and upgrade nothing. One value turns on the canonical k3s server + agent Plans.
+- **Secured**: upstream's least-privilege RBAC (no `cluster-admin`), and a controller pod that meets the Pod Security `restricted` profile (non-root, read-only root filesystem, no privilege escalation, all capabilities dropped, seccomp, resource requests and limits, no hostPath unless needed).
+- **Generic**: any Plan (k3s, RKE2, OS patching, ...) through `plans`; works with Helm 3/4, Argo CD and Flux; can take over an existing upstream-manifest install in place.
+
+## Installing the Chart
+
+**Using Traditional Helm Repository:**
+```sh
+helm repo add tobi https://this-is-tobi.github.io/helm-charts
+helm repo update
+helm install system-upgrade tobi/{{ template "chart.name" . }} --namespace system-upgrade --create-namespace
+```
+
+**Using OCI Registry (Recommended):**
+```sh
+helm install system-upgrade oci://ghcr.io/this-is-tobi/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }} \
+  --namespace system-upgrade --create-namespace
+```
+
+The upgrade Jobs are privileged by design (they replace host binaries). If Pod Security Admission is enforced, label the namespace, or let the chart own it with `namespace.create=true`:
+
+```sh
+kubectl label namespace system-upgrade pod-security.kubernetes.io/enforce=privileged
+```
+
+### CRD
+
+The `plans.upgrade.cattle.io` CRD ships in `crds/`: Helm creates it on the first install and never modifies or deletes it. The controller keeps it current itself, re-registering its embedded CRD (the chart's appVersion) every time it starts. To manage the CRD elsewhere, install with `--skip-crds` (Argo CD: `helm.skipCrds: true`).
+
+If a chart upgrade makes Plans use a field only the new CRD declares and Helm rejects them, re-run the upgrade once the new controller is running, or `kubectl apply` the chart's `crds/` first.
+
+### ArgoCD
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: system-upgrade
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: system-upgrade
+  sources:
+  - repoURL: ghcr.io/this-is-tobi/helm-charts
+    chart: {{ template "chart.name" . }}
+    targetRevision: {{ template "chart.version" . }}
+    helm:
+      releaseName: system-upgrade
+      values: |
+        namespace:
+          create: true
+        k3s:
+          enabled: true
+          version: v1.36.4+k3s1
+```
+
+## Upgrading k3s
+
+```yaml
+k3s:
+  enabled: true
+  version: v1.36.4+k3s1          # or channel: https://update.k3s.io/v1-release/channels/v1.36
+  window:                         # optional maintenance window
+    days: [monday, tuesday, wednesday, thursday, friday]
+    startTime: "02:00"
+    endTime: "06:00"
+    timeZone: Europe/Paris
+```
+
+This renders two Plans:
+
+- `server-plan`: control-plane nodes, one at a time (keeps etcd quorum), cordoned first.
+- `agent-plan`: every other node, one at a time; its `prepare` step waits for `server-plan` to finish.
+
+Both accept any Plan field on top of their defaults (`k3s.server.*`, `k3s.agent.*`), e.g. `drain`, `concurrency`, `postCompleteDelay` or `tolerations`.
+
+> [!WARNING]
+> Never skip a Kubernetes minor version: go from `v1.35.x` to `v1.36.x`, let both Plans complete, then to `v1.37.x`.
+
+A pinned `version` is deterministic and reviewable (bump it with Renovate or by hand); a `channel` follows new patches on its own every `controller.planPollingInterval`. With a channel the controller needs a CA bundle to reach the channel URL: `caCerts.hostPath: auto` (the default) mounts the host's CA directories only in that case.
+
+## Other Plans
+
+Any Plan goes under `plans`, keyed by name. `planDefaults` is layered under every Plan (k3s preset included). A plan's own fields win; maps deep-merge, lists replace. Every Plan defaults to `concurrency: 1` and the chart's ServiceAccount (the controller treats an unset concurrency as 0 and never runs the Plan).
+
+```yaml
+planDefaults:
+  window:
+    days: [sunday]
+    startTime: "01:00"
+    endTime: "05:00"
+    timeZone: UTC
+
+plans:
+  os-patch:
+    version: "24.04"                         # bump to run the Plan again
+    concurrency: 1
+    drain:
+      force: true
+      ignoreDaemonSets: true
+      deleteEmptydirData: true
+    nodeSelector:
+      matchLabels:
+        os-patch: enabled
+    upgrade:
+      image: docker.io/library/ubuntu      # tagged with `version` by the controller
+      command: ["chroot", "/host"]
+      args: ["sh", "-c", "apt-get update && apt-get -y upgrade"]
+```
+
+A node is marked done with a `plan.upgrade.cattle.io/<plan name>` label holding a hash of the resolved version and the ServiceAccount: renaming a Plan, changing its version or changing `serviceAccount.name` re-runs it on every node. Other fields (`window`, `drain`, `concurrency`, selectors) can change freely.
+
+## Migrating from the upstream manifests
+
+The chart can take over an install made from upstream's `system-upgrade-controller.yaml` without re-running any Plan:
+
+- keep the controller name and Deployment name: `controllerName: system-upgrade-controller`, `fullnameOverride: system-upgrade-controller`;
+- keep the ServiceAccount: `serviceAccount.name: system-upgrade`;
+- keep your Plan names and versions (`k3s.server.name`, `k3s.agent.name`);
+- if the namespace was part of the manifests, keep it managed: `namespace.create: true`.
+
+Argo CD adopts the existing objects in place. Plain Helm refuses objects it does not own: first annotate them with `meta.helm.sh/release-name`, `meta.helm.sh/release-namespace` and label them `app.kubernetes.io/managed-by=Helm`.
+
+## Policy engines
+
+The controller pod passes the Pod Security `restricted` profile and the usual policy-engine rules (non-root, resource limits, no `latest` tag, fully qualified images). The **upgrade Jobs cannot**: they run privileged, as root, with the host's IPC/PID/network namespaces and the host filesystem mounted at `/host`, and the Plan API has no field for their resources. Exempt only them, never the whole namespace. They are named `apply-<plan>-on-<node>-with-<hash>` and labelled `upgrade.cattle.io/controller=<controllerName>`.
+
+Kyverno example (adapt the policy and rule names to yours):
+
+```yaml
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: system-upgrade-jobs
+  namespace: kyverno
+spec:
+  exceptions:
+  - policyName: pod-security-baseline
+    ruleNames: [baseline, autogen-baseline]
+  match:
+    any:
+    - resources:
+        kinds: [Pod, Job]
+        namespaces: [system-upgrade]
+        names: [apply-*]
+  podSecurity:
+  - controlName: Privileged Containers
+    images: ["*rancher/k3s-upgrade:*", "*rancher/kubectl:*"]
+  - controlName: Host Namespaces
+  - controlName: HostPath Volumes
+```
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+## Sources
+
+{{ template "chart.homepageLine" . }}
+
+**Source code:**
+{{ template "chart.sourcesList" . }}
+
+{{ template "helm-docs.versionFooter" . }}

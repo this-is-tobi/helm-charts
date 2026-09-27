@@ -1,0 +1,19 @@
+# k3s preset pinned to a version, but pointed at a node label no node carries: the API server
+# validates the rendered Plans against the real CRD and the controller resolves them, while no
+# upgrade Job can ever be created.
+k3s:
+  enabled: true
+  version: v1.36.4+k3s1
+  window:
+    days: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+    startTime: "00:00"
+    endTime: "23:59"
+    timeZone: UTC
+  server:
+    nodeSelector:
+      matchLabels:
+        system-upgrade-controller.test/target: none
+  agent:
+    nodeSelector:
+      matchLabels:
+        system-upgrade-controller.test/target: none

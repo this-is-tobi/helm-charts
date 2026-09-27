@@ -1,0 +1,191 @@
+# -- Override the chart name (used in resource naming).
+nameOverride: ""
+# -- Override the full resource name (release-name + chart-name).
+fullnameOverride: ""
+# -- Controller name: the `upgrade.cattle.io/controller` pod label (sole Deployment selector), the leader-election lease and the label put on every upgrade Job. Defaults to the fullname. Must stay unique per cluster and stable across upgrades: in-flight Jobs are tracked by it.
+controllerName: ""
+
+namespace:
+  # -- Render the release namespace as part of the chart. Keep `false` with `helm install --create-namespace`; set `true` when a GitOps tool should own the namespace and its labels.
+  create: false
+  # -- Namespace labels. The upgrade Jobs are privileged by design, so the namespace must allow them.
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+  # -- Namespace annotations.
+  annotations: {}
+
+serviceAccount:
+  # -- Create the ServiceAccount used by the controller and, by default, by the upgrade Jobs.
+  create: true
+  # -- ServiceAccount name. Defaults to the fullname. Part of every Plan's hash: changing it re-runs all Plans on every node.
+  name: ""
+  # -- ServiceAccount annotations.
+  annotations: {}
+
+rbac:
+  # -- Create the least-privilege Role, ClusterRoles and bindings (upstream's controller + drainer roles).
+  create: true
+
+image:
+  # -- Controller image registry.
+  registry: docker.io
+  # -- Controller image repository.
+  repository: rancher/system-upgrade-controller
+  # -- Controller image tag. Defaults to the chart appVersion.
+  tag: ""
+  # -- Controller image digest (`sha256:...`). Takes precedence over the tag.
+  digest: ""
+  # -- Controller image pull policy.
+  pullPolicy: IfNotPresent
+
+# -- Image pull secrets for the controller pod (upgrade Jobs use `imagePullSecrets` on their Plan).
+imagePullSecrets: []
+
+# -- Controller replicas. Leader election makes more than one safe; the anti-affinity spreads them across nodes.
+replicaCount: 1
+
+# -- Deployment strategy (upstream default).
+strategy:
+  type: Recreate
+
+controller:
+  # -- Controller debug logging.
+  debug: false
+  # -- Controller worker threads.
+  threads: 2
+  # -- Leader election (required when replicaCount > 1).
+  leaderElect: true
+  # -- How often Plans are re-resolved (channel polling).
+  planPollingInterval: 15m
+  job:
+    # -- Deadline of an upgrade Job, in seconds.
+    activeDeadlineSeconds: 900
+    # -- Retries of an upgrade Job.
+    backoffLimit: 99
+    # -- Pull policy of the upgrade Job images.
+    imagePullPolicy: Always
+    # -- Run upgrade containers privileged (required to replace host binaries).
+    privileged: true
+    # -- Seconds before a finished upgrade Job is garbage-collected.
+    ttlSecondsAfterFinish: 900
+    # -- Image of the cordon/drain containers. Keep it within one minor of the cluster version.
+    kubectlImage: docker.io/rancher/kubectl:v1.30.3
+  # -- Extra controller environment variables.
+  extraEnv: []
+
+caCerts:
+  # -- Mount the host CA directories (`/etc/ssl`, `/etc/pki`, `/etc/ca-certificates`) read-only. The controller image ships no CA bundle and only needs one to resolve a Plan `channel` over HTTPS. `auto` mounts them only when a rendered Plan uses a channel, so version-pinned installs keep a restricted-compliant pod (hostPath is not allowed by Pod Security baseline). One of `auto`, `true`, `false`.
+  hostPath: auto
+
+# -- Controller pod annotations.
+podAnnotations: {}
+# -- Controller pod labels.
+podLabels: {}
+
+# -- Controller pod security context (Pod Security `restricted`).
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
+  runAsGroup: 65534
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Controller container security context (Pod Security `restricted`, read-only root filesystem).
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  capabilities:
+    drop:
+    - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Controller resources. Memory grows with the number of nodes, Plans and Jobs it watches.
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
+
+# -- Controller priority class.
+priorityClassName: ""
+# -- Controller node selector.
+nodeSelector: {}
+# -- Controller affinity. Empty means upstream's: control-plane Linux nodes, one replica per node.
+affinity: {}
+# -- Controller tolerations (upstream's control-plane / etcd / CriticalAddonsOnly set).
+tolerations:
+- key: CriticalAddonsOnly
+  operator: Exists
+- key: node-role.kubernetes.io/master
+  operator: Exists
+  effect: NoSchedule
+- key: node-role.kubernetes.io/controlplane
+  operator: Exists
+  effect: NoSchedule
+- key: node-role.kubernetes.io/control-plane
+  operator: Exists
+  effect: NoSchedule
+- key: node-role.kubernetes.io/etcd
+  operator: Exists
+  effect: NoExecute
+
+# -- Extra controller volumes (e.g. a CA bundle ConfigMap instead of `caCerts.hostPath`).
+extraVolumes: []
+# -- Extra controller volume mounts.
+extraVolumeMounts: []
+
+# -- Defaults layered under every Plan (k3s preset and `plans`): `labels`, `annotations` and any Plan spec field (`window`, `imagePullSecrets`, `priorityClassName`, ...). A plan's own fields win; maps deep-merge, lists replace.
+planDefaults: {}
+
+k3s:
+  # -- Render the canonical k3s server + agent Plans.
+  enabled: false
+  # -- k3s version to upgrade to (e.g. `v1.36.4+k3s1`). Exactly one of `version` or `channel`. Never skip a minor version.
+  version: ""
+  # -- k3s release channel URL (e.g. `https://update.k3s.io/v1-release/channels/v1.36`), resolved every `controller.planPollingInterval`.
+  channel: ""
+  # -- Upgrade image, without tag (the controller tags it with the resolved version).
+  image: docker.io/rancher/k3s-upgrade
+  # -- Maintenance window applied to both Plans (`days`, `startTime`, `endTime`, `timeZone`).
+  window: {}
+  # -- Server Plan: control-plane nodes, one at a time. Accepts `enabled`, `name`, `labels`, `annotations` and any Plan spec field.
+  # @default -- control-plane nodes, `concurrency: 1`, `cordon: true`
+  server:
+    enabled: true
+    name: server-plan
+    concurrency: 1
+    cordon: true
+    nodeSelector:
+      matchExpressions:
+      - key: node-role.kubernetes.io/control-plane
+        operator: In
+        values:
+        - "true"
+    tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+    - key: node-role.kubernetes.io/master
+      operator: Exists
+      effect: NoSchedule
+  # -- Agent Plan: all other nodes, after the server Plan completes (its `prepare` step waits on it). Accepts `enabled`, `name`, `labels`, `annotations` and any Plan spec field.
+  # @default -- non control-plane nodes, `concurrency: 1`, `cordon: true`
+  agent:
+    enabled: true
+    name: agent-plan
+    concurrency: 1
+    cordon: true
+    nodeSelector:
+      matchExpressions:
+      - key: node-role.kubernetes.io/control-plane
+        operator: DoesNotExist
+
+# -- Extra Plans, keyed by name. Each entry accepts `enabled`, `labels`, `annotations` and any Plan spec field (`upgrade` and `version` or `channel` are required; `concurrency` defaults to 1 and `serviceAccountName` to the chart's).
+plans: {}
+
+# -- Extra manifests rendered with the release (strings are passed through `tpl`).
+extraObjects: []

@@ -1,0 +1,26 @@
+{{- /*
+Values validation only - renders no resource. Fails at template time on combinations the API server
+would accept but the controller would silently never act on.
+*/ -}}
+{{- if and .Values.k3s.enabled (eq (empty .Values.k3s.version) (empty .Values.k3s.channel)) }}
+{{- fail "k3s.enabled requires exactly one of k3s.version or k3s.channel" }}
+{{- end }}
+{{- $seen := dict }}
+{{- range (include "suc.plans" . | fromYaml).plans }}
+{{- if hasKey $seen .name }}
+{{- fail (printf "Plan %q is defined twice (k3s preset and plans share one namespace)" .name) }}
+{{- end }}
+{{- $_ := set $seen .name true }}
+{{- if not .spec.upgrade }}
+{{- fail (printf "Plan %q needs an upgrade container (spec field `upgrade`)" .name) }}
+{{- end }}
+{{- if not (or .spec.version .spec.channel) }}
+{{- fail (printf "Plan %q needs a version or a channel, otherwise it never resolves" .name) }}
+{{- end }}
+{{- end }}
+{{- if gt (len (include "suc.controllerName" .)) 63 }}
+{{- fail "controllerName must be at most 63 characters (it is used as a label value)" }}
+{{- end }}
+{{- if and .Values.image.digest (not (regexMatch "^sha256:[a-f0-9]{64}$" .Values.image.digest)) }}
+{{- fail (printf "image.digest must be a full digest such as \"sha256:<64 hex>\", got %q" .Values.image.digest) }}
+{{- end }}

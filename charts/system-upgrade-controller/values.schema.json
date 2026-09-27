@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "system-upgrade-controller values",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "stringMap": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "plan": {
+      "description": "Plan metadata keys (enabled, name, labels, annotations) plus any Plan spec field; the spec itself is validated by the API server against the CRD.",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "name": { "type": "string", "minLength": 1 },
+        "labels": { "$ref": "#/definitions/stringMap" },
+        "annotations": { "$ref": "#/definitions/stringMap" }
+      }
+    }
+  },
+  "properties": {
+    "global": { "type": "object" },
+    "nameOverride": { "type": "string" },
+    "fullnameOverride": { "type": "string" },
+    "controllerName": { "type": "string" },
+    "namespace": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "create": { "type": "boolean" },
+        "labels": { "$ref": "#/definitions/stringMap" },
+        "annotations": { "$ref": "#/definitions/stringMap" }
+      }
+    },
+    "serviceAccount": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "create": { "type": "boolean" },
+        "name": { "type": "string" },
+        "annotations": { "$ref": "#/definitions/stringMap" }
+      }
+    },
+    "rbac": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "create": { "type": "boolean" }
+      }
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "registry": { "type": "string" },
+        "repository": { "type": "string", "minLength": 1 },
+        "tag": { "type": "string", "not": { "const": "latest" } },
+        "digest": { "type": "string" },
+        "pullPolicy": { "enum": ["Always", "IfNotPresent", "Never"] }
+      }
+    },
+    "imagePullSecrets": { "type": "array", "items": { "type": "object" } },
+    "replicaCount": { "type": "integer", "minimum": 0 },
+    "strategy": { "type": "object" },
+    "controller": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "debug": { "type": "boolean" },
+        "threads": { "type": "integer", "minimum": 1 },
+        "leaderElect": { "type": "boolean" },
+        "planPollingInterval": { "type": "string", "minLength": 1 },
+        "job": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "activeDeadlineSeconds": { "type": "integer", "minimum": 0 },
+            "backoffLimit": { "type": "integer", "minimum": 0 },
+            "imagePullPolicy": { "enum": ["Always", "IfNotPresent", "Never"] },
+            "privileged": { "type": "boolean" },
+            "ttlSecondsAfterFinish": { "type": "integer", "minimum": 0 },
+            "kubectlImage": { "type": "string", "pattern": "^[^\\s]+(:[^\\s]+|@sha256:[a-f0-9]{64})$", "not": { "pattern": ":latest$" } }
+          }
+        },
+        "extraEnv": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "caCerts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hostPath": { "enum": ["auto", true, false] }
+      }
+    },
+    "podAnnotations": { "$ref": "#/definitions/stringMap" },
+    "podLabels": { "$ref": "#/definitions/stringMap" },
+    "podSecurityContext": { "type": "object" },
+    "securityContext": { "type": "object" },
+    "resources": { "type": "object" },
+    "priorityClassName": { "type": "string" },
+    "nodeSelector": { "$ref": "#/definitions/stringMap" },
+    "affinity": { "type": "object" },
+    "tolerations": { "type": "array", "items": { "type": "object" } },
+    "extraVolumes": { "type": "array", "items": { "type": "object" } },
+    "extraVolumeMounts": { "type": "array", "items": { "type": "object" } },
+    "planDefaults": { "$ref": "#/definitions/plan" },
+    "k3s": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "version": { "type": "string" },
+        "channel": { "type": "string" },
+        "image": { "type": "string", "minLength": 1 },
+        "window": { "type": "object" },
+        "server": { "$ref": "#/definitions/plan" },
+        "agent": { "$ref": "#/definitions/plan" }
+      }
+    },
+    "plans": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/plan" }
+    },
+    "extraObjects": { "type": "array" }
+  }
+}

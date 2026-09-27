@@ -1,0 +1,61 @@
+apiVersion: v2
+name: system-upgrade-controller
+type: application
+version: 0.1.0
+appVersion: "v0.20.2"
+description: Secure, plug-and-play Helm chart for the Rancher system-upgrade-controller, with a one-value k3s upgrade preset and generic upgrade Plans.
+# Floor set by the APIs the chart renders (apiextensions/v1, coordination/v1 leases, batch/v1
+# jobs) and by the `restricted` Pod Security Standard the controller pod is built to meet.
+kubeVersion: ">=1.25.0-0"
+home: https://github.com/rancher/system-upgrade-controller
+deprecated: false
+annotations:
+  artifacthub.io/category: integration-delivery
+  artifacthub.io/license: MIT
+  artifacthub.io/changes: |
+    - kind: added
+      description: Initial release (system-upgrade-controller v0.20.2)
+  artifacthub.io/images: |
+    - name: system-upgrade-controller
+      image: docker.io/rancher/system-upgrade-controller:v0.20.2
+    - name: kubectl
+      image: docker.io/rancher/kubectl:v1.30.3
+  artifacthub.io/crds: |
+    - kind: Plan
+      version: v1
+      name: plans.upgrade.cattle.io
+      displayName: Plan
+      description: A set of nodes to upgrade and how to upgrade them.
+  artifacthub.io/crdsExamples: |
+    - apiVersion: upgrade.cattle.io/v1
+      kind: Plan
+      metadata:
+        name: server-plan
+      spec:
+        concurrency: 1
+        cordon: true
+        nodeSelector:
+          matchExpressions:
+          - key: node-role.kubernetes.io/control-plane
+            operator: In
+            values: ["true"]
+        serviceAccountName: system-upgrade-controller
+        upgrade:
+          image: docker.io/rancher/k3s-upgrade
+        version: v1.36.4+k3s1
+keywords:
+- system-upgrade-controller
+- k3s
+- rke2
+- upgrade
+- kubernetes
+- nodes
+- plan
+dependencies: []
+sources:
+- https://github.com/this-is-tobi/helm-charts
+- https://github.com/rancher/system-upgrade-controller
+maintainers:
+- name: this-is-tobi
+  email: this-is-tobi@proton.me
+  url: https://this-is-tobi.com

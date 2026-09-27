@@ -1,0 +1,108 @@
+{{- /*
+Upstream's least-privilege RBAC. The controller role covers the controller itself; the drainer
+role covers the upgrade Jobs, which run as the same ServiceAccount (cordon/drain via kubectl).
+*/ -}}
+{{- if .Values.rbac.create }}
+{{- $fullname := include "suc.fullname" . }}
+{{- $serviceAccount := include "suc.serviceAccountName" . }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $fullname }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "suc.labels" . | nindent 4 }}
+rules:
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["create", "delete", "deletecollection", "patch", "update", "get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ $fullname }}
+  labels:
+    {{- include "suc.labels" . | nindent 4 }}
+rules:
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "list", "watch", "create", "patch", "update"]
+- apiGroups: [""]
+  resources: ["namespaces", "nodes"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["update"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "create", "patch", "update"]
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["create"]
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  resourceNames: [{{ include "suc.controllerName" . | quote }}]
+  verbs: ["get", "update"]
+- apiGroups: ["upgrade.cattle.io"]
+  resources: ["plans", "plans/status"]
+  verbs: ["get", "list", "watch", "create", "patch", "update", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ $fullname }}-drainer
+  labels:
+    {{- include "suc.labels" . | nindent 4 }}
+rules:
+- apiGroups: [""]
+  resources: ["pods/eviction"]
+  verbs: ["create"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "delete"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "patch"]
+- apiGroups: ["apps"]
+  resources: ["statefulsets", "daemonsets", "replicasets"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $fullname }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "suc.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $fullname }}
+subjects:
+- kind: ServiceAccount
+  name: {{ $serviceAccount }}
+  namespace: {{ .Release.Namespace }}
+{{- range $suffix := list "" "-drainer" }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ $fullname }}{{ $suffix }}
+  labels:
+    {{- include "suc.labels" $ | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ $fullname }}{{ $suffix }}
+subjects:
+- kind: ServiceAccount
+  name: {{ $serviceAccount }}
+  namespace: {{ $.Release.Namespace }}
+{{- end }}
+{{- end }}

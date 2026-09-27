@@ -13,6 +13,7 @@ This repository hosts a set of personal Helm Charts available through:
 | ------------------------------------- | ----------------------------------------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------- |
 | [backup-utils](./charts/backup-utils) | -                                                                       | Easy backup tools deployment. | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/backup-utils) |
 | [cnpg-cluster](./charts/cnpg-cluster) | [CNPG](https://cloudnative-pg.io)                                       | Easy CNPG cluster deployment. | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/cnpg-cluster) |
+| [system-upgrade-controller](./charts/system-upgrade-controller) | [SUC](https://github.com/rancher/system-upgrade-controller) | Easy node upgrades (k3s, RKE2, OS). | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/system-upgrade-controller) |
 | [vso-utils](./charts/vso-utils)       | [VSO](https://developer.hashicorp.com/vault/docs/deploy/kubernetes/vso) | Easy VSO objects deployment.  | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/vso-utils)    |
 
 ## Usage

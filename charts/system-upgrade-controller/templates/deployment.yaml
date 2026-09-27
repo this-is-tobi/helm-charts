@@ -1,0 +1,147 @@
+{{- $controllerName := include "suc.controllerName" . }}
+{{- $hostCACerts := include "suc.mountHostCACerts" . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "suc.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "suc.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+spec:
+  replicas: {{ .Values.replicaCount }}
+  {{- with .Values.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      upgrade.cattle.io/controller: {{ $controllerName }}
+  template:
+    metadata:
+      labels:
+        {{- include "suc.labels" . | nindent 8 }}
+        app.kubernetes.io/component: controller
+        upgrade.cattle.io/controller: {{ $controllerName }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "suc.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      affinity:
+        {{- if .Values.affinity }}
+        {{- toYaml .Values.affinity | nindent 8 }}
+        {{- else }}
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+              - key: kubernetes.io/os
+                operator: In
+                values:
+                - linux
+        # Must match controller pods only. Upgrade Job pods carry the controller label and every
+        # Plan label (the controller copies them), so selecting on either would keep every Job
+        # off the node running the controller - that node could then never be upgraded.
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app.kubernetes.io/instance: {{ .Release.Name }}
+                app.kubernetes.io/component: controller
+            topologyKey: kubernetes.io/hostname
+        {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: controller
+        image: {{ include "suc.image" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: SYSTEM_UPGRADE_CONTROLLER_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['upgrade.cattle.io/controller']
+        - name: SYSTEM_UPGRADE_CONTROLLER_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: SYSTEM_UPGRADE_CONTROLLER_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        {{- with .Values.controller.extraEnv }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ include "suc.fullname" . }}-env
+        {{- with .Values.securityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        {{- if $hostCACerts }}
+        - name: etc-ssl
+          mountPath: /etc/ssl
+          readOnly: true
+        - name: etc-pki
+          mountPath: /etc/pki
+          readOnly: true
+        - name: etc-ca-certificates
+          mountPath: /etc/ca-certificates
+          readOnly: true
+        {{- end }}
+        {{- with .Values.extraVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      {{- if $hostCACerts }}
+      - name: etc-ssl
+        hostPath:
+          path: /etc/ssl
+          type: DirectoryOrCreate
+      - name: etc-pki
+        hostPath:
+          path: /etc/pki
+          type: DirectoryOrCreate
+      - name: etc-ca-certificates
+        hostPath:
+          path: /etc/ca-certificates
+          type: DirectoryOrCreate
+      {{- end }}
+      {{- with .Values.extraVolumes }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}

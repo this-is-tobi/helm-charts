@@ -1,0 +1,2 @@
+# Chart defaults: controller, CRD and RBAC only - no Plan, so no node is ever touched.
+{}
