@@ -1,8 +1,8 @@
 apiVersion: v2
 name: vso-utils
 type: application
-version: 2.0.0
-appVersion: "1.3.0"
+version: 2.1.0
+appVersion: "1.6.0"
 description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator resources - sync static secrets, generate dynamic credentials, issue PKI certificates, and configure Vault authentication.
 deprecated: false
 annotations:
@@ -10,7 +10,11 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: changed
-      description: "BREAKING: replace tls nested block with flat caCertSecretRef, caCertPath, and tlsServerName fields in VaultConnection"
+      description: Upgrade vault-secrets-operator dependency to 1.6.0
+    - kind: changed
+      description: "Upstream breaking (VSO 1.5.0): VaultAuth appRole.secretIDPath is removed, use appRole.secretRef"
+    - kind: removed
+      description: "Upstream breaking (VSO 1.6.0): HCP Vault Secrets support (HCPAuth, HCPVaultSecretsApp CRDs) is removed from the bundled operator"
 keywords:
 - vault
 - secrets
