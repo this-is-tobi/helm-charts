@@ -78,7 +78,6 @@
           "params": { "type": "object" },
           "renewalPercent": { "type": "integer", "default": 67 },
           "revoke": { "type": "boolean", "default": true },
-          "hmacSecretData": { "type": "boolean", "default": true },
           "rolloutRestartTargets": {
             "type": "array",
             "items": {
@@ -130,7 +129,6 @@
           "ttl": { "type": "string", "default": "720h" },
           "excludeCNFromSans": { "type": "boolean", "default": false },
           "privateKeyFormat": { "type": "string", "enum": ["rsa", "ec", "ed25519"], "default": "rsa" },
-          "hmacSecretData": { "type": "boolean", "default": true },
           "rolloutRestartTargets": {
             "type": "array",
             "items": {

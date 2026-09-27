@@ -295,7 +295,6 @@ vaultDynamicSecrets:
   dbCreds:
     mount: database
     path: creds/my-role
-    hmacSecretData: true  # Required for rollout restarts
     rolloutRestartTargets:
     - kind: Deployment
       name: backend
@@ -328,7 +327,7 @@ vaultStaticSecrets:
 
 ## Security Best Practices
 
-1. **Enable HMAC Secret Data**: Always set `hmacSecretData: true` for drift detection
+1. **Enable HMAC Secret Data**: Keep `hmacSecretData: true` on static secrets for drift detection (dynamic and PKI secrets have no such field)
 2. **Use Specific Roles**: Create dedicated Vault roles with least-privilege policies
 3. **Enable TLS**: Never set `skipTLSVerify: true` in production
 4. **Rotate Credentials**: Use `VaultDynamicSecret` for auto-rotating credentials

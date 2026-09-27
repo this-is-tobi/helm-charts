@@ -121,7 +121,6 @@ vaultDynamicSecrets: {}
   #   # -- Revoke secret from Vault when VaultDynamicSecret is deleted.
   #   revoke: true
   #   # -- Enable HMAC computation for drift detection.
-  #   hmacSecretData: true
   #   # -- Rollout restart targets for secret rotation.
   #   rolloutRestartTargets: []
   #   # - kind: Deployment
@@ -187,7 +186,6 @@ vaultPKISecrets: {}
   #   # -- Private key format ("rsa", "ec", "ed25519").
   #   privateKeyFormat: "rsa"
   #   # -- Enable HMAC computation.
-  #   hmacSecretData: true
   #   # -- Rollout restart targets for certificate rotation.
   #   rolloutRestartTargets: []
   #   # - kind: Deployment
