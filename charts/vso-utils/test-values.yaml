@@ -100,7 +100,6 @@ vaultDynamicSecrets:
     path: creds/postgres-role
     renewalPercent: 67
     revoke: true
-    hmacSecretData: true
     rolloutRestartTargets:
     - kind: Deployment
       name: api-server
@@ -119,7 +118,6 @@ vaultDynamicSecrets:
       ttl: "1h"
     renewalPercent: 67
     revoke: true
-    hmacSecretData: true
     destination:
       name: aws-credentials
       create: true
@@ -131,7 +129,6 @@ vaultDynamicSecrets:
     path: creds/mysql-role
     renewalPercent: 67
     revoke: true
-    hmacSecretData: true
     destination:
       name: mysql-creds
       create: true
@@ -157,7 +154,6 @@ vaultPKISecrets:
     expiryOffset: "24h"
     revoke: true
     privateKeyFormat: rsa
-    hmacSecretData: true
     rolloutRestartTargets:
     - kind: Deployment
       name: myservice
@@ -178,7 +174,6 @@ vaultPKISecrets:
     revoke: true
     clear: true
     privateKeyFormat: ec
-    hmacSecretData: true
     destination:
       name: client-cert
       type: kubernetes.io/tls
@@ -201,7 +196,6 @@ vaultPKISecrets:
     expiryOffset: "2h"
     format: pem
     excludeCNFromSans: false
-    hmacSecretData: true
     destination:
       name: mesh-cert
       type: kubernetes.io/tls
