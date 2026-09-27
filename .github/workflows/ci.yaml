@@ -49,6 +49,14 @@ jobs:
       - name: Run chart-testing (install)
         run: ct install --config ./ci/configs/chart-testing.yaml
 
+      # Beyond ct's install/readiness check: restricted Pod Security admission, Plan validation
+      # against the real CRD, and one full no-op upgrade Job (cordon, run, uncordon).
+      - name: Run system-upgrade-controller e2e
+        run: |
+          if ct list-changed --config ./ci/configs/chart-testing.yaml | grep -qx 'charts/system-upgrade-controller'; then
+            ./ci/scripts/test-system-upgrade-controller.sh --e2e
+          fi
+
   lint-template:
     if: ${{ !github.event.pull_request.draft }}
     name: Lint and render template chart
@@ -65,6 +73,20 @@ jobs:
       # going unchecked.
       - name: Run template chart checks
         run: ./ci/scripts/test-template.sh
+
+  test-system-upgrade-controller:
+    if: ${{ !github.event.pull_request.draft }}
+    name: Test system-upgrade-controller chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checks-out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Run chart checks
+        run: ./ci/scripts/test-system-upgrade-controller.sh
 
   lint-docs:
     if: ${{ !github.event.pull_request.draft }}
