@@ -3202,6 +3202,69 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.0/homarr-0.1.0.tgz
     version: 0.1.0
+  system-upgrade-controller:
+  - annotations:
+      artifacthub.io/category: integration-delivery
+      artifacthub.io/changes: |
+        - kind: added
+          description: Initial release (system-upgrade-controller v0.20.2)
+      artifacthub.io/crds: |
+        - kind: Plan
+          version: v1
+          name: plans.upgrade.cattle.io
+          displayName: Plan
+          description: A set of nodes to upgrade and how to upgrade them.
+      artifacthub.io/crdsExamples: |
+        - apiVersion: upgrade.cattle.io/v1
+          kind: Plan
+          metadata:
+            name: server-plan
+          spec:
+            concurrency: 1
+            cordon: true
+            nodeSelector:
+              matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: In
+                values: ["true"]
+            serviceAccountName: system-upgrade-controller
+            upgrade:
+              image: docker.io/rancher/k3s-upgrade
+            version: v1.36.4+k3s1
+      artifacthub.io/images: |
+        - name: system-upgrade-controller
+          image: docker.io/rancher/system-upgrade-controller:v0.20.2
+        - name: kubectl
+          image: docker.io/rancher/kubectl:v1.30.3
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v0.20.2
+    created: "2026-09-27T23:46:10.471573741Z"
+    description: Secure, plug-and-play Helm chart for the Rancher system-upgrade-controller,
+      with a one-value k3s upgrade preset and generic upgrade Plans.
+    digest: 66ff22e92d91507e20d78a797d7d3a05bb1d95b47ff5129291775f64e50525ad
+    home: https://github.com/rancher/system-upgrade-controller
+    keywords:
+    - system-upgrade-controller
+    - k3s
+    - rke2
+    - upgrade
+    - kubernetes
+    - nodes
+    - plan
+    kubeVersion: '>=1.25.0-0'
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: system-upgrade-controller
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/rancher/system-upgrade-controller
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/system-upgrade-controller-0.1.0/system-upgrade-controller-0.1.0.tgz
+    version: 0.1.0
   vso-utils:
   - annotations:
       artifacthub.io/category: security
@@ -3683,4 +3746,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-09-25T22:11:29.369161555Z"
+generated: "2026-09-27T23:46:10.471689284Z"
