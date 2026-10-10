@@ -8,6 +8,15 @@
     "stringMap": {
       "type": "object",
       "additionalProperties": { "type": "string" }
+    },
+    "secretKeyRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "key"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "key": { "type": "string", "minLength": 1 }
+      }
     }
   },
   "properties": {
@@ -170,6 +179,24 @@
     },
     "extraVolumes": { "type": "array", "items": { "type": "object" } },
     "extraVolumeMounts": { "type": "array", "items": { "type": "object" } },
+    "serviceMonitor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "interval": { "type": "string" },
+        "scrapeTimeout": { "type": "string" },
+        "labels": { "$ref": "#/definitions/stringMap" },
+        "basicAuth": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "username": { "$ref": "#/definitions/secretKeyRef" },
+            "password": { "$ref": "#/definitions/secretKeyRef" }
+          }
+        }
+      }
+    },
     "valkey": {
       "description": "valkey subchart values.",
       "type": "object",

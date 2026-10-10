@@ -130,6 +130,25 @@ SearXNG signs its sessions and image proxy URLs and encrypts its cache with `ser
 kubectl -n searxng create secret generic searxng-secret --from-literal=secret-key="$(openssl rand -hex 32)"
 ```
 
+## Metrics
+
+SearXNG serves Prometheus metrics on `/metrics` when `settings.general.open_metrics` holds a password, checked with HTTP basic auth (any username). SearXNG only reads it from its settings, so it ends up in the chart's ConfigMap: use a password dedicated to scraping. `serviceMonitor` scrapes it with the Prometheus Operator, the password coming from a Secret:
+
+```yaml
+settings:
+  general:
+    open_metrics: <scrape password>
+serviceMonitor:
+  enabled: true
+  basicAuth:
+    username:
+      name: searxng-metrics
+      key: username
+    password:
+      name: searxng-metrics
+      key: password
+```
+
 ## Valkey and the limiter
 
 With `valkey.enabled`, the chart deploys [Valkey](https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey) (password authentication on, no volume) and points SearXNG at it with `SEARXNG_VALKEY_URL`, built from the Valkey service and the password of its Secret. SearXNG uses it for its bot detection and its [limiter](https://docs.searxng.org/admin/searx.limiter.html), and connects to it once, at startup: a `wait-for-valkey` init container holds SearXNG until Valkey answers.
@@ -214,6 +233,11 @@ OpenShift's restricted SCCs assign the user, group and fsGroup from the namespac
 | serviceAccount.automount | bool | `false` | Mount the ServiceAccount token in the pod. SearXNG never calls the Kubernetes API. |
 | serviceAccount.create | bool | `true` | Create the ServiceAccount. |
 | serviceAccount.name | string | `""` | ServiceAccount name. Defaults to the fullname, or `default` when not created. |
+| serviceMonitor.basicAuth | object | `{}` | Basic auth of the scrape: Secret key references (`name`, `key`) for `username` and `password`, the password matching `settings.general.open_metrics`. Required. |
+| serviceMonitor.enabled | bool | `false` | Create a Prometheus Operator ServiceMonitor scraping `/metrics`. SearXNG serves it only when `settings.general.open_metrics` holds a password, checked with HTTP basic auth (any username). |
+| serviceMonitor.interval | string | `"30s"` | Scrape interval. |
+| serviceMonitor.labels | object | `{}` | ServiceMonitor labels (e.g. the one your Prometheus selects). |
+| serviceMonitor.scrapeTimeout | string | `"10s"` | Scrape timeout. |
 | settings | object | `{}` | SearXNG settings, rendered to `/etc/searxng/settings.yml` on top of SearXNG's own defaults: set only what you change. The chart sets `use_default_settings: true`; give it SearXNG's map form to keep or remove default engines (e.g. `use_default_settings.engines.keep_only`). The secret key comes from `secret`. See https://docs.searxng.org/admin/settings/. |
 | startupProbe | object | `{"failureThreshold":24,"httpGet":{"path":"/healthz","port":"http"},"periodSeconds":5}` | Startup probe: gives the first start up to two minutes without delaying the other probes. |
 | strategy | object | `{}` | Deployment strategy. |
