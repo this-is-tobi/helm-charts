@@ -1,7 +1,7 @@
 apiVersion: v2
 name: searxng
 type: application
-version: 0.1.0
+version: 0.2.0
 appVersion: "2026.9.8-3fdc6d753"
 description: Secure, plug-and-play Helm chart for SearXNG, the privacy-respecting metasearch engine, with optional Valkey for its limiter.
 # Floor set by the APIs the chart renders (autoscaling/v2, policy/v1) and by the `restricted` Pod
@@ -13,7 +13,7 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: added
-      description: Initial release (SearXNG 2026.9.8-3fdc6d753)
+      description: settingsFromSecrets, to set SearXNG settings such as the metrics password from Secret keys
   artifacthub.io/images: |
     - name: searxng
       image: docker.io/searxng/searxng:2026.9.8-3fdc6d753

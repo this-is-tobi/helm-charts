@@ -60,8 +60,46 @@ spec:
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.valkey.enabled }}
+      {{- if or .Values.settingsFromSecrets .Values.valkey.enabled }}
       initContainers:
+      {{- if .Values.settingsFromSecrets }}
+      # SearXNG reads only a few settings from its environment: the final settings.yml, with the Secret values
+      # in it, is written to an in-memory volume.
+      - name: render-settings
+        image: {{ include "searxng.image" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+        - /usr/local/searxng/.venv/bin/python3
+        - -c
+        - |
+          {{- .Files.Get "files/render-settings.py" | nindent 10 }}
+        {{- range $index, $setting := .Values.settingsFromSecrets }}
+        - {{ printf "%s=SETTING_%d" $setting.path $index | quote }}
+        {{- end }}
+        env:
+        {{- range $index, $setting := .Values.settingsFromSecrets }}
+        - name: SETTING_{{ $index }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ $setting.name }}
+              key: {{ $setting.key }}
+        {{- end }}
+        {{- with include "searxng.securityContext" (dict "context" .Values.securityContext "root" $) }}
+        securityContext:
+          {{- . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - name: config
+          mountPath: /config
+          readOnly: true
+        - name: rendered-config
+          mountPath: /rendered
+      {{- end }}
+      {{- if .Values.valkey.enabled }}
       # SearXNG connects to Valkey once, at startup: without it, it runs without its limiter until restarted.
       - name: wait-for-valkey
         image: {{ include "searxng.image" . }}
@@ -78,6 +116,7 @@ spec:
         resources:
           {{- toYaml . | nindent 10 }}
         {{- end }}
+      {{- end }}
       {{- end }}
       containers:
       - name: searxng
@@ -132,7 +171,7 @@ spec:
           {{- toYaml . | nindent 10 }}
         {{- end }}
         volumeMounts:
-        - name: config
+        - name: {{ ternary "rendered-config" "config" (not (empty .Values.settingsFromSecrets)) }}
           mountPath: /etc/searxng
           readOnly: true
         - name: tmp
@@ -144,6 +183,13 @@ spec:
       - name: config
         configMap:
           name: {{ include "searxng.fullname" . }}
+      {{- if .Values.settingsFromSecrets }}
+      # The rendered settings hold Secret values: keep them off the node's disk.
+      - name: rendered-config
+        emptyDir:
+          medium: Memory
+          sizeLimit: 8Mi
+      {{- end }}
       - name: tmp
         emptyDir: {}
       {{- with .Values.extraVolumes }}
