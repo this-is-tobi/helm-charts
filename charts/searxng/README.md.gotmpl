@@ -57,6 +57,32 @@ spec:
           existingSecret: searxng-secret
 ```
 
+## Exposing SearXNG
+
+Through an Ingress or a Gateway API HTTPRoute; set `settings.server.base_url` to the public URL in both cases.
+
+```yaml
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+  - name: search.example.com
+    paths:
+    - path: /
+  tls:
+  - secretName: search-example-com-tls
+    hosts:
+    - search.example.com
+# or
+httpRoute:
+  enabled: true
+  parentRefs:
+  - name: gateway
+    namespace: gateway-system
+  hostnames:
+  - search.example.com
+```
+
 ## Settings
 
 `settings` is rendered to `/etc/searxng/settings.yml` with `use_default_settings: true`: SearXNG loads its own defaults first and applies yours on top, so only set what differs. See the [settings reference](https://docs.searxng.org/admin/settings/).

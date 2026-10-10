@@ -52,6 +52,38 @@ service:
   # -- Service annotations.
   annotations: {}
 
+ingress:
+  # -- Expose SearXNG through an Ingress.
+  enabled: false
+  # -- Ingress class.
+  className: ""
+  # -- Ingress annotations.
+  annotations: {}
+  # -- Ingress labels.
+  labels: {}
+  # -- Hosts and paths routed to SearXNG.
+  hosts:
+  - name: searxng.local
+    paths:
+    - path: /
+      pathType: Prefix
+  # -- Ingress TLS (`secretName` and `hosts`).
+  tls: []
+
+httpRoute:
+  # -- Expose SearXNG through a Gateway API HTTPRoute (needs the gateway.networking.k8s.io CRDs).
+  enabled: false
+  # -- HTTPRoute annotations.
+  annotations: {}
+  # -- HTTPRoute labels.
+  labels: {}
+  # -- Gateways (and listeners) the HTTPRoute attaches to. Required.
+  parentRefs: []
+  # -- Hostnames the HTTPRoute matches.
+  hostnames: []
+  # -- Routing rules (`matches`, `filters`), all sent to SearXNG. Empty routes everything to it.
+  rules: []
+
 serviceAccount:
   # -- Create the ServiceAccount.
   create: true
