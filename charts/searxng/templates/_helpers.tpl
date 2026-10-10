@@ -97,3 +97,25 @@ complete settings and fails on every setting left out.
 {{- end }}
 {{- toYaml $settings }}
 {{- end }}
+
+
+{{/*
+Whether to drop the fixed IDs from the security contexts so that OpenShift assigns them.
+*/}}
+{{- define "searxng.adaptSecurityContext" -}}
+{{- $mode := dig "compatibility" "openshift" "adaptSecurityContext" "auto" (.Values.global | default dict) }}
+{{- if or (eq $mode "force") (and (eq $mode "auto") (.Capabilities.APIVersions.Has "security.openshift.io/v1")) }}true{{ end }}
+{{- end }}
+
+
+{{/*
+A security context, without runAsUser, runAsGroup and fsGroup when adapting to OpenShift.
+Usage: include "searxng.securityContext" (dict "context" .Values.podSecurityContext "root" $)
+*/}}
+{{- define "searxng.securityContext" -}}
+{{- $context := deepCopy (.context | default dict) }}
+{{- if include "searxng.adaptSecurityContext" .root }}
+{{- $context = omit $context "runAsUser" "runAsGroup" "fsGroup" }}
+{{- end }}
+{{- with $context }}{{ toYaml . }}{{ end }}
+{{- end }}
