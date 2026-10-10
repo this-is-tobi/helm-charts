@@ -63,6 +63,32 @@ spec:
           existingSecret: searxng-secret
 ```
 
+## Exposing SearXNG
+
+Through an Ingress or a Gateway API HTTPRoute; set `settings.server.base_url` to the public URL in both cases.
+
+```yaml
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+  - name: search.example.com
+    paths:
+    - path: /
+  tls:
+  - secretName: search-example-com-tls
+    hosts:
+    - search.example.com
+# or
+httpRoute:
+  enabled: true
+  parentRefs:
+  - name: gateway
+    namespace: gateway-system
+  hostnames:
+  - search.example.com
+```
+
 ## Settings
 
 `settings` is rendered to `/etc/searxng/settings.yml` with `use_default_settings: true`: SearXNG loads its own defaults first and applies yours on top, so only set what differs. See the [settings reference](https://docs.searxng.org/admin/settings/).
@@ -142,12 +168,24 @@ OpenShift's restricted SCCs assign the user, group and fsGroup from the namespac
 | extraVolumes | list | `[]` | Extra volumes. |
 | fullnameOverride | string | `""` | Override the full resource name (release-name + chart-name). |
 | global.compatibility.openshift.adaptSecurityContext | string | `"auto"` | Drop `runAsUser`, `runAsGroup` and `fsGroup` from the security contexts so that OpenShift's SCC assigns them from the namespace range (it rejects pods that set others): `auto` when the cluster serves `security.openshift.io/v1`, `force` always, `disabled` never. The valkey subchart adapts itself when it detects OpenShift (`route.openshift.io/v1`); with `force` elsewhere, also set `valkey.targetPlatform: openshift`. |
+| httpRoute.annotations | object | `{}` | HTTPRoute annotations. |
+| httpRoute.enabled | bool | `false` | Expose SearXNG through a Gateway API HTTPRoute (needs the gateway.networking.k8s.io CRDs). |
+| httpRoute.hostnames | list | `[]` | Hostnames the HTTPRoute matches. |
+| httpRoute.labels | object | `{}` | HTTPRoute labels. |
+| httpRoute.parentRefs | list | `[]` | Gateways (and listeners) the HTTPRoute attaches to. Required. |
+| httpRoute.rules | list | `[]` | Routing rules (`matches`, `filters`), all sent to SearXNG. Empty routes everything to it. |
 | image.digest | string | `""` | SearXNG image digest (`sha256:...`). Takes precedence over the tag. |
 | image.pullPolicy | string | `"IfNotPresent"` | SearXNG image pull policy. |
 | image.registry | string | `"docker.io"` | SearXNG image registry. |
 | image.repository | string | `"searxng/searxng"` | SearXNG image repository. |
 | image.tag | string | `""` | SearXNG image tag. Defaults to the chart appVersion. |
 | imagePullSecrets | list | `[]` | Image pull secrets. |
+| ingress.annotations | object | `{}` | Ingress annotations. |
+| ingress.className | string | `""` | Ingress class. |
+| ingress.enabled | bool | `false` | Expose SearXNG through an Ingress. |
+| ingress.hosts | list | `[{"name":"searxng.local","paths":[{"path":"/","pathType":"Prefix"}]}]` | Hosts and paths routed to SearXNG. |
+| ingress.labels | object | `{}` | Ingress labels. |
+| ingress.tls | list | `[]` | Ingress TLS (`secretName` and `hosts`). |
 | livenessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/healthz","port":"http"},"periodSeconds":20,"timeoutSeconds":5}` | Liveness probe. |
 | nameOverride | string | `""` | Override the chart name (used in resource naming). |
 | nodeSelector | object | `{}` | Node selector. |
