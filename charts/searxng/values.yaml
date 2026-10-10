@@ -186,6 +186,18 @@ extraVolumes: []
 # -- Extra volume mounts of the SearXNG container.
 extraVolumeMounts: []
 
+serviceMonitor:
+  # -- Create a Prometheus Operator ServiceMonitor scraping `/metrics`. SearXNG serves it only when `settings.general.open_metrics` holds a password, checked with HTTP basic auth (any username).
+  enabled: false
+  # -- Scrape interval.
+  interval: 30s
+  # -- Scrape timeout.
+  scrapeTimeout: 10s
+  # -- ServiceMonitor labels (e.g. the one your Prometheus selects).
+  labels: {}
+  # -- Basic auth of the scrape: Secret key references (`name`, `key`) for `username` and `password`, the password matching `settings.general.open_metrics`. Required.
+  basicAuth: {}
+
 valkey:
   # -- Deploy Valkey (the [CloudPirates chart](https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey)) and point SearXNG at it: `SEARXNG_VALKEY_URL`, with the password of the Valkey Secret, takes precedence over `settings.valkey.url`. SearXNG needs Valkey for its limiter (`settings.server.limiter`) and bot detection, and connects to it once at startup, so an init container waits for it. Any other key configures the subchart.
   enabled: false
