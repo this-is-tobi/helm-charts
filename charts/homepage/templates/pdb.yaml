@@ -1,0 +1,19 @@
+{{- if .Values.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "homepage.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "homepage.labels" . | nindent 4 }}
+spec:
+  {{- /* Compared to "" rather than tested for truthiness: maxUnavailable: 0 (no voluntary eviction) is valid but falsy. */}}
+  {{- if ne (toString .Values.pdb.maxUnavailable) "" }}
+  maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  {{- else }}
+  minAvailable: {{ .Values.pdb.minAvailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "homepage.selectorLabels" . | nindent 6 }}
+{{- end }}

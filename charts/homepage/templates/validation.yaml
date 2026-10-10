@@ -1,0 +1,52 @@
+{{- /*
+Values validation only - renders no resource. Fails at template time on combinations the API server
+would accept but Homepage would not run with.
+*/ -}}
+{{- if and .Values.image.digest (not (regexMatch "^sha256:[a-f0-9]{64}$" .Values.image.digest)) }}
+{{- fail (printf "image.digest must be a full digest such as \"sha256:<64 hex>\", got %q" .Values.image.digest) }}
+{{- end }}
+{{- if and .Values.httpRoute.enabled (not .Values.httpRoute.parentRefs) }}
+{{- fail "httpRoute.enabled requires httpRoute.parentRefs: an HTTPRoute attached to no Gateway is never served" }}
+{{- end }}
+{{- if and .Values.ingress.enabled (not .Values.ingress.hosts) }}
+{{- fail "ingress.enabled requires at least one host in ingress.hosts" }}
+{{- end }}
+{{- if and .Values.pdb.enabled (eq (toString .Values.pdb.maxUnavailable) "") (eq (toString .Values.pdb.minAvailable) "") }}
+{{- fail "pdb.enabled requires pdb.maxUnavailable or pdb.minAvailable: a budget without either protects nothing" }}
+{{- end }}
+{{- if and .Values.pdb.enabled (ne (toString .Values.pdb.maxUnavailable) "") (ne (toString .Values.pdb.minAvailable) "") }}
+{{- fail "pdb.maxUnavailable and pdb.minAvailable are exclusive: set pdb.maxUnavailable to null to use pdb.minAvailable" }}
+{{- end }}
+{{- if and .Values.autoscaling.enabled (gt (int .Values.autoscaling.minReplicas) (int .Values.autoscaling.maxReplicas)) }}
+{{- fail "autoscaling.minReplicas cannot exceed autoscaling.maxReplicas" }}
+{{- end }}
+{{- if and .Values.autoscaling.enabled (not (or .Values.autoscaling.targetCPUUtilizationPercentage .Values.autoscaling.targetMemoryUtilizationPercentage)) }}
+{{- fail "autoscaling.enabled requires a CPU or memory utilization target" }}
+{{- end }}
+{{- range .Values.allowedHosts }}
+{{- if regexMatch "[/@\\s]" . }}
+{{- fail (printf "allowedHosts holds hosts as the Host header carries them (\"home.example.com\" or \"home.example.com:8443\"), not %q" .) }}
+{{- end }}
+{{- end }}
+{{- if and .Values.auth.enabled (not (regexMatch "^https?://[^/@?#\\s]+/?$" .Values.auth.externalUrl)) }}
+{{- fail "auth.enabled requires auth.externalUrl, the public URL of Homepage such as \"https://home.example.com\": Homepage builds its sign-in redirects from it, and refuses credentials, a query or a fragment in it" }}
+{{- end }}
+{{- if and .Values.auth.oidc.enabled (not .Values.auth.enabled) }}
+{{- fail "auth.oidc.enabled requires auth.enabled" }}
+{{- end }}
+{{- if and .Values.auth.oidc.enabled (not (and .Values.auth.oidc.issuer .Values.auth.oidc.clientId)) }}
+{{- fail "auth.oidc.enabled requires auth.oidc.issuer and auth.oidc.clientId" }}
+{{- end }}
+{{- if and .Values.auth.oidc.enabled (not .Values.auth.secret.existingSecret) }}
+{{- fail "auth.oidc.enabled requires auth.secret.existingSecret: the chart cannot generate the OIDC client secret, nor an auth secret Argo CD and others would keep" }}
+{{- end }}
+{{- $mode := dig "mode" "" .Values.config.kubernetes }}
+{{- if and (eq $mode "cluster") (not .Values.kubernetes.enabled) }}
+{{- fail "config.kubernetes.mode \"cluster\" requires kubernetes.enabled: without it the pod has no ServiceAccount token to reach the cluster with" }}
+{{- end }}
+{{- if and (eq $mode "disabled") .Values.kubernetes.enabled }}
+{{- fail "kubernetes.enabled contradicts config.kubernetes.mode \"disabled\": drop one" }}
+{{- end }}
+{{- if and .Values.config.kubernetes (not $mode) (not .Values.kubernetes.enabled) }}
+{{- fail "config.kubernetes has no effect while kubernetes.enabled is false: Homepage then runs with the Kubernetes integration disabled" }}
+{{- end }}

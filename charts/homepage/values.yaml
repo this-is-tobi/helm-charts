@@ -1,0 +1,262 @@
+global:
+  compatibility:
+    openshift:
+      # -- Drop `runAsUser`, `runAsGroup` and `fsGroup` from the security contexts so that OpenShift's SCC assigns them from the namespace range (it rejects pods that set others): `auto` when the cluster serves `security.openshift.io/v1`, `force` always, `disabled` never.
+      adaptSecurityContext: auto
+
+# -- Override the chart name (used in resource naming).
+nameOverride: ""
+# -- Override the full resource name (release-name + chart-name).
+fullnameOverride: ""
+
+image:
+  # -- Homepage image registry.
+  registry: ghcr.io
+  # -- Homepage image repository.
+  repository: gethomepage/homepage
+  # -- Homepage image tag. Defaults to the chart appVersion.
+  tag: ""
+  # -- Homepage image digest (`sha256:...`). Takes precedence over the tag.
+  digest: ""
+  # -- Homepage image pull policy.
+  pullPolicy: IfNotPresent
+
+# -- Image pull secrets.
+imagePullSecrets: []
+
+# -- Homepage replicas (ignored with `autoscaling.enabled`). With more than one, enable sticky sessions on your ingress to avoid needless page re-renders; with `auth.enabled` they all share the same auth secret.
+replicaCount: 1
+
+# -- Old ReplicaSets kept for rollbacks. A configuration change rolls the pod, so Kubernetes' default of 10 piles up.
+revisionHistoryLimit: 3
+
+# Homepage configuration, one value per file of its config directory (https://gethomepage.dev/configs/). Homepage exits when a file is missing and the directory is read-only, so the chart always renders all of them. Put secrets in `env` as `HOMEPAGE_VAR_*` variables (from Secret keys) and reference them as `{{HOMEPAGE_VAR_NAME}}`.
+config:
+  # -- `settings.yaml`: title, theme, layout, providers. Map.
+  settings: {}
+  # -- `services.yaml`: service groups. List.
+  services: []
+  # -- `bookmarks.yaml`: bookmark groups. List.
+  bookmarks: []
+  # -- `widgets.yaml`: information widgets. List.
+  widgets: []
+  # -- `docker.yaml`: Docker instances, reached over TCP (a mounted socket would need a hostPath, which Pod Security `restricted` forbids). Map.
+  docker: {}
+  # -- `proxmox.yaml`: Proxmox instances. Map.
+  proxmox: {}
+  # -- `kubernetes.yaml`: discovery options (`ingress`, `traefik`, `gateway`) and `mode`. The mode is `cluster` with `kubernetes.enabled` and `disabled` otherwise; set it for `default` (a kubeconfig you mount with `extraVolumes`). Map.
+  kubernetes: {}
+
+# -- `custom.css`, loaded by every page.
+customCss: ""
+# -- `custom.js`, loaded by every page.
+customJs: ""
+
+# -- Extra hosts Homepage accepts in the `Host` header (`HOMEPAGE_ALLOWED_HOSTS`), on top of those the chart derives from `ingress.hosts`, `httpRoute.hostnames` and the host of `auth.externalUrl`. List a host here when the route is not created by this chart (an ApisixRoute, a Traefik IngressRoute, ...), with its port when it is not the default one. `"*"` allows any host and replaces the rest. Setting `HOMEPAGE_ALLOWED_HOSTS` in `env` replaces the whole list.
+allowedHosts: []
+
+auth:
+  # -- Enable Homepage's built-in authentication (v2+): a password, or OIDC with `auth.oidc.enabled`. Without it, Homepage serves its pages and APIs to whoever reaches it: keep it behind a network or a proxy that authenticates. Homepage does not rate limit password attempts: do it at the ingress (`POST /api/auth/callback/credentials`).
+  enabled: false
+  # -- Public URL Homepage is reached at (`HOMEPAGE_EXTERNAL_URL`), such as `https://home.example.com`. Required with `auth.enabled`; use `https` for anything but a trusted LAN.
+  externalUrl: ""
+  secret:
+    # -- Existing Secret holding the auth secret, the password (password login) and the OIDC client secret (OIDC), under the keys below. When empty, the chart creates one with a random auth secret and a random password, and keeps them across upgrades; OIDC always needs an existing Secret. Tools that render without cluster access (Argo CD) would generate new ones on every render: give them an existing Secret.
+    existingSecret: ""
+    # -- Key of the auth secret (`HOMEPAGE_AUTH_SECRET`, at least 32 characters).
+    authSecretKey: auth-secret
+    # -- Key of the password (`HOMEPAGE_AUTH_PASSWORD`).
+    passwordKey: password
+    # -- Key of the OIDC client secret (`HOMEPAGE_OIDC_CLIENT_SECRET`).
+    oidcClientSecretKey: oidc-client-secret
+  oidc:
+    # -- Log in through an OpenID Connect provider instead of a password. The provider's callback URI is `<externalUrl>/api/auth/callback/homepage-oidc`. Homepage lets in everyone the provider authorizes for the client: restrict it there.
+    enabled: false
+    # -- OIDC issuer URL (`HOMEPAGE_OIDC_ISSUER`).
+    issuer: ""
+    # -- OIDC client ID (`HOMEPAGE_OIDC_CLIENT_ID`).
+    clientId: ""
+    # -- Name of the provider on the login button (`HOMEPAGE_OIDC_NAME`).
+    name: ""
+    # -- Scopes to request (`HOMEPAGE_OIDC_SCOPE`). Homepage defaults to `openid email profile`.
+    scope: ""
+    # -- Send visitors straight to the provider (`HOMEPAGE_OIDC_AUTO_LOGIN`). `/auth/signin?autologin=0` still shows the login page.
+    autoLogin: false
+
+kubernetes:
+  # -- Let Homepage query the cluster, for its Kubernetes widget, pod status and service discovery from `gethomepage.dev/*` annotations (`config.kubernetes`). It mounts the ServiceAccount token in the pod and, with `kubernetes.rbac.create`, gets a read-only ClusterRole. Off by default: a dashboard with no integration needs no access to the cluster.
+  enabled: false
+  rbac:
+    # -- Create the ClusterRole and ClusterRoleBinding, limited to what Homepage reads: nodes, pods and their metrics, ingresses, and, when `config.kubernetes.traefik` or `config.kubernetes.gateway` are set, Traefik IngressRoutes or Gateway API routes. Set to false to bring your own.
+    create: true
+    # -- Extra rules for the ClusterRole.
+    extraRules: []
+
+# -- Extra Homepage environment variables. `HOMEPAGE_VAR_*` ones fill `{{HOMEPAGE_VAR_NAME}}` placeholders in the config; `LOG_TARGETS` (`stdout` by default here) and `HOMEPAGE_ALLOWED_HOSTS` replace the chart's own.
+env: []
+# -- Extra Homepage environment variables from ConfigMaps or Secrets.
+envFrom: []
+
+service:
+  # -- Service type.
+  type: ClusterIP
+  # -- Service port.
+  port: 3000
+  # -- Service annotations.
+  annotations: {}
+
+ingress:
+  # -- Expose Homepage through an Ingress.
+  enabled: false
+  # -- Ingress class.
+  className: ""
+  # -- Ingress annotations.
+  annotations: {}
+  # -- Ingress labels.
+  labels: {}
+  # -- Hosts and paths routed to Homepage. They are allowed in the `Host` header automatically.
+  hosts:
+  - name: homepage.local
+    paths:
+    - path: /
+      pathType: Prefix
+  # -- Ingress TLS (`secretName` and `hosts`).
+  tls: []
+
+httpRoute:
+  # -- Expose Homepage through a Gateway API HTTPRoute (needs the gateway.networking.k8s.io CRDs).
+  enabled: false
+  # -- HTTPRoute annotations.
+  annotations: {}
+  # -- HTTPRoute labels.
+  labels: {}
+  # -- Gateways (and listeners) the HTTPRoute attaches to. Required.
+  parentRefs: []
+  # -- Hostnames the HTTPRoute matches. They are allowed in the `Host` header automatically.
+  hostnames: []
+  # -- Routing rules (`matches`, `filters`), all sent to Homepage. Empty routes everything to it.
+  rules: []
+
+serviceAccount:
+  # -- Create the ServiceAccount. Its token is mounted in the pod only with `kubernetes.enabled`.
+  create: true
+  # -- ServiceAccount name. Defaults to the fullname, or `default` when not created.
+  name: ""
+  # -- ServiceAccount annotations.
+  annotations: {}
+
+# -- Deployment annotations, for what reads them on the Deployment itself (Reloader, Argo CD hooks, ...).
+deploymentAnnotations: {}
+# -- Pod annotations.
+podAnnotations: {}
+# -- Pod labels.
+podLabels: {}
+
+# -- Pod security context (Pod Security `restricted`). 1000 is the user and group the image's files belong to.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Container security context (Pod Security `restricted`, read-only root filesystem: Homepage only writes to emptyDirs on its cache and log directories).
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+    - ALL
+
+# -- Startup probe. `/api/healthcheck` stays public with `auth.enabled`; Homepage rejects any `Host` it was not told about, so the probes send the one it always accepts.
+startupProbe:
+  httpGet:
+    path: /api/healthcheck
+    port: http
+    httpHeaders:
+    - name: Host
+      value: localhost:3000
+  periodSeconds: 5
+  failureThreshold: 24
+# -- Readiness probe.
+readinessProbe:
+  httpGet:
+    path: /api/healthcheck
+    port: http
+    httpHeaders:
+    - name: Host
+      value: localhost:3000
+  periodSeconds: 10
+  timeoutSeconds: 5
+# -- Liveness probe.
+livenessProbe:
+  httpGet:
+    path: /api/healthcheck
+    port: http
+    httpHeaders:
+    - name: Host
+      value: localhost:3000
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# -- Resources. Homepage uses about 130Mi once warm; widgets and service lookups add to it.
+resources:
+  requests:
+    cpu: 50m
+    memory: 192Mi
+  limits:
+    cpu: "1"
+    memory: 512Mi
+
+# -- Deployment strategy.
+strategy: {}
+# -- Priority class.
+priorityClassName: ""
+# -- Node selector.
+nodeSelector: {}
+# -- Affinity.
+affinity: {}
+# -- Tolerations.
+tolerations: []
+# -- Topology spread constraints, e.g. one replica per node: `topologyKey: kubernetes.io/hostname` with a `labelSelector` on `app.kubernetes.io/name: homepage` and the release's `app.kubernetes.io/instance`.
+topologySpreadConstraints: []
+
+autoscaling:
+  # -- Scale Homepage with a HorizontalPodAutoscaler (needs a metrics server).
+  enabled: false
+  # -- Minimum replicas.
+  minReplicas: 1
+  # -- Maximum replicas.
+  maxReplicas: 3
+  # -- Average CPU utilization target, in percent of the CPU request.
+  targetCPUUtilizationPercentage: 80
+  # -- Average memory utilization target, in percent of the memory request. Empty by default: a warm pod already sits near its request.
+  targetMemoryUtilizationPercentage: ""
+
+pdb:
+  # -- Create a PodDisruptionBudget.
+  enabled: false
+  # -- Pods that must stay available during voluntary disruptions (number or percentage). Exclusive with `maxUnavailable`: set that one to null to use it. With a single replica, `1` blocks node drains.
+  minAvailable: ""
+  # -- Pods that may be unavailable during voluntary disruptions (number or percentage).
+  maxUnavailable: 1
+
+networkPolicy:
+  # -- Create a NetworkPolicy (it only counts on a CNI that enforces them). Once on, Homepage can only be reached on its port and can only reach DNS, the Kubernetes API (with `kubernetes.enabled`) and what `egress.rules` lists: add your widgets' and OIDC provider's destinations there, or `[{}]` to allow all egress.
+  enabled: false
+  ingress:
+    # -- Peers allowed to reach Homepage (NetworkPolicy `from` items: `podSelector`, `namespaceSelector`, `ipBlock`), e.g. your ingress controller's namespace. Empty allows any source.
+    from: []
+  egress:
+    # -- Extra egress rules (NetworkPolicy `egress` items: `to` and `ports`), e.g. the services your widgets query. `[{}]` allows all egress.
+    rules: []
+
+# -- Extra volumes.
+extraVolumes: []
+# -- Extra volume mounts of the Homepage container.
+extraVolumeMounts: []
+
+# -- Extra objects to deploy with the release (rendered with `tpl`).
+extraObjects: []

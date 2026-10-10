@@ -1,0 +1,333 @@
+{{ template "chart.header" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.kubeVersionLine" . }}
+
+## Overview
+
+[Homepage](https://github.com/gethomepage/homepage) is a dashboard for your services, bookmarks and widgets, configured with YAML files. This chart deploys it with safe defaults.
+
+- **Plug and play**: the defaults run an empty dashboard; `config` holds your files, and the hosts of the `ingress` and `httpRoute` the chart creates are allowed automatically.
+- **Secured**: the pod meets the Pod Security `restricted` profile (non-root, read-only root filesystem, no privilege escalation, all capabilities dropped, seccomp, resource requests and limits) and gets no ServiceAccount token.
+- **Cluster access on demand**: one value adds Kubernetes service discovery, with a read-only ClusterRole limited to what the enabled features read.
+- **Authentication on demand**: Homepage's built-in password or OIDC login, with its secrets kept in a Secret.
+- **OpenShift ready**: on OpenShift, the fixed user and group IDs are left to the SCC.
+
+> [!NOTE]
+> This chart is a port of the [UnknownIQ homepage chart](https://artifacthub.io/packages/helm/unknowniq/homepage), with its own values: `ingress.main` is `ingress` (hosts are `name`), `route` is `httpRoute`, and the `config` blocks keep their names. It drops the ServiceMonitor (Homepage serves no metrics) and the config PersistentVolumeClaim (the configuration comes from the values, and a copy kept on a volume would ignore later changes to them). The NetworkPolicy stays, opt-in and reworked.
+
+## Installing the Chart
+
+**Using Traditional Helm Repository:**
+```sh
+helm repo add tobi https://this-is-tobi.github.io/helm-charts
+helm repo update
+helm install homepage tobi/{{ template "chart.name" . }} --namespace homepage --create-namespace
+```
+
+**Using OCI Registry (Recommended):**
+```sh
+helm install homepage oci://ghcr.io/this-is-tobi/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }} \
+  --namespace homepage --create-namespace
+```
+
+### ArgoCD
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homepage
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: homepage
+  sources:
+  - repoURL: ghcr.io/this-is-tobi/helm-charts
+    chart: {{ template "chart.name" . }}
+    targetRevision: {{ template "chart.version" . }}
+    helm:
+      releaseName: homepage
+      values: |
+        ingress:
+          enabled: true
+          hosts:
+          - name: home.example.com
+            paths:
+            - path: /
+```
+
+Argo CD renders the chart without cluster access: with `auth.enabled`, give it an existing Secret (see [Authentication](#authentication)).
+
+## Exposing Homepage
+
+Through an Ingress or a Gateway API HTTPRoute.
+
+```yaml
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+  - name: home.example.com
+    paths:
+    - path: /
+  tls:
+  - secretName: home-example-com-tls
+    hosts:
+    - home.example.com
+# or
+httpRoute:
+  enabled: true
+  parentRefs:
+  - name: gateway
+    namespace: gateway-system
+  hostnames:
+  - home.example.com
+```
+
+### Allowed hosts
+
+Homepage answers `400 Host validation failed` to any `Host` header it was not told about (`HOMEPAGE_ALLOWED_HOSTS`; `localhost:3000` is always allowed). The chart allows, on its own:
+
+- the hosts of `ingress.hosts` (when enabled),
+- the `httpRoute.hostnames` (when enabled; wildcard ones are skipped, Homepage compares hosts as they are),
+- the host of `auth.externalUrl`.
+
+For a route the chart does not create (an ApisixRoute, a Traefik IngressRoute, a Gateway managed elsewhere, ...), add its host with `allowedHosts`, with its port when it is not the default one. `"*"` allows any host. To take over completely, set `HOMEPAGE_ALLOWED_HOSTS` in `env`: the chart then sets nothing.
+
+```yaml
+allowedHosts:
+- home.example.com
+- home.example.com:8443
+```
+
+The probes send `Host: localhost:3000` for the same reason, so they never depend on the list.
+
+## Configuration
+
+`config` holds one value per file of Homepage's config directory ([reference](https://gethomepage.dev/configs/)), rendered into a ConfigMap and mounted read-only. Homepage exits when a file is missing and its directory is read-only, so the chart always renders all nine, empty ones included.
+
+```yaml
+config:
+  settings:
+    title: Home
+    theme: dark
+    layout:
+      Media:
+        style: row
+        columns: 3
+  services:
+  - Media:
+    - Jellyfin:
+        href: https://jellyfin.example.com
+        description: Movies and shows
+  bookmarks:
+  - Developer:
+    - GitHub:
+      - abbr: GH
+        href: https://github.com
+  widgets:
+  - search:
+      provider: duckduckgo
+      target: _blank
+customCss: |
+  body { background: #101418; }
+```
+
+The pod rolls when the configuration changes. The root filesystem is read-only: Homepage only writes to emptyDirs on `/app/config/logs` and `/app/.next/cache`. It logs to stdout (`LOG_TARGETS`, overridable in `env`); mount a volume with `extraVolumes` and `extraVolumeMounts` for anything else.
+
+### Local images and icons
+
+Backgrounds and icons referenced as `/images/...` and `/icons/...` are read from `/app/public/images` and `/app/public/icons`. Mount a volume on them with `extraVolumes` and `extraVolumeMounts` (a PersistentVolumeClaim you fill, or a ConfigMap for a few small files); Homepage lists the icons when it starts, so restart it after adding some.
+
+```yaml
+config:
+  settings:
+    background: /images/background.png
+extraVolumes:
+- name: images
+  persistentVolumeClaim:
+    claimName: homepage-images
+extraVolumeMounts:
+- name: images
+  mountPath: /app/public/images
+  readOnly: true
+```
+
+### Secrets in the configuration
+
+Widgets need API keys, which should not sit in `config`, in git and in the ConfigMap. Homepage replaces `{{ "{{HOMEPAGE_VAR_NAME}}" }}` in its files with the environment variable `HOMEPAGE_VAR_NAME`, so take the value from a Secret key with `env`:
+
+```yaml
+config:
+  widgets:
+  - openmeteo:
+      label: Home
+      latitude: 48.85
+      longitude: 2.35
+  services:
+  - Media:
+    - Jellyfin:
+        href: https://jellyfin.example.com
+        widget:
+          type: jellyfin
+          url: https://jellyfin.example.com
+          key: "{{ "{{HOMEPAGE_VAR_JELLYFIN_KEY}}" }}"
+env:
+- name: HOMEPAGE_VAR_JELLYFIN_KEY
+  valueFrom:
+    secretKeyRef:
+      name: homepage-secrets
+      key: jellyfin-key
+```
+
+`envFrom` takes a whole Secret at once; `HOMEPAGE_FILE_NAME` variables read the value from a file instead (mount the Secret with `extraVolumes`). The Secret is read when the pod starts: restart the Deployment after rotating it.
+
+## Authentication
+
+Homepage has no authentication unless you turn on its own (v2+), so it serves its pages and its widget APIs to whoever reaches it: keep it behind a network or a proxy that authenticates, or set `auth.enabled`. `auth.externalUrl` is required (Homepage builds its sign-in redirects from it; use `https` unless it is a trusted LAN).
+
+```yaml
+auth:
+  enabled: true
+  externalUrl: https://home.example.com
+```
+
+The chart then creates a Secret with a random auth secret (`HOMEPAGE_AUTH_SECRET`, which signs the sessions) and a random password (`HOMEPAGE_AUTH_PASSWORD`), kept across upgrades, so every replica shares them and nobody is signed out:
+
+```sh
+kubectl -n homepage get secret homepage-homepage-auth -o jsonpath='{.data.password}' | base64 -d
+```
+
+Tools that render without cluster access (Argo CD) would generate new ones on every render: give them an existing Secret (keys `auth-secret` and `password`, renameable with `auth.secret.*Key`).
+
+```sh
+kubectl -n homepage create secret generic homepage-auth \
+  --from-literal=auth-secret="$(openssl rand -base64 32)" --from-literal=password="$(openssl rand -base64 24)"
+```
+
+```yaml
+auth:
+  enabled: true
+  externalUrl: https://home.example.com
+  secret:
+    existingSecret: homepage-auth
+```
+
+For OIDC, the provider's callback URI is `<externalUrl>/api/auth/callback/homepage-oidc`, and the Secret (which the chart cannot generate) also holds the client secret (key `oidc-client-secret`). Homepage lets in everyone the provider authorizes for the client: restrict it there.
+
+```yaml
+auth:
+  enabled: true
+  externalUrl: https://home.example.com
+  secret:
+    existingSecret: homepage-auth
+  oidc:
+    enabled: true
+    issuer: https://auth.example.com/realms/home
+    clientId: homepage
+```
+
+`/api/healthcheck` stays public, so the probes keep working. Homepage does not limit password attempts: do it on your ingress, for `POST /api/auth/callback/credentials`.
+
+## Kubernetes integration
+
+Off by default: a dashboard needs no access to the cluster. `kubernetes.enabled` mounts the ServiceAccount token, sets Homepage's Kubernetes `mode` to `cluster`, and creates a ClusterRole and binding (`kubernetes.rbac.create`) for what Homepage reads:
+
+| Feature | Read |
+| --- | --- |
+| Kubernetes widget, pod status of services | nodes, pods, namespaces and their metrics (needs a metrics server) |
+| Discovery from `gethomepage.dev/*` annotations | ingresses |
+| `config.kubernetes.traefik: true` | Traefik IngressRoutes, and the CRDs Homepage checks for |
+| `config.kubernetes.gateway: true` | Gateway API HTTPRoutes and their Gateways |
+
+```yaml
+kubernetes:
+  enabled: true
+config:
+  kubernetes:
+    ingress: true
+    gateway: true
+  widgets:
+  - kubernetes:
+      cluster:
+        show: true
+        cpu: true
+        memory: true
+      nodes:
+        show: true
+        cpu: true
+        memory: true
+```
+
+Annotate an Ingress (or HTTPRoute) with `gethomepage.dev/enabled: "true"`, `gethomepage.dev/name`, `gethomepage.dev/group`, ... to list it ([reference](https://gethomepage.dev/configs/kubernetes/)). Bring your own RBAC with `kubernetes.rbac.create: false`, or add rules with `kubernetes.rbac.extraRules`. `config.kubernetes.mode` overrides the mode (`default` reads a kubeconfig you mount with `extraVolumes`).
+
+## Network policy
+
+Off by default: Homepage queries whatever your widgets point at, so a policy has to know them. With `networkPolicy.enabled` (on a CNI that enforces policies), Homepage can only be reached on its port and can only reach DNS (ports 53 and 5353), the Kubernetes API (with `kubernetes.enabled`) and what you list. Widgets and an OIDC provider will fail until you do:
+
+```yaml
+networkPolicy:
+  enabled: true
+  ingress:
+    # Only the ingress controller reaches Homepage (empty: any source).
+    from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-nginx
+  egress:
+    rules:
+    # Widgets on the LAN, and the OIDC provider.
+    - to:
+      - ipBlock:
+          cidr: 192.168.0.0/16
+    - to:
+      - ipBlock:
+          cidr: 0.0.0.0/0
+          except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16]
+      ports:
+      - protocol: TCP
+        port: 443
+```
+
+Restricting only the ingress is `egress.rules: [{}]`, which allows every destination.
+
+## Overriding the defaults
+
+Everything the chart sets can be changed, extended or turned off:
+
+| To | Do |
+| --- | --- |
+| Loosen the pod hardening | Set the key to change (`securityContext.readOnlyRootFilesystem: false`). Maps merge with the defaults, so `null` removes a key (`securityContext.capabilities: null`) |
+| Drop a probe | Set it to `null` (`startupProbe: null`): `{}` keeps the default |
+| Log to a file as well | `LOG_TARGETS=both` in `env`: the logs emptyDir is already mounted |
+| Take over the allowed hosts | `HOMEPAGE_ALLOWED_HOSTS` in `env` |
+| Bring your own RBAC or ServiceAccount | `kubernetes.rbac.create: false`, `serviceAccount.create: false` and `serviceAccount.name` |
+| Keep more or fewer old ReplicaSets | `revisionHistoryLimit` |
+| Annotate the Deployment (Reloader, Argo CD) | `deploymentAnnotations` |
+| Add anything else | `extraObjects` (rendered with `tpl`), `extraVolumes`, `extraVolumeMounts`, `env`, `envFrom` |
+
+## Multiple replicas
+
+Replicas share nothing but the configuration (and, with `auth.enabled`, the auth secret). Homepage re-renders pages needlessly when requests alternate between replicas: enable sticky sessions on your ingress or route when you run more than one, for instance with `autoscaling.enabled`.
+
+## OpenShift
+
+OpenShift's restricted SCCs assign the user, group and fsGroup from the namespace's range and reject pods that set others. With `global.compatibility.openshift.adaptSecurityContext: auto` (the default), the chart drops `runAsUser`, `runAsGroup` and `fsGroup` from its security contexts when the cluster serves `security.openshift.io/v1`; `force` drops them anywhere (for platforms that inject IDs the same way), `disabled` keeps them. Homepage runs with any UID and GID 0: it only writes to its emptyDirs.
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+## Sources
+
+{{ template "chart.homepageLine" . }}
+
+**Source code:**
+{{ template "chart.sourcesList" . }}
+
+{{ template "helm-docs.versionFooter" . }}
