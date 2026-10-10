@@ -1,0 +1,184 @@
+{{- $envNames := include "homepage.envNames" . | fromJsonArray }}
+{{- $allowedHosts := include "homepage.allowedHosts" . }}
+{{- $secretName := include "homepage.authSecretName" . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "homepage.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "homepage.labels" . | nindent 4 }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- with .Values.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "homepage.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "homepage.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "homepage.serviceAccountName" . }}
+      # The token is the cluster integration's: without it Homepage never calls the Kubernetes API.
+      automountServiceAccountToken: {{ .Values.kubernetes.enabled }}
+      # A Service named homepage would inject HOMEPAGE_* variables the application could read.
+      enableServiceLinks: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      {{- with include "homepage.securityContext" (dict "context" .Values.podSecurityContext "root" $) }}
+      securityContext:
+        {{- . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: homepage
+        image: {{ include "homepage.image" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        {{- if not (has "LOG_TARGETS" $envNames) }}
+        # Logs to stdout only: nothing else to write or rotate on a read-only filesystem.
+        - name: LOG_TARGETS
+          value: stdout
+        {{- end }}
+        {{- if and $allowedHosts (not (has "HOMEPAGE_ALLOWED_HOSTS" $envNames)) }}
+        - name: HOMEPAGE_ALLOWED_HOSTS
+          value: {{ $allowedHosts | quote }}
+        {{- end }}
+        {{- if .Values.auth.enabled }}
+        - name: HOMEPAGE_AUTH_ENABLED
+          value: "true"
+        - name: HOMEPAGE_EXTERNAL_URL
+          value: {{ .Values.auth.externalUrl | quote }}
+        - name: HOMEPAGE_AUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ $secretName }}
+              key: {{ .Values.auth.secret.authSecretKey }}
+        {{- if .Values.auth.oidc.enabled }}
+        - name: HOMEPAGE_OIDC_ISSUER
+          value: {{ .Values.auth.oidc.issuer | quote }}
+        - name: HOMEPAGE_OIDC_CLIENT_ID
+          value: {{ .Values.auth.oidc.clientId | quote }}
+        - name: HOMEPAGE_OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ $secretName }}
+              key: {{ .Values.auth.secret.oidcClientSecretKey }}
+        {{- with .Values.auth.oidc.name }}
+        - name: HOMEPAGE_OIDC_NAME
+          value: {{ . | quote }}
+        {{- end }}
+        {{- with .Values.auth.oidc.scope }}
+        - name: HOMEPAGE_OIDC_SCOPE
+          value: {{ . | quote }}
+        {{- end }}
+        {{- if .Values.auth.oidc.autoLogin }}
+        - name: HOMEPAGE_OIDC_AUTO_LOGIN
+          value: "true"
+        {{- end }}
+        {{- else }}
+        - name: HOMEPAGE_AUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $secretName }}
+              key: {{ .Values.auth.secret.passwordKey }}
+        {{- end }}
+        {{- end }}
+        {{- with .Values.env }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.envFrom }}
+        envFrom:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        {{- with .Values.startupProbe }}
+        startupProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.readinessProbe }}
+        readinessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.livenessProbe }}
+        livenessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with include "homepage.securityContext" (dict "context" .Values.securityContext "root" $) }}
+        securityContext:
+          {{- . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        # One file at a time, as Homepage's own manifests do: /app/config does not exist in the image and
+        # its logs directory has to stay writable.
+        {{- range $file := list "settings.yaml" "services.yaml" "bookmarks.yaml" "widgets.yaml" "docker.yaml" "proxmox.yaml" "kubernetes.yaml" "custom.css" "custom.js" }}
+        - name: config
+          mountPath: /app/config/{{ $file }}
+          subPath: {{ $file }}
+          readOnly: true
+        {{- end }}
+        - name: logs
+          mountPath: /app/config/logs
+        - name: cache
+          mountPath: /app/.next/cache
+        {{- with .Values.extraVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ include "homepage.fullname" . }}
+      - name: logs
+        emptyDir:
+          sizeLimit: 64Mi
+      - name: cache
+        emptyDir: {}
+      {{- with .Values.extraVolumes }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}

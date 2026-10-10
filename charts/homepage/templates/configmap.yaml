@@ -1,0 +1,28 @@
+{{- /*
+Every file of Homepage's config directory is rendered, empty ones included: Homepage copies a skeleton
+for a missing file and exits when the directory is read-only.
+*/ -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "homepage.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "homepage.labels" . | nindent 4 }}
+data:
+  settings.yaml: |
+    {{- toYaml .Values.config.settings | nindent 4 }}
+  services.yaml: |
+    {{- toYaml .Values.config.services | nindent 4 }}
+  bookmarks.yaml: |
+    {{- toYaml .Values.config.bookmarks | nindent 4 }}
+  widgets.yaml: |
+    {{- toYaml .Values.config.widgets | nindent 4 }}
+  docker.yaml: |
+    {{- toYaml .Values.config.docker | nindent 4 }}
+  proxmox.yaml: |
+    {{- toYaml .Values.config.proxmox | nindent 4 }}
+  kubernetes.yaml: |
+    {{- include "homepage.kubernetesConfig" . | nindent 4 }}
+  custom.css: {{ .Values.customCss | toJson }}
+  custom.js: {{ .Values.customJs | toJson }}
