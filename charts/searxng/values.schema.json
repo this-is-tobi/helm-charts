@@ -147,6 +147,27 @@
     "nodeSelector": { "$ref": "#/definitions/stringMap" },
     "affinity": { "type": "object" },
     "tolerations": { "type": "array", "items": { "type": "object" } },
+    "topologySpreadConstraints": { "type": "array" },
+    "autoscaling": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "minReplicas": { "type": "integer", "minimum": 1 },
+        "maxReplicas": { "type": "integer", "minimum": 1 },
+        "targetCPUUtilizationPercentage": { "anyOf": [{ "type": "integer", "minimum": 1 }, { "const": "" }] },
+        "targetMemoryUtilizationPercentage": { "anyOf": [{ "type": "integer", "minimum": 1 }, { "const": "" }] }
+      }
+    },
+    "pdb": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "minAvailable": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "string", "pattern": "^([0-9]+%?)?$" }] },
+        "maxUnavailable": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "string", "pattern": "^([0-9]+%?)?$" }] }
+      }
+    },
     "extraVolumes": { "type": "array", "items": { "type": "object" } },
     "extraVolumeMounts": { "type": "array", "items": { "type": "object" } },
     "valkey": {

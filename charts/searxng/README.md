@@ -160,6 +160,11 @@ OpenShift's restricted SCCs assign the user, group and fsGroup from the namespac
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity. |
+| autoscaling.enabled | bool | `false` | Scale SearXNG with a HorizontalPodAutoscaler (needs a metrics server). |
+| autoscaling.maxReplicas | int | `3` | Maximum replicas. |
+| autoscaling.minReplicas | int | `1` | Minimum replicas. |
+| autoscaling.targetCPUUtilizationPercentage | int | `80` | Average CPU utilization target, in percent of the CPU request. |
+| autoscaling.targetMemoryUtilizationPercentage | string | `""` | Average memory utilization target, in percent of the memory request. Empty by default: an idle worker already sits near its request. |
 | env | list | `[]` | Extra SearXNG environment variables. |
 | envFrom | list | `[]` | Extra SearXNG environment variables from ConfigMaps or Secrets. |
 | extraConfigFiles | object | `{}` | Extra files rendered next to `settings.yml` in `/etc/searxng`, by file name (e.g. `limiter.toml`, `favicons.toml`). |
@@ -189,12 +194,15 @@ OpenShift's restricted SCCs assign the user, group and fsGroup from the namespac
 | livenessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/healthz","port":"http"},"periodSeconds":20,"timeoutSeconds":5}` | Liveness probe. |
 | nameOverride | string | `""` | Override the chart name (used in resource naming). |
 | nodeSelector | object | `{}` | Node selector. |
+| pdb.enabled | bool | `false` | Create a PodDisruptionBudget. |
+| pdb.maxUnavailable | int | `1` | Pods that may be unavailable during voluntary disruptions (number or percentage). |
+| pdb.minAvailable | string | `""` | Pods that must stay available during voluntary disruptions (number or percentage). Exclusive with `maxUnavailable`: set that one to null to use it. With a single replica, `1` blocks node drains. |
 | podAnnotations | object | `{}` | Pod annotations. |
 | podLabels | object | `{}` | Pod labels. |
 | podSecurityContext | object | `{"fsGroup":977,"runAsGroup":977,"runAsNonRoot":true,"runAsUser":977,"seccompProfile":{"type":"RuntimeDefault"}}` | Pod security context (Pod Security `restricted`). 977 is the image's `searxng` user. |
 | priorityClassName | string | `""` | Priority class. |
 | readinessProbe | object | `{"httpGet":{"path":"/healthz","port":"http"},"periodSeconds":10,"timeoutSeconds":5}` | Readiness probe. `/healthz` goes through SearXNG's request setup, so a broken configuration fails it, without rendering a page. |
-| replicaCount | int | `1` | SearXNG replicas. They all share the secret key below. |
+| replicaCount | int | `1` | SearXNG replicas (ignored with `autoscaling.enabled`). They all share the secret key below. |
 | resources | object | `{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"50m","memory":"160Mi"}}` | Resources. One SearXNG worker uses about 130Mi once warm. |
 | secret.existingSecret | string | `""` | Existing Secret holding the SearXNG secret key (`server.secret_key`). When empty, the chart creates one with a random key and keeps it across upgrades. Tools that render without cluster access (Argo CD) would generate a new key on every render: give them an existing Secret. |
 | secret.key | string | `"secret-key"` | Key of the secret key in the Secret. |
@@ -210,6 +218,7 @@ OpenShift's restricted SCCs assign the user, group and fsGroup from the namespac
 | startupProbe | object | `{"failureThreshold":24,"httpGet":{"path":"/healthz","port":"http"},"periodSeconds":5}` | Startup probe: gives the first start up to two minutes without delaying the other probes. |
 | strategy | object | `{}` | Deployment strategy. |
 | tolerations | list | `[]` | Tolerations. |
+| topologySpreadConstraints | list | `[]` | Topology spread constraints, e.g. one replica per node: `topologyKey: kubernetes.io/hostname` with a `labelSelector` on `app.kubernetes.io/name: searxng` and the release's `app.kubernetes.io/instance`. |
 | valkey.auth.existingSecret | string | `""` | Existing Secret holding the Valkey password (key `auth.existingSecretPasswordKey`). When empty, the subchart creates one with a random password and keeps it across upgrades; tools that render without cluster access (Argo CD) would generate a new one on every render. |
 | valkey.enabled | bool | `false` | Deploy Valkey (the [CloudPirates chart](https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey)) and point SearXNG at it: `SEARXNG_VALKEY_URL`, with the password of the Valkey Secret, takes precedence over `settings.valkey.url`. SearXNG needs Valkey for its limiter (`settings.server.limiter`) and bot detection, and connects to it once at startup, so an init container waits for it. Any other key configures the subchart. |
 | valkey.initContainer.resources | object | `{"limits":{"cpu":"100m","memory":"64Mi"},"requests":{"cpu":"10m","memory":"32Mi"}}` | Resources of the Valkey init container (`architecture: replication`). |
