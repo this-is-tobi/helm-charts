@@ -17,6 +17,18 @@ would accept but SearXNG would not run with.
 {{- if and .Values.ingress.enabled (not .Values.ingress.hosts) }}
 {{- fail "ingress.enabled requires at least one host in ingress.hosts" }}
 {{- end }}
+{{- if and .Values.pdb.enabled (eq (toString .Values.pdb.maxUnavailable) "") (eq (toString .Values.pdb.minAvailable) "") }}
+{{- fail "pdb.enabled requires pdb.maxUnavailable or pdb.minAvailable: a budget without either protects nothing" }}
+{{- end }}
+{{- if and .Values.pdb.enabled (ne (toString .Values.pdb.maxUnavailable) "") (ne (toString .Values.pdb.minAvailable) "") }}
+{{- fail "pdb.maxUnavailable and pdb.minAvailable are exclusive: set pdb.maxUnavailable to null to use pdb.minAvailable" }}
+{{- end }}
+{{- if and .Values.autoscaling.enabled (gt (int .Values.autoscaling.minReplicas) (int .Values.autoscaling.maxReplicas)) }}
+{{- fail "autoscaling.minReplicas cannot exceed autoscaling.maxReplicas" }}
+{{- end }}
+{{- if and .Values.autoscaling.enabled (not (or .Values.autoscaling.targetCPUUtilizationPercentage .Values.autoscaling.targetMemoryUtilizationPercentage)) }}
+{{- fail "autoscaling.enabled requires a CPU or memory utilization target" }}
+{{- end }}
 {{- if and .Values.valkey.enabled (dig "tls" "enabled" false .Values.valkey) }}
 {{- fail "valkey.tls.enabled is not supported: SearXNG would also need to trust Valkey's certificate" }}
 {{- end }}

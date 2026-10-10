@@ -24,7 +24,7 @@ image:
 # -- Image pull secrets.
 imagePullSecrets: []
 
-# -- SearXNG replicas. They all share the secret key below.
+# -- SearXNG replicas (ignored with `autoscaling.enabled`). They all share the secret key below.
 replicaCount: 1
 
 # -- SearXNG settings, rendered to `/etc/searxng/settings.yml` on top of SearXNG's own defaults: set only what you change. The chart sets `use_default_settings: true`; give it SearXNG's map form to keep or remove default engines (e.g. `use_default_settings.engines.keep_only`). The secret key comes from `secret`. See https://docs.searxng.org/admin/settings/.
@@ -158,6 +158,28 @@ nodeSelector: {}
 affinity: {}
 # -- Tolerations.
 tolerations: []
+# -- Topology spread constraints, e.g. one replica per node: `topologyKey: kubernetes.io/hostname` with a `labelSelector` on `app.kubernetes.io/name: searxng` and the release's `app.kubernetes.io/instance`.
+topologySpreadConstraints: []
+
+autoscaling:
+  # -- Scale SearXNG with a HorizontalPodAutoscaler (needs a metrics server).
+  enabled: false
+  # -- Minimum replicas.
+  minReplicas: 1
+  # -- Maximum replicas.
+  maxReplicas: 3
+  # -- Average CPU utilization target, in percent of the CPU request.
+  targetCPUUtilizationPercentage: 80
+  # -- Average memory utilization target, in percent of the memory request. Empty by default: an idle worker already sits near its request.
+  targetMemoryUtilizationPercentage: ""
+
+pdb:
+  # -- Create a PodDisruptionBudget.
+  enabled: false
+  # -- Pods that must stay available during voluntary disruptions (number or percentage). Exclusive with `maxUnavailable`: set that one to null to use it. With a single replica, `1` blocks node drains.
+  minAvailable: ""
+  # -- Pods that may be unavailable during voluntary disruptions (number or percentage).
+  maxUnavailable: 1
 
 # -- Extra volumes.
 extraVolumes: []

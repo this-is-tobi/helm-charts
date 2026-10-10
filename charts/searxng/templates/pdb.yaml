@@ -1,0 +1,19 @@
+{{- if .Values.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "searxng.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "searxng.labels" . | nindent 4 }}
+spec:
+  {{- /* Compared to "" rather than tested for truthiness: maxUnavailable: 0 (no voluntary eviction) is valid but falsy. */}}
+  {{- if ne (toString .Values.pdb.maxUnavailable) "" }}
+  maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  {{- else }}
+  minAvailable: {{ .Values.pdb.minAvailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "searxng.selectorLabels" . | nindent 6 }}
+{{- end }}

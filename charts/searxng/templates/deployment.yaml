@@ -6,7 +6,9 @@ metadata:
   labels:
     {{- include "searxng.labels" . | nindent 4 }}
 spec:
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   {{- with .Values.strategy }}
   strategy:
     {{- toYaml . | nindent 4 }}
@@ -52,6 +54,10 @@ spec:
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if .Values.valkey.enabled }}
