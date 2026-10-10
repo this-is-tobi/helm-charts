@@ -49,6 +49,10 @@ render "autoscaling + pdb" --set autoscaling.enabled=true --set pdb.enabled=true
 render "existing secret" --set secret.existingSecret=searxng-secret
 render "digest-pinned image" --set "image.digest=sha256:$(printf '0%.0s' {1..64})"
 render "OpenShift" "${OPENSHIFT[@]}" -f "${CHART_DIR}/ci/valkey-values.yaml"
+# shellcheck disable=SC2016
+SECRET_SETTINGS=(--set-json 'settingsFromSecrets=[{"path":"general.open_metrics","name":"searxng-metrics","key":"password"}]')
+render "settings from secrets, metrics and valkey" "${SECRET_SETTINGS[@]}" --set valkey.enabled=true \
+  --set serviceMonitor.enabled=true --set serviceMonitor.basicAuth.password.name=searxng-metrics --set serviceMonitor.basicAuth.password.key=password
 
 # Parent charts toggle this one with `condition: searxng.enabled`, which hands it that key.
 echo "==> render as a dependency of a parent chart"
@@ -96,6 +100,21 @@ CONFIGMAP=(--show-only templates/configmap.yaml)
 expect_count 1 'use_default_settings: true' "${CONFIGMAP[@]}"
 expect_count 0 'use_default_settings: true' "${CONFIGMAP[@]}" --set-json 'settings.use_default_settings={"engines":{"keep_only":["duckduckgo"]}}'
 expect_count 1 'keep_only:' "${CONFIGMAP[@]}" --set-json 'settings.use_default_settings={"engines":{"keep_only":["duckduckgo"]}}'
+
+echo "==> settingsFromSecrets: settings rendered by an init container from the Secret, in memory"
+DEPLOYMENT=(--show-only templates/deployment.yaml)
+expect_count 0 'name: render-settings' "${DEPLOYMENT[@]}"
+expect_count 1 'name: render-settings' "${DEPLOYMENT[@]}" "${SECRET_SETTINGS[@]}"
+expect_count 1 'medium: Memory' "${DEPLOYMENT[@]}" "${SECRET_SETTINGS[@]}"
+expect_count 1 'name: searxng-metrics' "${DEPLOYMENT[@]}" "${SECRET_SETTINGS[@]}"
+expect_count 0 'open_metrics' --show-only templates/configmap.yaml "${SECRET_SETTINGS[@]}"
+# SearXNG must read the rendered settings, not the ConfigMap's.
+mount="$(helm template release-name "${CHART_DIR}" "${DEPLOYMENT[@]}" "${SECRET_SETTINGS[@]}" \
+  | yq e -N '.spec.template.spec.containers[0].volumeMounts[] | select(.mountPath == "/etc/searxng") | .name' -)" || exit 1
+if [ "${mount}" != "rendered-config" ]; then
+  echo "ERROR: SearXNG mounts '${mount}' on /etc/searxng instead of the rendered settings" >&2
+  exit 1
+fi
 
 echo "==> security contexts follow global.compatibility.openshift.adaptSecurityContext"
 expect_count 1 'runAsUser:'
@@ -183,6 +202,7 @@ expect_hardened "valkey" --set valkey.enabled=true
 expect_hardened "valkey with its optional containers" --set valkey.enabled=true --set valkey.architecture=replication \
   --set valkey.sentinel.enabled=true --set valkey.sentinel.masterProxy.enabled=true --set valkey.metrics.enabled=true
 expect_hardened "OpenShift" "${OPENSHIFT[@]}" --set valkey.enabled=true
+expect_hardened "settings from secrets and valkey" "${SECRET_SETTINGS[@]}" --set valkey.enabled=true
 
 # Each value must be refused for the reason given, not for any error.
 expect_failure() {
@@ -219,6 +239,18 @@ expect_failure "pdb with both budgets" "are exclusive" --set pdb.enabled=true --
 expect_failure "autoscaling minReplicas above maxReplicas" "cannot exceed" --set autoscaling.enabled=true --set autoscaling.minReplicas=4
 expect_failure "autoscaling without target" "requires a CPU or memory" --set autoscaling.enabled=true --set autoscaling.targetCPUUtilizationPercentage=
 expect_failure "autoscaling target not a number" "targetCPUUtilizationPercentage" --set autoscaling.targetCPUUtilizationPercentage=eighty
+# shellcheck disable=SC2016
+expect_failure "settingsFromSecrets path also set in settings" "which settings already sets" "${SECRET_SETTINGS[@]}" \
+  --set settings.general.open_metrics=literal
+# shellcheck disable=SC2016
+expect_failure "settingsFromSecrets path set twice" "sets general.open_metrics twice" \
+  --set-json 'settingsFromSecrets=[{"path":"general.open_metrics","name":"a","key":"b"},{"path":"general.open_metrics","name":"c","key":"d"}]'
+# shellcheck disable=SC2016
+expect_failure "settingsFromSecrets malformed path" "path" \
+  --set-json 'settingsFromSecrets=[{"path":"general..open_metrics","name":"a","key":"b"}]'
+# shellcheck disable=SC2016
+expect_failure "settingsFromSecrets without key" "key" \
+  --set-json 'settingsFromSecrets=[{"path":"general.open_metrics","name":"a"}]'
 expect_failure "valkey over TLS" "valkey.tls.enabled is not supported" \
   --set valkey.enabled=true --set valkey.tls.enabled=true --set valkey.tls.existingSecret=valkey-tls
 
@@ -272,6 +304,30 @@ if [ "${clients:-0}" -lt 2 ]; then
   echo "ERROR: SearXNG is not connected to valkey (connected_clients=${clients:-none})" >&2
   kubectl -n "${NS}" logs "deploy/${RELEASE}" -c wait-for-valkey >&2 || true
   kubectl -n "${NS}" logs "deploy/${RELEASE}" -c searxng --tail=30 >&2 || true
+  exit 1
+fi
+
+echo "==> e2e: metrics password read from a Secret, served only with it, never in the ConfigMap"
+METRICS_PASSWORD="$(openssl rand -hex 16)"
+kubectl -n "${NS}" create secret generic searxng-metrics --from-literal=password="${METRICS_PASSWORD}"
+# The init container writes the settings as the arbitrary UID an SCC assigns, SearXNG reads them as the same one.
+helm upgrade "${RELEASE}" "${CHART_DIR}" --namespace "${NS}" --wait --timeout 4m \
+  -f "${CHART_DIR}/ci/valkey-values.yaml" "${SECRET_SETTINGS[@]}" \
+  --set podSecurityContext.runAsUser=1000650000 --set podSecurityContext.runAsGroup=null \
+  --set podSecurityContext.fsGroup=1000650000
+check_http
+if kubectl -n "${NS}" exec "deploy/${RELEASE}" -c searxng -- wget -q -O /dev/null http://127.0.0.1:8080/metrics 2>/dev/null; then
+  echo "ERROR: /metrics answered without the password" >&2
+  exit 1
+fi
+authorization="Authorization: Basic $(printf 'scrape:%s' "${METRICS_PASSWORD}" | base64 | tr -d '\n')"
+if ! kubectl -n "${NS}" exec "deploy/${RELEASE}" -c searxng -- wget -q -O - --header "${authorization}" http://127.0.0.1:8080/metrics | grep -q '^# '; then
+  echo "ERROR: /metrics did not answer with the password from the Secret" >&2
+  kubectl -n "${NS}" logs "deploy/${RELEASE}" -c render-settings >&2 || true
+  exit 1
+fi
+if kubectl -n "${NS}" get configmap "${RELEASE}" -o jsonpath='{.data}' | grep -q "${METRICS_PASSWORD}"; then
+  echo "ERROR: the metrics password is in the ConfigMap" >&2
   exit 1
 fi
 
