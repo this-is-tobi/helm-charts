@@ -30,6 +30,9 @@ replicaCount: 1
 # -- SearXNG settings, rendered to `/etc/searxng/settings.yml` on top of SearXNG's own defaults: set only what you change. The chart sets `use_default_settings: true`; give it SearXNG's map form to keep or remove default engines (e.g. `use_default_settings.engines.keep_only`). The secret key comes from `secret`. See https://docs.searxng.org/admin/settings/.
 settings: {}
 
+# -- Settings whose value comes from a Secret key, by dotted path in `settings` (`path`, Secret `name` and `key`), e.g. `general.open_metrics` or the credentials of `outgoing.proxies`. SearXNG reads only a few settings from its environment and cannot include a second file, so an init container writes the final `settings.yml` into an in-memory volume, with these values read from the container environment. A path cannot also be set in `settings`; a rotated Secret takes a pod restart.
+settingsFromSecrets: []
+
 # -- Extra files rendered next to `settings.yml` in `/etc/searxng`, by file name (e.g. `limiter.toml`, `favicons.toml`).
 extraConfigFiles: {}
 

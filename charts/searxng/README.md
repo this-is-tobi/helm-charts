@@ -1,6 +1,6 @@
 # searxng
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2026.9.8-3fdc6d753](https://img.shields.io/badge/AppVersion-2026.9.8--3fdc6d753-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2026.9.8-3fdc6d753](https://img.shields.io/badge/AppVersion-2026.9.8--3fdc6d753-informational?style=flat-square)
 
 Secure, plug-and-play Helm chart for SearXNG, the privacy-respecting metasearch engine, with optional Valkey for its limiter.
 
@@ -34,7 +34,7 @@ helm install searxng tobi/searxng --namespace searxng --create-namespace
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install searxng oci://ghcr.io/this-is-tobi/helm-charts/searxng --version 0.1.0 \
+helm install searxng oci://ghcr.io/this-is-tobi/helm-charts/searxng --version 0.2.0 \
   --namespace searxng --create-namespace
 ```
 
@@ -55,7 +55,7 @@ spec:
   sources:
   - repoURL: ghcr.io/this-is-tobi/helm-charts
     chart: searxng
-    targetRevision: 0.1.0
+    targetRevision: 0.2.0
     helm:
       releaseName: searxng
       values: |
@@ -119,6 +119,19 @@ settings:
 
 Other configuration files (`limiter.toml`, `favicons.toml`, ...) go under `extraConfigFiles`, by file name; they are mounted next to `settings.yml`. The root filesystem is read-only and `/tmp` is the only writable path: keep cache files there (`favicons.toml`'s `db_url` defaults to `/tmp/faviconcache.db`), or mount a volume with `extraVolumes` and `extraVolumeMounts`.
 
+## Secrets in the settings
+
+SearXNG reads only a few settings from its environment (the secret key among them) and cannot include a second file, so a secret value such as the metrics password (`general.open_metrics`) or a proxy's credentials would otherwise sit in `settings`, in git and in the ConfigMap. `settingsFromSecrets` takes it from a Secret key instead, by dotted path:
+
+```yaml
+settingsFromSecrets:
+- path: general.open_metrics
+  name: searxng-metrics
+  key: password
+```
+
+An init container (the SearXNG image) writes the final `settings.yml`, with the Secret values read from its environment, to an in-memory volume that SearXNG mounts at `/etc/searxng`; `extraConfigFiles` are copied next to it. A path cannot also be set in `settings`, and it addresses keys of nested maps only (not an item of a list such as `engines`). The Secret is read when the pod starts: restart the Deployment after rotating it.
+
 ## Secret key
 
 SearXNG signs its sessions and image proxy URLs and encrypts its cache with `server.secret_key`, so every replica needs the same key and it must not change. The chart passes it in the `SEARXNG_SECRET` environment variable, from:
@@ -132,12 +145,13 @@ kubectl -n searxng create secret generic searxng-secret --from-literal=secret-ke
 
 ## Metrics
 
-SearXNG serves Prometheus metrics on `/metrics` when `settings.general.open_metrics` holds a password, checked with HTTP basic auth (any username). SearXNG only reads it from its settings, so it ends up in the chart's ConfigMap: use a password dedicated to scraping. `serviceMonitor` scrapes it with the Prometheus Operator, the password coming from a Secret:
+SearXNG serves Prometheus metrics on `/metrics` when `settings.general.open_metrics` holds a password, checked with HTTP basic auth (any username). SearXNG only reads it from its settings: set it from a Secret with `settingsFromSecrets` (see above), or it ends up in the chart's ConfigMap. `serviceMonitor` scrapes it with the Prometheus Operator, the password coming from the same Secret:
 
 ```yaml
-settings:
-  general:
-    open_metrics: <scrape password>
+settingsFromSecrets:
+- path: general.open_metrics
+  name: searxng-metrics
+  key: password
 serviceMonitor:
   enabled: true
   basicAuth:
@@ -239,6 +253,7 @@ OpenShift's restricted SCCs assign the user, group and fsGroup from the namespac
 | serviceMonitor.labels | object | `{}` | ServiceMonitor labels (e.g. the one your Prometheus selects). |
 | serviceMonitor.scrapeTimeout | string | `"10s"` | Scrape timeout. |
 | settings | object | `{}` | SearXNG settings, rendered to `/etc/searxng/settings.yml` on top of SearXNG's own defaults: set only what you change. The chart sets `use_default_settings: true`; give it SearXNG's map form to keep or remove default engines (e.g. `use_default_settings.engines.keep_only`). The secret key comes from `secret`. See https://docs.searxng.org/admin/settings/. |
+| settingsFromSecrets | list | `[]` | Settings whose value comes from a Secret key, by dotted path in `settings` (`path`, Secret `name` and `key`), e.g. `general.open_metrics` or the credentials of `outgoing.proxies`. SearXNG reads only a few settings from its environment and cannot include a second file, so an init container writes the final `settings.yml` into an in-memory volume, with these values read from the container environment. A path cannot also be set in `settings`; a rotated Secret takes a pod restart. |
 | startupProbe | object | `{"failureThreshold":24,"httpGet":{"path":"/healthz","port":"http"},"periodSeconds":5}` | Startup probe: gives the first start up to two minutes without delaying the other probes. |
 | strategy | object | `{}` | Deployment strategy. |
 | tolerations | list | `[]` | Tolerations. |

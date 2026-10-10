@@ -62,6 +62,20 @@
         "use_default_settings": { "type": ["boolean", "object"] }
       }
     },
+    "settingsFromSecrets": {
+      "description": "Settings set from Secret keys, by dotted path.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "name", "key"],
+        "properties": {
+          "path": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_-]*(\\.[A-Za-z_][A-Za-z0-9_-]*)*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "key": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
     "extraConfigFiles": {
       "description": "Extra files in /etc/searxng, by file name.",
       "$ref": "#/definitions/stringMap",
