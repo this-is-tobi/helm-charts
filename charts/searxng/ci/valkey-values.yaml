@@ -1,0 +1,3 @@
+# Valkey: SearXNG waits for it at startup and gets its URL and password from the chart.
+valkey:
+  enabled: true

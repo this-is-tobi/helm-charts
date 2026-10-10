@@ -11,3 +11,6 @@ would accept but SearXNG would not run with.
 {{- if and .Values.image.digest (not (regexMatch "^sha256:[a-f0-9]{64}$" .Values.image.digest)) }}
 {{- fail (printf "image.digest must be a full digest such as \"sha256:<64 hex>\", got %q" .Values.image.digest) }}
 {{- end }}
+{{- if and .Values.valkey.enabled (dig "tls" "enabled" false .Values.valkey) }}
+{{- fail "valkey.tls.enabled is not supported: SearXNG would also need to trust Valkey's certificate" }}
+{{- end }}

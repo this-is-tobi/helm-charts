@@ -2,9 +2,17 @@
 
 ![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2026.9.8-3fdc6d753](https://img.shields.io/badge/AppVersion-2026.9.8--3fdc6d753-informational?style=flat-square)
 
-Secure, plug-and-play Helm chart for SearXNG, the privacy-respecting metasearch engine.
+Secure, plug-and-play Helm chart for SearXNG, the privacy-respecting metasearch engine, with optional Valkey for its limiter.
 
 Kubernetes: `>=1.25.0-0`
+
+## Requirements
+
+Kubernetes: `>=1.25.0-0`
+
+| Repository | Name | Version |
+|------------|------|---------|
+| oci://registry-1.docker.io/cloudpirates | valkey | 0.25.13 |
 
 ## Overview
 
@@ -13,6 +21,7 @@ Kubernetes: `>=1.25.0-0`
 - **Plug and play**: the defaults run SearXNG with its own default settings and a generated secret key; `settings` only holds what you change.
 - **Secured**: the pod meets the Pod Security `restricted` profile (non-root, read-only root filesystem, no privilege escalation, all capabilities dropped, seccomp, resource requests and limits) and gets no ServiceAccount token.
 - **OpenShift ready**: on OpenShift, the fixed user and group IDs are left to the SCC.
+- **Valkey on demand**: one value adds Valkey for SearXNG's limiter and bot detection.
 
 ## Installing the Chart
 
@@ -95,9 +104,30 @@ SearXNG signs its sessions and image proxy URLs and encrypts its cache with `ser
 kubectl -n searxng create secret generic searxng-secret --from-literal=secret-key="$(openssl rand -hex 32)"
 ```
 
+## Valkey and the limiter
+
+With `valkey.enabled`, the chart deploys [Valkey](https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey) (password authentication on, no volume) and points SearXNG at it with `SEARXNG_VALKEY_URL`, built from the Valkey service and the password of its Secret. SearXNG uses it for its bot detection and its [limiter](https://docs.searxng.org/admin/searx.limiter.html), and connects to it once, at startup: a `wait-for-valkey` init container holds SearXNG until Valkey answers.
+
+The subchart generates the password and keeps it across upgrades. Tools that render without cluster access (Argo CD) would generate a new one on every render: give them an existing Secret with `valkey.auth.existingSecret` (key `valkey.auth.existingSecretPasswordKey`), whose password must stay URL-safe.
+
+The limiter stays off until `settings.server.limiter: true`. It then answers `429` to the requests its bot detection does not trust, which includes clients calling SearXNG directly (an Open WebUI web search, for instance): keep it off for those. Behind an ingress, list the ingress controller's addresses in `botdetection.trusted_proxies` (`extraConfigFiles."limiter.toml"`), so that SearXNG takes the client address from `X-Forwarded-For` instead of limiting every user as the ingress.
+
+```yaml
+valkey:
+  enabled: true
+settings:
+  server:
+    limiter: true
+extraConfigFiles:
+  limiter.toml: |
+    [botdetection]
+    # The ingress controller's pod network.
+    trusted_proxies = ["10.42.0.0/16"]
+```
+
 ## OpenShift
 
-OpenShift's restricted SCCs assign the user, group and fsGroup from the namespace's range and reject pods that set others. With `global.compatibility.openshift.adaptSecurityContext: auto` (the default), the chart drops `runAsUser`, `runAsGroup` and `fsGroup` from its security contexts when the cluster serves `security.openshift.io/v1`; `force` drops them anywhere (for platforms that inject IDs the same way), `disabled` keeps them. SearXNG runs with any UID and GID 0: it only writes to its `/tmp` emptyDir.
+OpenShift's restricted SCCs assign the user, group and fsGroup from the namespace's range and reject pods that set others. With `global.compatibility.openshift.adaptSecurityContext: auto` (the default), the chart drops `runAsUser`, `runAsGroup` and `fsGroup` from its security contexts when the cluster serves `security.openshift.io/v1`; `force` drops them anywhere (for platforms that inject IDs the same way), `disabled` keeps them. SearXNG runs with any UID and GID 0: it only writes to its `/tmp` emptyDir. The valkey subchart adapts itself when it detects OpenShift (`route.openshift.io/v1`); with `force` elsewhere, also set `valkey.targetPlatform: openshift`.
 
 ## Values
 
@@ -111,7 +141,7 @@ OpenShift's restricted SCCs assign the user, group and fsGroup from the namespac
 | extraVolumeMounts | list | `[]` | Extra volume mounts of the SearXNG container. |
 | extraVolumes | list | `[]` | Extra volumes. |
 | fullnameOverride | string | `""` | Override the full resource name (release-name + chart-name). |
-| global.compatibility.openshift.adaptSecurityContext | string | `"auto"` | Drop `runAsUser`, `runAsGroup` and `fsGroup` from the security contexts so that OpenShift's SCC assigns them from the namespace range (it rejects pods that set others): `auto` when the cluster serves `security.openshift.io/v1`, `force` always, `disabled` never. |
+| global.compatibility.openshift.adaptSecurityContext | string | `"auto"` | Drop `runAsUser`, `runAsGroup` and `fsGroup` from the security contexts so that OpenShift's SCC assigns them from the namespace range (it rejects pods that set others): `auto` when the cluster serves `security.openshift.io/v1`, `force` always, `disabled` never. The valkey subchart adapts itself when it detects OpenShift (`route.openshift.io/v1`); with `force` elsewhere, also set `valkey.targetPlatform: openshift`. |
 | image.digest | string | `""` | SearXNG image digest (`sha256:...`). Takes precedence over the tag. |
 | image.pullPolicy | string | `"IfNotPresent"` | SearXNG image pull policy. |
 | image.registry | string | `"docker.io"` | SearXNG image registry. |
@@ -142,6 +172,15 @@ OpenShift's restricted SCCs assign the user, group and fsGroup from the namespac
 | startupProbe | object | `{"failureThreshold":24,"httpGet":{"path":"/healthz","port":"http"},"periodSeconds":5}` | Startup probe: gives the first start up to two minutes without delaying the other probes. |
 | strategy | object | `{}` | Deployment strategy. |
 | tolerations | list | `[]` | Tolerations. |
+| valkey.auth.existingSecret | string | `""` | Existing Secret holding the Valkey password (key `auth.existingSecretPasswordKey`). When empty, the subchart creates one with a random password and keeps it across upgrades; tools that render without cluster access (Argo CD) would generate a new one on every render. |
+| valkey.enabled | bool | `false` | Deploy Valkey (the [CloudPirates chart](https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey)) and point SearXNG at it: `SEARXNG_VALKEY_URL`, with the password of the Valkey Secret, takes precedence over `settings.valkey.url`. SearXNG needs Valkey for its limiter (`settings.server.limiter`) and bot detection, and connects to it once at startup, so an init container waits for it. Any other key configures the subchart. |
+| valkey.initContainer.resources | object | `{"limits":{"cpu":"100m","memory":"64Mi"},"requests":{"cpu":"10m","memory":"32Mi"}}` | Resources of the Valkey init container (`architecture: replication`). |
+| valkey.metrics.resources | object | `{"limits":{"cpu":"100m","memory":"64Mi"},"requests":{"cpu":"10m","memory":"32Mi"}}` | Resources of the Valkey metrics exporter (`metrics.enabled`). |
+| valkey.persistence.enabled | bool | `false` | Persist Valkey's data. It only holds SearXNG's limiter counters and cache. |
+| valkey.podSecurityContext | object | `{"fsGroup":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | Valkey pod security context: the subchart's fsGroup plus the seccomp profile Pod Security `restricted` requires. |
+| valkey.resources | object | `{"limits":{"cpu":"100m","memory":"128Mi"},"requests":{"cpu":"50m","memory":"64Mi"}}` | Valkey resources (the subchart sets none; quotas and policy engines usually require them). |
+| valkey.sentinel.masterProxy.resources | object | `{"limits":{"cpu":"100m","memory":"64Mi"},"requests":{"cpu":"10m","memory":"32Mi"}}` | Resources of the sentinel's HAProxy master proxy (`sentinel.masterProxy.enabled`). |
+| valkey.sentinel.resources | object | `{"limits":{"cpu":"100m","memory":"64Mi"},"requests":{"cpu":"10m","memory":"32Mi"}}` | Resources of the Valkey sentinel (`sentinel.enabled`). |
 
 ## Maintainers
 

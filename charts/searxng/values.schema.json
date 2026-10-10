@@ -102,6 +102,13 @@
     "tolerations": { "type": "array", "items": { "type": "object" } },
     "extraVolumes": { "type": "array", "items": { "type": "object" } },
     "extraVolumeMounts": { "type": "array", "items": { "type": "object" } },
+    "valkey": {
+      "description": "valkey subchart values.",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" }
+      }
+    },
     "extraObjects": { "type": "array" }
   }
 }

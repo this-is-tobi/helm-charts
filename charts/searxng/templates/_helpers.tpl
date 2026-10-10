@@ -87,6 +87,52 @@ Name of the Secret holding the SearXNG secret key.
 
 
 {{/*
+Service of the valkey subchart: the name its fullname helper gives it (also the name of its Secret).
+*/}}
+{{- define "searxng.valkeyHost" -}}
+{{- if .Values.valkey.fullnameOverride }}
+{{- .Values.valkey.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := .Values.valkey.nameOverride | default "valkey" }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+
+{{/*
+Port of the valkey subchart's service.
+*/}}
+{{- define "searxng.valkeyPort" -}}
+{{- dig "service" "port" 6379 .Values.valkey }}
+{{- end }}
+
+
+{{/*
+Secret and key of the Valkey password: the subchart's own Secret unless valkey.auth.existingSecret is set.
+*/}}
+{{- define "searxng.valkeySecretName" -}}
+{{- with dig "auth" "existingSecret" "" .Values.valkey }}{{ tpl . $ }}{{ else }}{{ include "searxng.valkeyHost" . }}{{ end }}
+{{- end }}
+
+{{- define "searxng.valkeyPasswordKey" -}}
+{{- if dig "auth" "existingSecret" "" .Values.valkey }}{{ dig "auth" "existingSecretPasswordKey" "password" .Values.valkey }}{{ else }}password{{ end }}
+{{- end }}
+
+
+{{/*
+SEARXNG_VALKEY_URL: the subchart's service, with the password Kubernetes expands from VALKEY_PASSWORD.
+*/}}
+{{- define "searxng.valkeyUrl" -}}
+{{- $credentials := ternary ":$(VALKEY_PASSWORD)@" "" (dig "auth" "enabled" true .Values.valkey) }}
+{{- printf "valkey://%s%s:%s/0" $credentials (include "searxng.valkeyHost" .) (include "searxng.valkeyPort" .) }}
+{{- end }}
+
+
+{{/*
 settings.yml content, always with use_default_settings: without it SearXNG takes the file as its
 complete settings and fails on every setting left out.
 */}}

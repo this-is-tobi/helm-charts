@@ -1,7 +1,7 @@
 global:
   compatibility:
     openshift:
-      # -- Drop `runAsUser`, `runAsGroup` and `fsGroup` from the security contexts so that OpenShift's SCC assigns them from the namespace range (it rejects pods that set others): `auto` when the cluster serves `security.openshift.io/v1`, `force` always, `disabled` never.
+      # -- Drop `runAsUser`, `runAsGroup` and `fsGroup` from the security contexts so that OpenShift's SCC assigns them from the namespace range (it rejects pods that set others): `auto` when the cluster serves `security.openshift.io/v1`, `force` always, `disabled` never. The valkey subchart adapts itself when it detects OpenShift (`route.openshift.io/v1`); with `force` elsewhere, also set `valkey.targetPlatform: openshift`.
       adaptSecurityContext: auto
 
 # -- Override the chart name (used in resource naming).
@@ -131,6 +131,66 @@ tolerations: []
 extraVolumes: []
 # -- Extra volume mounts of the SearXNG container.
 extraVolumeMounts: []
+
+valkey:
+  # -- Deploy Valkey (the [CloudPirates chart](https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey)) and point SearXNG at it: `SEARXNG_VALKEY_URL`, with the password of the Valkey Secret, takes precedence over `settings.valkey.url`. SearXNG needs Valkey for its limiter (`settings.server.limiter`) and bot detection, and connects to it once at startup, so an init container waits for it. Any other key configures the subchart.
+  enabled: false
+  auth:
+    # -- Existing Secret holding the Valkey password (key `auth.existingSecretPasswordKey`). When empty, the subchart creates one with a random password and keeps it across upgrades; tools that render without cluster access (Argo CD) would generate a new one on every render.
+    existingSecret: ""
+  # -- Valkey pod security context: the subchart's fsGroup plus the seccomp profile Pod Security `restricted` requires.
+  podSecurityContext:
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  persistence:
+    # -- Persist Valkey's data. It only holds SearXNG's limiter counters and cache.
+    enabled: false
+  # -- Valkey resources (the subchart sets none; quotas and policy engines usually require them).
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  # The subchart sets no resources on its optional containers either; each uses under 25Mi.
+  initContainer:
+    # -- Resources of the Valkey init container (`architecture: replication`).
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
+  metrics:
+    # -- Resources of the Valkey metrics exporter (`metrics.enabled`).
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
+  sentinel:
+    # -- Resources of the Valkey sentinel (`sentinel.enabled`).
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
+    masterProxy:
+      # -- Resources of the sentinel's HAProxy master proxy (`sentinel.masterProxy.enabled`).
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
 
 # -- Extra objects to deploy with the release (rendered with `tpl`).
 extraObjects: []
