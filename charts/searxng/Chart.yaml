@@ -1,0 +1,32 @@
+apiVersion: v2
+name: searxng
+type: application
+version: 0.1.0
+appVersion: "2026.9.8-3fdc6d753"
+description: Secure, plug-and-play Helm chart for SearXNG, the privacy-respecting metasearch engine.
+# Floor set by the APIs the chart renders (autoscaling/v2, policy/v1) and by the `restricted` Pod
+# Security Standard the pod is built to meet.
+kubeVersion: ">=1.25.0-0"
+home: https://github.com/searxng/searxng
+deprecated: false
+annotations:
+  artifacthub.io/license: MIT
+  artifacthub.io/changes: |
+    - kind: added
+      description: Initial release (SearXNG 2026.9.8-3fdc6d753)
+  artifacthub.io/images: |
+    - name: searxng
+      image: docker.io/searxng/searxng:2026.9.8-3fdc6d753
+keywords:
+- searxng
+- search
+- metasearch
+- privacy
+dependencies: []
+sources:
+- https://github.com/this-is-tobi/helm-charts
+- https://github.com/searxng/searxng
+maintainers:
+- name: this-is-tobi
+  email: this-is-tobi@proton.me
+  url: https://this-is-tobi.com

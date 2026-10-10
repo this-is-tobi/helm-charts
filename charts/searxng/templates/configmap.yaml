@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "searxng.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "searxng.labels" . | nindent 4 }}
+data:
+  settings.yml: |
+    {{- include "searxng.settings" . | nindent 4 }}
+  {{- range $name, $content := .Values.extraConfigFiles }}
+  {{ $name }}: |
+    {{- $content | nindent 4 }}
+  {{- end }}

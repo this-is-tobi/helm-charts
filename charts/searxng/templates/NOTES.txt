@@ -1,0 +1,13 @@
+SearXNG {{ .Chart.AppVersion }} is installed in namespace {{ .Release.Namespace }}.
+
+Reach it from your machine:
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "searxng.fullname" . }} 8080:{{ .Values.service.port }}
+
+then browse http://localhost:8080.
+{{- if not .Values.secret.existingSecret }}
+
+The secret key lives in Secret {{ include "searxng.fullname" . }} and is kept across upgrades. Tools that
+render the chart without cluster access (Argo CD) generate a new one on every render: give them an
+existing Secret with `secret.existingSecret`.
+{{- end }}

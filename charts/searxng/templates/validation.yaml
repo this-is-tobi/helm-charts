@@ -1,0 +1,13 @@
+{{- /*
+Values validation only - renders no resource. Fails at template time on combinations the API server
+would accept but SearXNG would not run with.
+*/ -}}
+{{- if eq (toString (get .Values.settings "use_default_settings")) "false" }}
+{{- fail "settings.use_default_settings must stay true (or SearXNG's map form): without it SearXNG takes settings as a complete file and fails on every setting left out" }}
+{{- end }}
+{{- if hasKey .Values.extraConfigFiles "settings.yml" }}
+{{- fail "extraConfigFiles cannot hold settings.yml: the chart renders it from settings" }}
+{{- end }}
+{{- if and .Values.image.digest (not (regexMatch "^sha256:[a-f0-9]{64}$" .Values.image.digest)) }}
+{{- fail (printf "image.digest must be a full digest such as \"sha256:<64 hex>\", got %q" .Values.image.digest) }}
+{{- end }}

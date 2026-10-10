@@ -1,0 +1,130 @@
+# -- Override the chart name (used in resource naming).
+nameOverride: ""
+# -- Override the full resource name (release-name + chart-name).
+fullnameOverride: ""
+
+image:
+  # -- SearXNG image registry.
+  registry: docker.io
+  # -- SearXNG image repository.
+  repository: searxng/searxng
+  # -- SearXNG image tag. Defaults to the chart appVersion.
+  tag: ""
+  # -- SearXNG image digest (`sha256:...`). Takes precedence over the tag.
+  digest: ""
+  # -- SearXNG image pull policy.
+  pullPolicy: IfNotPresent
+
+# -- Image pull secrets.
+imagePullSecrets: []
+
+# -- SearXNG replicas. They all share the secret key below.
+replicaCount: 1
+
+# -- SearXNG settings, rendered to `/etc/searxng/settings.yml` on top of SearXNG's own defaults: set only what you change. The chart sets `use_default_settings: true`; give it SearXNG's map form to keep or remove default engines (e.g. `use_default_settings.engines.keep_only`). The secret key comes from `secret`. See https://docs.searxng.org/admin/settings/.
+settings: {}
+
+# -- Extra files rendered next to `settings.yml` in `/etc/searxng`, by file name (e.g. `limiter.toml`, `favicons.toml`).
+extraConfigFiles: {}
+
+secret:
+  # -- Existing Secret holding the SearXNG secret key (`server.secret_key`). When empty, the chart creates one with a random key and keeps it across upgrades. Tools that render without cluster access (Argo CD) would generate a new key on every render: give them an existing Secret.
+  existingSecret: ""
+  # -- Key of the secret key in the Secret.
+  key: secret-key
+
+# -- Extra SearXNG environment variables.
+env: []
+# -- Extra SearXNG environment variables from ConfigMaps or Secrets.
+envFrom: []
+
+service:
+  # -- Service type.
+  type: ClusterIP
+  # -- Service port.
+  port: 8080
+  # -- Service annotations.
+  annotations: {}
+
+serviceAccount:
+  # -- Create the ServiceAccount.
+  create: true
+  # -- ServiceAccount name. Defaults to the fullname, or `default` when not created.
+  name: ""
+  # -- ServiceAccount annotations.
+  annotations: {}
+  # -- Mount the ServiceAccount token in the pod. SearXNG never calls the Kubernetes API.
+  automount: false
+
+# -- Pod annotations.
+podAnnotations: {}
+# -- Pod labels.
+podLabels: {}
+
+# -- Pod security context (Pod Security `restricted`). 977 is the image's `searxng` user.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 977
+  runAsGroup: 977
+  fsGroup: 977
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Container security context (Pod Security `restricted`, read-only root filesystem: SearXNG only writes to an emptyDir on `/tmp`).
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+    - ALL
+
+# -- Startup probe: gives the first start up to two minutes without delaying the other probes.
+startupProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  periodSeconds: 5
+  failureThreshold: 24
+# -- Readiness probe. `/healthz` goes through SearXNG's request setup, so a broken configuration fails it, without rendering a page.
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  periodSeconds: 10
+  timeoutSeconds: 5
+# -- Liveness probe.
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# -- Resources. One SearXNG worker uses about 130Mi once warm.
+resources:
+  requests:
+    cpu: 50m
+    memory: 160Mi
+  limits:
+    cpu: "1"
+    memory: 512Mi
+
+# -- Deployment strategy.
+strategy: {}
+# -- Priority class.
+priorityClassName: ""
+# -- Node selector.
+nodeSelector: {}
+# -- Affinity.
+affinity: {}
+# -- Tolerations.
+tolerations: []
+
+# -- Extra volumes.
+extraVolumes: []
+# -- Extra volume mounts of the SearXNG container.
+extraVolumeMounts: []
+
+# -- Extra objects to deploy with the release (rendered with `tpl`).
+extraObjects: []
