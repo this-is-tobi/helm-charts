@@ -11,7 +11,22 @@
     }
   },
   "properties": {
-    "global": { "type": "object" },
+    "global": {
+      "type": "object",
+      "properties": {
+        "compatibility": {
+          "type": "object",
+          "properties": {
+            "openshift": {
+              "type": "object",
+              "properties": {
+                "adaptSecurityContext": { "type": "string", "enum": ["auto", "force", "disabled"] }
+              }
+            }
+          }
+        }
+      }
+    },
     "nameOverride": { "type": "string" },
     "fullnameOverride": { "type": "string" },
     "enabled": {

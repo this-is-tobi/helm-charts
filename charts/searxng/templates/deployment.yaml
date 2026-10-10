@@ -38,9 +38,9 @@ spec:
       {{- with .Values.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
-      {{- with .Values.podSecurityContext }}
+      {{- with include "searxng.securityContext" (dict "context" .Values.podSecurityContext "root" $) }}
       securityContext:
-        {{- toYaml . | nindent 8 }}
+        {{- . | nindent 8 }}
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -87,9 +87,9 @@ spec:
         livenessProbe:
           {{- toYaml . | nindent 10 }}
         {{- end }}
-        {{- with .Values.securityContext }}
+        {{- with include "searxng.securityContext" (dict "context" .Values.securityContext "root" $) }}
         securityContext:
-          {{- toYaml . | nindent 10 }}
+          {{- . | nindent 10 }}
         {{- end }}
         {{- with .Values.resources }}
         resources:

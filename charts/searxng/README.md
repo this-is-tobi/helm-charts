@@ -12,6 +12,7 @@ Kubernetes: `>=1.25.0-0`
 
 - **Plug and play**: the defaults run SearXNG with its own default settings and a generated secret key; `settings` only holds what you change.
 - **Secured**: the pod meets the Pod Security `restricted` profile (non-root, read-only root filesystem, no privilege escalation, all capabilities dropped, seccomp, resource requests and limits) and gets no ServiceAccount token.
+- **OpenShift ready**: on OpenShift, the fixed user and group IDs are left to the SCC.
 
 ## Installing the Chart
 
@@ -94,6 +95,10 @@ SearXNG signs its sessions and image proxy URLs and encrypts its cache with `ser
 kubectl -n searxng create secret generic searxng-secret --from-literal=secret-key="$(openssl rand -hex 32)"
 ```
 
+## OpenShift
+
+OpenShift's restricted SCCs assign the user, group and fsGroup from the namespace's range and reject pods that set others. With `global.compatibility.openshift.adaptSecurityContext: auto` (the default), the chart drops `runAsUser`, `runAsGroup` and `fsGroup` from its security contexts when the cluster serves `security.openshift.io/v1`; `force` drops them anywhere (for platforms that inject IDs the same way), `disabled` keeps them. SearXNG runs with any UID and GID 0: it only writes to its `/tmp` emptyDir.
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -106,6 +111,7 @@ kubectl -n searxng create secret generic searxng-secret --from-literal=secret-ke
 | extraVolumeMounts | list | `[]` | Extra volume mounts of the SearXNG container. |
 | extraVolumes | list | `[]` | Extra volumes. |
 | fullnameOverride | string | `""` | Override the full resource name (release-name + chart-name). |
+| global.compatibility.openshift.adaptSecurityContext | string | `"auto"` | Drop `runAsUser`, `runAsGroup` and `fsGroup` from the security contexts so that OpenShift's SCC assigns them from the namespace range (it rejects pods that set others): `auto` when the cluster serves `security.openshift.io/v1`, `force` always, `disabled` never. |
 | image.digest | string | `""` | SearXNG image digest (`sha256:...`). Takes precedence over the tag. |
 | image.pullPolicy | string | `"IfNotPresent"` | SearXNG image pull policy. |
 | image.registry | string | `"docker.io"` | SearXNG image registry. |
