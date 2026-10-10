@@ -6,6 +6,8 @@
 
 {{ template "chart.kubeVersionLine" . }}
 
+{{ template "chart.requirementsSection" . }}
+
 ## Overview
 
 [SearXNG](https://github.com/searxng/searxng) is a metasearch engine: it queries many search engines and aggregates their results without tracking its users. This chart deploys it with safe defaults.
@@ -13,6 +15,7 @@
 - **Plug and play**: the defaults run SearXNG with its own default settings and a generated secret key; `settings` only holds what you change.
 - **Secured**: the pod meets the Pod Security `restricted` profile (non-root, read-only root filesystem, no privilege escalation, all capabilities dropped, seccomp, resource requests and limits) and gets no ServiceAccount token.
 - **OpenShift ready**: on OpenShift, the fixed user and group IDs are left to the SCC.
+- **Valkey on demand**: one value adds Valkey for SearXNG's limiter and bot detection.
 
 ## Installing the Chart
 
@@ -95,9 +98,30 @@ SearXNG signs its sessions and image proxy URLs and encrypts its cache with `ser
 kubectl -n searxng create secret generic searxng-secret --from-literal=secret-key="$(openssl rand -hex 32)"
 ```
 
+## Valkey and the limiter
+
+With `valkey.enabled`, the chart deploys [Valkey](https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey) (password authentication on, no volume) and points SearXNG at it with `SEARXNG_VALKEY_URL`, built from the Valkey service and the password of its Secret. SearXNG uses it for its bot detection and its [limiter](https://docs.searxng.org/admin/searx.limiter.html), and connects to it once, at startup: a `wait-for-valkey` init container holds SearXNG until Valkey answers.
+
+The subchart generates the password and keeps it across upgrades. Tools that render without cluster access (Argo CD) would generate a new one on every render: give them an existing Secret with `valkey.auth.existingSecret` (key `valkey.auth.existingSecretPasswordKey`), whose password must stay URL-safe.
+
+The limiter stays off until `settings.server.limiter: true`. It then answers `429` to the requests its bot detection does not trust, which includes clients calling SearXNG directly (an Open WebUI web search, for instance): keep it off for those. Behind an ingress, list the ingress controller's addresses in `botdetection.trusted_proxies` (`extraConfigFiles."limiter.toml"`), so that SearXNG takes the client address from `X-Forwarded-For` instead of limiting every user as the ingress.
+
+```yaml
+valkey:
+  enabled: true
+settings:
+  server:
+    limiter: true
+extraConfigFiles:
+  limiter.toml: |
+    [botdetection]
+    # The ingress controller's pod network.
+    trusted_proxies = ["10.42.0.0/16"]
+```
+
 ## OpenShift
 
-OpenShift's restricted SCCs assign the user, group and fsGroup from the namespace's range and reject pods that set others. With `global.compatibility.openshift.adaptSecurityContext: auto` (the default), the chart drops `runAsUser`, `runAsGroup` and `fsGroup` from its security contexts when the cluster serves `security.openshift.io/v1`; `force` drops them anywhere (for platforms that inject IDs the same way), `disabled` keeps them. SearXNG runs with any UID and GID 0: it only writes to its `/tmp` emptyDir.
+OpenShift's restricted SCCs assign the user, group and fsGroup from the namespace's range and reject pods that set others. With `global.compatibility.openshift.adaptSecurityContext: auto` (the default), the chart drops `runAsUser`, `runAsGroup` and `fsGroup` from its security contexts when the cluster serves `security.openshift.io/v1`; `force` drops them anywhere (for platforms that inject IDs the same way), `disabled` keeps them. SearXNG runs with any UID and GID 0: it only writes to its `/tmp` emptyDir. The valkey subchart adapts itself when it detects OpenShift (`route.openshift.io/v1`); with `force` elsewhere, also set `valkey.targetPlatform: openshift`.
 
 {{ template "chart.valuesSection" . }}
 

@@ -54,6 +54,25 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.valkey.enabled }}
+      initContainers:
+      # SearXNG connects to Valkey once, at startup: without it, it runs without its limiter until restarted.
+      - name: wait-for-valkey
+        image: {{ include "searxng.image" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+        - sh
+        - -c
+        - until nc -w 2 {{ include "searxng.valkeyHost" . }} {{ include "searxng.valkeyPort" . }} </dev/null; do echo "waiting for valkey"; sleep 2; done
+        {{- with include "searxng.securityContext" (dict "context" .Values.securityContext "root" $) }}
+        securityContext:
+          {{- . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       containers:
       - name: searxng
         image: {{ include "searxng.image" . }}
@@ -64,6 +83,17 @@ spec:
             secretKeyRef:
               name: {{ include "searxng.secretName" . }}
               key: {{ .Values.secret.key }}
+        {{- if .Values.valkey.enabled }}
+        {{- if dig "auth" "enabled" true .Values.valkey }}
+        - name: VALKEY_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "searxng.valkeySecretName" . }}
+              key: {{ include "searxng.valkeyPasswordKey" . }}
+        {{- end }}
+        - name: SEARXNG_VALKEY_URL
+          value: {{ include "searxng.valkeyUrl" . | quote }}
+        {{- end }}
         {{- with .Values.env }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
