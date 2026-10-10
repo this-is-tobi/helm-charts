@@ -1,0 +1,108 @@
+{{ template "chart.header" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.kubeVersionLine" . }}
+
+## Overview
+
+[SearXNG](https://github.com/searxng/searxng) is a metasearch engine: it queries many search engines and aggregates their results without tracking its users. This chart deploys it with safe defaults.
+
+- **Plug and play**: the defaults run SearXNG with its own default settings and a generated secret key; `settings` only holds what you change.
+- **Secured**: the pod meets the Pod Security `restricted` profile (non-root, read-only root filesystem, no privilege escalation, all capabilities dropped, seccomp, resource requests and limits) and gets no ServiceAccount token.
+
+## Installing the Chart
+
+**Using Traditional Helm Repository:**
+```sh
+helm repo add tobi https://this-is-tobi.github.io/helm-charts
+helm repo update
+helm install searxng tobi/{{ template "chart.name" . }} --namespace searxng --create-namespace
+```
+
+**Using OCI Registry (Recommended):**
+```sh
+helm install searxng oci://ghcr.io/this-is-tobi/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }} \
+  --namespace searxng --create-namespace
+```
+
+### ArgoCD
+
+Argo CD renders the chart without cluster access, so the chart cannot keep a generated secret key: give it an existing Secret (see [Secret key](#secret-key)).
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: searxng
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: searxng
+  sources:
+  - repoURL: ghcr.io/this-is-tobi/helm-charts
+    chart: {{ template "chart.name" . }}
+    targetRevision: {{ template "chart.version" . }}
+    helm:
+      releaseName: searxng
+      values: |
+        secret:
+          existingSecret: searxng-secret
+```
+
+## Settings
+
+`settings` is rendered to `/etc/searxng/settings.yml` with `use_default_settings: true`: SearXNG loads its own defaults first and applies yours on top, so only set what differs. See the [settings reference](https://docs.searxng.org/admin/settings/).
+
+```yaml
+settings:
+  general:
+    instance_name: My search
+  search:
+    # Clients such as Open WebUI query SearXNG for JSON results.
+    formats:
+    - html
+    - json
+  server:
+    base_url: https://search.example.com/
+```
+
+To keep or remove some of SearXNG's default engines, give `use_default_settings` SearXNG's map form (engines you define under `engines` are added to the ones kept):
+
+```yaml
+settings:
+  use_default_settings:
+    engines:
+      keep_only:
+      - duckduckgo
+      - wikipedia
+```
+
+Other configuration files (`limiter.toml`, `favicons.toml`, ...) go under `extraConfigFiles`, by file name; they are mounted next to `settings.yml`. The root filesystem is read-only and `/tmp` is the only writable path: keep cache files there (`favicons.toml`'s `db_url` defaults to `/tmp/faviconcache.db`), or mount a volume with `extraVolumes` and `extraVolumeMounts`.
+
+## Secret key
+
+SearXNG signs its sessions and image proxy URLs and encrypts its cache with `server.secret_key`, so every replica needs the same key and it must not change. The chart passes it in the `SEARXNG_SECRET` environment variable, from:
+
+- a Secret the chart creates with a random key, reused on every upgrade (Helm reads it back from the cluster);
+- or `secret.existingSecret` (key `secret.key`), required for tools that render without cluster access such as Argo CD, which would otherwise get a new key on every render.
+
+```sh
+kubectl -n searxng create secret generic searxng-secret --from-literal=secret-key="$(openssl rand -hex 32)"
+```
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+## Sources
+
+{{ template "chart.homepageLine" . }}
+
+**Source code:**
+{{ template "chart.sourcesList" . }}
+
+{{ template "helm-docs.versionFooter" . }}

@@ -1,0 +1,156 @@
+# searxng
+
+![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2026.9.8-3fdc6d753](https://img.shields.io/badge/AppVersion-2026.9.8--3fdc6d753-informational?style=flat-square)
+
+Secure, plug-and-play Helm chart for SearXNG, the privacy-respecting metasearch engine.
+
+Kubernetes: `>=1.25.0-0`
+
+## Overview
+
+[SearXNG](https://github.com/searxng/searxng) is a metasearch engine: it queries many search engines and aggregates their results without tracking its users. This chart deploys it with safe defaults.
+
+- **Plug and play**: the defaults run SearXNG with its own default settings and a generated secret key; `settings` only holds what you change.
+- **Secured**: the pod meets the Pod Security `restricted` profile (non-root, read-only root filesystem, no privilege escalation, all capabilities dropped, seccomp, resource requests and limits) and gets no ServiceAccount token.
+
+## Installing the Chart
+
+**Using Traditional Helm Repository:**
+```sh
+helm repo add tobi https://this-is-tobi.github.io/helm-charts
+helm repo update
+helm install searxng tobi/searxng --namespace searxng --create-namespace
+```
+
+**Using OCI Registry (Recommended):**
+```sh
+helm install searxng oci://ghcr.io/this-is-tobi/helm-charts/searxng --version 0.1.0 \
+  --namespace searxng --create-namespace
+```
+
+### ArgoCD
+
+Argo CD renders the chart without cluster access, so the chart cannot keep a generated secret key: give it an existing Secret (see [Secret key](#secret-key)).
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: searxng
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: searxng
+  sources:
+  - repoURL: ghcr.io/this-is-tobi/helm-charts
+    chart: searxng
+    targetRevision: 0.1.0
+    helm:
+      releaseName: searxng
+      values: |
+        secret:
+          existingSecret: searxng-secret
+```
+
+## Settings
+
+`settings` is rendered to `/etc/searxng/settings.yml` with `use_default_settings: true`: SearXNG loads its own defaults first and applies yours on top, so only set what differs. See the [settings reference](https://docs.searxng.org/admin/settings/).
+
+```yaml
+settings:
+  general:
+    instance_name: My search
+  search:
+    # Clients such as Open WebUI query SearXNG for JSON results.
+    formats:
+    - html
+    - json
+  server:
+    base_url: https://search.example.com/
+```
+
+To keep or remove some of SearXNG's default engines, give `use_default_settings` SearXNG's map form (engines you define under `engines` are added to the ones kept):
+
+```yaml
+settings:
+  use_default_settings:
+    engines:
+      keep_only:
+      - duckduckgo
+      - wikipedia
+```
+
+Other configuration files (`limiter.toml`, `favicons.toml`, ...) go under `extraConfigFiles`, by file name; they are mounted next to `settings.yml`. The root filesystem is read-only and `/tmp` is the only writable path: keep cache files there (`favicons.toml`'s `db_url` defaults to `/tmp/faviconcache.db`), or mount a volume with `extraVolumes` and `extraVolumeMounts`.
+
+## Secret key
+
+SearXNG signs its sessions and image proxy URLs and encrypts its cache with `server.secret_key`, so every replica needs the same key and it must not change. The chart passes it in the `SEARXNG_SECRET` environment variable, from:
+
+- a Secret the chart creates with a random key, reused on every upgrade (Helm reads it back from the cluster);
+- or `secret.existingSecret` (key `secret.key`), required for tools that render without cluster access such as Argo CD, which would otherwise get a new key on every render.
+
+```sh
+kubectl -n searxng create secret generic searxng-secret --from-literal=secret-key="$(openssl rand -hex 32)"
+```
+
+## Values
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| affinity | object | `{}` | Affinity. |
+| env | list | `[]` | Extra SearXNG environment variables. |
+| envFrom | list | `[]` | Extra SearXNG environment variables from ConfigMaps or Secrets. |
+| extraConfigFiles | object | `{}` | Extra files rendered next to `settings.yml` in `/etc/searxng`, by file name (e.g. `limiter.toml`, `favicons.toml`). |
+| extraObjects | list | `[]` | Extra objects to deploy with the release (rendered with `tpl`). |
+| extraVolumeMounts | list | `[]` | Extra volume mounts of the SearXNG container. |
+| extraVolumes | list | `[]` | Extra volumes. |
+| fullnameOverride | string | `""` | Override the full resource name (release-name + chart-name). |
+| image.digest | string | `""` | SearXNG image digest (`sha256:...`). Takes precedence over the tag. |
+| image.pullPolicy | string | `"IfNotPresent"` | SearXNG image pull policy. |
+| image.registry | string | `"docker.io"` | SearXNG image registry. |
+| image.repository | string | `"searxng/searxng"` | SearXNG image repository. |
+| image.tag | string | `""` | SearXNG image tag. Defaults to the chart appVersion. |
+| imagePullSecrets | list | `[]` | Image pull secrets. |
+| livenessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/healthz","port":"http"},"periodSeconds":20,"timeoutSeconds":5}` | Liveness probe. |
+| nameOverride | string | `""` | Override the chart name (used in resource naming). |
+| nodeSelector | object | `{}` | Node selector. |
+| podAnnotations | object | `{}` | Pod annotations. |
+| podLabels | object | `{}` | Pod labels. |
+| podSecurityContext | object | `{"fsGroup":977,"runAsGroup":977,"runAsNonRoot":true,"runAsUser":977,"seccompProfile":{"type":"RuntimeDefault"}}` | Pod security context (Pod Security `restricted`). 977 is the image's `searxng` user. |
+| priorityClassName | string | `""` | Priority class. |
+| readinessProbe | object | `{"httpGet":{"path":"/healthz","port":"http"},"periodSeconds":10,"timeoutSeconds":5}` | Readiness probe. `/healthz` goes through SearXNG's request setup, so a broken configuration fails it, without rendering a page. |
+| replicaCount | int | `1` | SearXNG replicas. They all share the secret key below. |
+| resources | object | `{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"50m","memory":"160Mi"}}` | Resources. One SearXNG worker uses about 130Mi once warm. |
+| secret.existingSecret | string | `""` | Existing Secret holding the SearXNG secret key (`server.secret_key`). When empty, the chart creates one with a random key and keeps it across upgrades. Tools that render without cluster access (Argo CD) would generate a new key on every render: give them an existing Secret. |
+| secret.key | string | `"secret-key"` | Key of the secret key in the Secret. |
+| securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true}` | Container security context (Pod Security `restricted`, read-only root filesystem: SearXNG only writes to an emptyDir on `/tmp`). |
+| service.annotations | object | `{}` | Service annotations. |
+| service.port | int | `8080` | Service port. |
+| service.type | string | `"ClusterIP"` | Service type. |
+| serviceAccount.annotations | object | `{}` | ServiceAccount annotations. |
+| serviceAccount.automount | bool | `false` | Mount the ServiceAccount token in the pod. SearXNG never calls the Kubernetes API. |
+| serviceAccount.create | bool | `true` | Create the ServiceAccount. |
+| serviceAccount.name | string | `""` | ServiceAccount name. Defaults to the fullname, or `default` when not created. |
+| settings | object | `{}` | SearXNG settings, rendered to `/etc/searxng/settings.yml` on top of SearXNG's own defaults: set only what you change. The chart sets `use_default_settings: true`; give it SearXNG's map form to keep or remove default engines (e.g. `use_default_settings.engines.keep_only`). The secret key comes from `secret`. See https://docs.searxng.org/admin/settings/. |
+| startupProbe | object | `{"failureThreshold":24,"httpGet":{"path":"/healthz","port":"http"},"periodSeconds":5}` | Startup probe: gives the first start up to two minutes without delaying the other probes. |
+| strategy | object | `{}` | Deployment strategy. |
+| tolerations | list | `[]` | Tolerations. |
+
+## Maintainers
+
+| Name | Email | Url |
+| ---- | ------ | --- |
+| this-is-tobi | <this-is-tobi@proton.me> | <https://this-is-tobi.com> |
+
+## Sources
+
+**Homepage:** <https://github.com/searxng/searxng>
+
+**Source code:**
+
+* <https://github.com/this-is-tobi/helm-charts>
+* <https://github.com/searxng/searxng>
+
+----------------------------------------------
+Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)
