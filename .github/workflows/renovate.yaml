@@ -49,7 +49,7 @@ jobs:
         run: ./ci/scripts/renovate-post-upgrade.sh
 
       - name: Regenerate the docs
-        run: ./ci/scripts/helm-docs.sh --write
+        run: ./ci/scripts/helm-docs.sh
 
       - name: Push the result and start the checks
         env:
@@ -58,7 +58,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Tracked files only: helm-docs leaves its binary in the working tree.
+          # Tracked files only: nothing the job left in the working tree is committed.
           git add -u -- charts template
           if git diff --cached --quiet; then
             echo "Nothing to update"
