@@ -1,0 +1,164 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": [
+    "Tracks what a bot can bump without touching a template: GitHub Actions (pinned by digest, with the version in a comment), the version of the CI tools, and the appVersion of the charts that package one image as is (backup-utils, searxng, homepage), plus the Helm dependencies of every chart.",
+    "Left to hand on purpose: cnpg-cluster, vso-utils and system-upgrade-controller, whose templates and CRDs are written against one version of what they deploy; and the images in values.yaml, which default to appVersion.",
+    "Not config:best-practices: its docker:pinDigests would pin appVersion, a bare tag, to a digest and cannot be switched off per dependency. What applies of it is listed here (config:recommended, the digest pinning of actions, config migration).",
+    "A Renovate pull request on a chart is completed by .github/workflows/renovate.yaml (Artifact Hub changes, images annotation, README): its commits are ignored below so that Renovate keeps rebasing the branch."
+  ],
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigestsToSemver",
+    ":configMigration",
+    ":dependencyDashboard"
+  ],
+  "enabledManagers": [
+    "github-actions",
+    "helmv3",
+    "custom.regex"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore",
+  "prConcurrentLimit": 5,
+  "minimumReleaseAge": "3 days",
+  "internalChecksFilter": "strict",
+  "gitIgnoredAuthors": [
+    "41898282+github-actions[bot]@users.noreply.github.com"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "backup-utils: appVersion is the tag of the backup image, a plain X.Y.Z",
+      "managerFilePatterns": [
+        "/^charts/backup-utils/Chart\\.yaml$/"
+      ],
+      "matchStrings": [
+        "(?:^|\\n)appVersion:\\s*\"?(?<currentValue>[^\"\\s]+)\"?"
+      ],
+      "depNameTemplate": "ghcr.io/this-is-tobi/tools/backup",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "searxng: appVersion is the tag of the SearXNG image, a date and the upstream commit (YYYY.M.D-<sha>). Only the date orders versions: the commit is matched but not captured (a pre-release would make every tag unstable, and Renovate then only follows the same date), so two builds of a day are one version. The tags are listed on GHCR, which holds the same ones with the same digests: Docker Hub refuses to list past its first thousand, and SearXNG has a tag per commit",
+      "managerFilePatterns": [
+        "/^charts/searxng/Chart\\.yaml$/"
+      ],
+      "matchStrings": [
+        "(?:^|\\n)appVersion:\\s*\"?(?<currentValue>[^\"\\s]+)\"?"
+      ],
+      "depNameTemplate": "searxng",
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-[0-9a-f]+$",
+      "packageNameTemplate": "ghcr.io/searxng/searxng"
+    },
+    {
+      "customType": "regex",
+      "description": "homepage: appVersion is the tag of the Homepage image, vX.Y.Z",
+      "managerFilePatterns": [
+        "/^charts/homepage/Chart\\.yaml$/"
+      ],
+      "matchStrings": [
+        "(?:^|\\n)appVersion:\\s*\"?(?<currentValue>[^\"\\s]+)\"?"
+      ],
+      "depNameTemplate": "ghcr.io/gethomepage/homepage",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "ci/scripts: KUBECONFORM_VERSION, written without the v of the release tag",
+      "managerFilePatterns": [
+        "/^ci/scripts/[^/]+\\.sh$/"
+      ],
+      "matchStrings": [
+        "(?:^|\\n)KUBECONFORM_VERSION=\"(?<currentValue>[^\"]+)\""
+      ],
+      "depNameTemplate": "yannh/kubeconform",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "description": "ci/scripts/helm-docs.sh: HELM_DOCS_VERSION, written without the v of the release tag",
+      "managerFilePatterns": [
+        "/^ci/scripts/helm-docs\\.sh$/"
+      ],
+      "matchStrings": [
+        "(?:^|\\n)HELM_DOCS_VERSION=\"(?<currentValue>[^\"]+)\""
+      ],
+      "depNameTemplate": "norwoodj/helm-docs",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "A bump in a chart releases a new chart version, which ct and the release both require: patch for a patch or a digest, major for a major, minor otherwise. The commit is scoped to the chart",
+      "matchFileNames": [
+        "charts/**"
+      ],
+      "semanticCommitScope": "{{lookup (split packageFileDir '/') 1}}",
+      "prBodyNotes": [
+        "A commit from github-actions[bot] follows within a minute: it writes the `artifacthub.io/changes` of the new version, keeps the images annotation in step with `appVersion` and regenerates the README. Review the diff once it is there."
+      ],
+      "bumpVersions": [
+        {
+          "name": "Chart version",
+          "filePatterns": [
+            "/^({{#each (distinct (lookupArray upgrades \"packageFileDir\"))}}{{{lookup (split . \"/\") 0}}}/{{{lookup (split . \"/\") 1}}}{{#unless @last}}|{{/unless}}{{/each}})/Chart\\.ya?ml$/"
+          ],
+          "matchStrings": [
+            "(?:^|\\n)version:\\s*\"?(?<version>\\d+\\.\\d+\\.\\d+)\"?(?:$|\\n)"
+          ],
+          "bumpType": "{{#if (or isPinDigest isPatch)}}patch{{else if isMajor}}major{{else}}minor{{/if}}"
+        }
+      ]
+    },
+    {
+      "description": "Actions and CI tool versions are not chart changes: ci(deps)",
+      "matchFileNames": [
+        ".github/**",
+        "ci/**"
+      ],
+      "semanticCommitType": "ci",
+      "semanticCommitScope": "deps"
+    },
+    {
+      "description": "A major update can break what runs on it: label it and read the release notes first. Never merged without a review, as nothing is",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "labels": [
+        "dependencies",
+        "major"
+      ],
+      "prBodyNotes": [
+        "Major update: read the release notes for breaking changes before merging."
+      ]
+    },
+    {
+      "description": "SearXNG is a rolling release (a tag per upstream commit, several a day): one pull request a month instead of one a week",
+      "matchDepNames": [
+        "docker.io/searxng/searxng"
+      ],
+      "schedule": [
+        "on the first day of the month"
+      ]
+    },
+    {
+      "description": "The valkey subchart's default image is listed in searxng's artifacthub.io/images, pinned by digest: it moves with the subchart, by hand",
+      "matchManagers": [
+        "helmv3"
+      ],
+      "matchFileNames": [
+        "charts/searxng/Chart.yaml"
+      ],
+      "prBodyNotes": [
+        "- [ ] set the `docker.io/valkey/valkey` image of `artifacthub.io/images` to the one the new subchart defaults to (`image` in its values), digest included"
+      ]
+    }
+  ]
+}
