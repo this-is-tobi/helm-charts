@@ -1,0 +1,72 @@
+name: Renovate post-upgrade
+
+# Renovate bumps the version of a chart, but cannot write what derives from the change: the Artifact Hub
+# changes of the new version, the images annotation, and the README.md that helm-docs generates. This job adds
+# them to the pull request in one commit, so that it passes the same checks as any other.
+#
+# No secret and no GitHub App: the job pushes with the token of the workflow, which cannot start the checks of
+# the pull request, so it starts the CI workflow on the branch itself (workflow_dispatch is the one event a
+# GITHUB_TOKEN may trigger). Renovate keeps rebasing the branch: it ignores the commits of github-actions[bot]
+# (gitIgnoredAuthors in renovate.json), and the job runs again on its new commit.
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'charts/**'
+      - 'ci/scripts/helm-docs.sh'
+
+permissions: {}
+
+concurrency:
+  group: renovate-post-upgrade-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  post-upgrade:
+    name: Update the chart changes and docs
+    # The branches of Renovate in this repository only: the pull request of a fork never reaches the write token.
+    if: github.event.pull_request.user.login == 'renovate[bot]' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write  # push the commit to the branch of Renovate
+      actions: write   # start the CI workflow on it
+    steps:
+      - name: Checks-out the branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      # The title of the pull request is data from a bot's branch: it only reaches the script as a variable.
+      - name: Update the Artifact Hub changes and images
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: ./ci/scripts/renovate-post-upgrade.sh
+
+      - name: Regenerate the docs
+        run: ./ci/scripts/helm-docs.sh --write
+
+      - name: Push the result and start the checks
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+
+          # Tracked files only: helm-docs leaves its binary in the working tree.
+          git add -u -- charts template
+          if git diff --cached --quiet; then
+            echo "Nothing to update"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --message "chore: update the chart changes and docs"
+          git push origin "HEAD:refs/heads/${HEAD_REF}"
+          gh workflow run ci.yaml --ref "${HEAD_REF}"

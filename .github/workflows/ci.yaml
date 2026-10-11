@@ -10,6 +10,8 @@ on:
     paths:
       - 'charts/**'
       - 'template/**'
+      - 'ci/**'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 jobs:
@@ -142,3 +144,14 @@ jobs:
 
       - name: Run helm-docs
         run: ./ci/scripts/helm-docs.sh
+
+  test-renovate:
+    if: ${{ !github.event.pull_request.draft }}
+    name: Test Renovate post-upgrade script
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checks-out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Run script checks
+        run: ./ci/scripts/test-renovate-post-upgrade.sh
