@@ -69,6 +69,8 @@ helm install --verify <release-name> <chart-name>
 
 OCI artifacts are signed using [Cosign](https://docs.sigstore.dev/cosign/overview/) with keyless signing (OIDC).
 
+The identity of a keyless signature is the workflow that made it, and it changed once: the first versions were signed by this repository's `release.yaml`, the later ones by the shared `attest-helm.yml` of [`this-is-tobi/github-workflows`](https://github.com/this-is-tobi/github-workflows), which now does the release (a shared workflow signs under its own identity, not its caller's). The command below accepts both, so it verifies any version.
+
 ```sh
 # Install cosign (if not already installed)
 # macOS: brew install cosign
@@ -76,7 +78,16 @@ OCI artifacts are signed using [Cosign](https://docs.sigstore.dev/cosign/overvie
 
 # Verify OCI chart signature
 cosign verify \
-  --certificate-identity-regexp="https://github.com/this-is-tobi/helm-charts" \
+  --certificate-identity-regexp='^https://github\.com/this-is-tobi/(helm-charts/\.github/workflows/release\.yaml@refs/heads/main|github-workflows/\.github/workflows/attest-helm\.yml@.+)$' \
+  --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+  ghcr.io/this-is-tobi/helm-charts/<chart-name>:<version>
+```
+
+Versions released through the shared workflows also carry a SLSA build provenance attestation, which says which repository and commit built the chart:
+
+```sh
+cosign verify-attestation --type slsaprovenance1 \
+  --certificate-identity-regexp='^https://github\.com/this-is-tobi/github-workflows/\.github/workflows/attest-helm\.yml@.+$' \
   --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
   ghcr.io/this-is-tobi/helm-charts/<chart-name>:<version>
 ```

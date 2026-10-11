@@ -1,5 +1,11 @@
 name: Release Charts
 
+# The release is the shared workflows' of this-is-tobi/github-workflows, pinned to a release by commit: chart-releaser
+# (the GitHub Releases and the index of the Helm repository on gh-pages, GPG-signed), the push to the OCI registry, then
+# the cosign signature and the build provenance of every chart that was pushed.
+#
+# Signatures made through a shared workflow carry ITS identity, not this repository's: see "Chart Signatures" in the README.
+
 on:
   push:
     branches:
@@ -8,133 +14,43 @@ on:
       - 'charts/**'
   workflow_dispatch:
 
+# One release at a time: two runs would race for the same gh-pages branch and the same tags. A run that is waiting is
+# replaced by a newer one, which is safe: chart-releaser releases everything that changed since the last tag.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions: {}
+
 jobs:
   release:
-    runs-on: ubuntu-latest
+    uses: this-is-tobi/github-workflows/.github/workflows/release-helm.yml@80dd0214fc1657cfb8740fc93d89ce935ca27404 # v0.42.0
     permissions:
       contents: write
       packages: write
-      id-token: write  # Required for OIDC authentication with Sigstore/Cosign
-    steps:
-      - name: Checks-out repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
+    with:
+      CHARTS_DIR: charts
+      CREATE_GITHUB_RELEASE: true
+      PUBLISH_OCI: true
+      # A merge that changes a chart without releasing it (a README, a comment) is not a failed release.
+      SKIP_EXISTING: true
+      SIGN_CHART: true
+      SIGNING_KEY_ID: "Tobi (Helm Charts) <this-is-tobi@proton.me>"
+      # What the charts' dependencies need (vso-utils); the OCI ones (searxng) need none.
+      HELM_REPOS: hashicorp=https://helm.releases.hashicorp.com
+    secrets:
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
-      - name: Install Helm
-        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
-
-      - name: Add Helm repos
-        run: |
-          helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm repo add cnpg https://cloudnative-pg.github.io/charts
-          helm repo add hashicorp https://helm.releases.hashicorp.com
-
-      - name: Import GPG key
-        run: |
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --import --batch --no-tty
-          gpg --list-secret-keys
-          
-          # Export keys in legacy GPG format for Helm compatibility
-          # Per Helm docs: https://helm.sh/docs/topics/provenance/
-          # GPG 2.1+ uses new format (kbx), but Helm requires legacy format with separate files:
-          # - pubring.gpg: public keys only
-          # - secring.gpg: secret keys only
-          gpg --batch --yes --export > "$HOME/.gnupg/pubring.gpg"
-          echo "${{ secrets.GPG_PASSPHRASE }}" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 --export-secret-keys > "$HOME/.gnupg/secring.gpg"
-          
-          # Verify files were created
-          ls -la "$HOME/.gnupg/"
-          
-          # Create passphrase file for helm signing
-          echo "${{ secrets.GPG_PASSPHRASE }}" > /tmp/passphrase.txt
-          chmod 600 /tmp/passphrase.txt
-
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
-        id: chart-releaser
-        with:
-          charts_dir: charts
-          config: ci/configs/cr.yaml
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          CR_KEY: "Tobi (Helm Charts) <this-is-tobi@proton.me>"
-          CR_KEYRING: ~/.gnupg/secring.gpg
-          CR_PASSPHRASE_FILE: /tmp/passphrase.txt
-          CR_SIGN: "true"
-
-      - name: Login to GitHub Container Registry
-        if: steps.chart-releaser.outputs.changed_charts != ''
-        run: |
-          # Login with Helm for pushing charts
-          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
-          # Also login with Docker for Cosign (which uses Docker credentials)
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Install Cosign for OCI signing
-        if: steps.chart-releaser.outputs.changed_charts != ''
-        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
-
-      - name: Publish and sign charts to OCI registry
-        if: steps.chart-releaser.outputs.changed_charts != ''
-        env:
-          COSIGN_EXPERIMENTAL: 1
-          OCI_REPO: oci://ghcr.io/${{ github.repository }}
-        run: |
-          set -euo pipefail
-
-          # nullglob so an unmatched pattern yields an empty array rather than
-          # the literal glob string. The previous `[ ! -f ... ] && continue`
-          # form turned that into a green run that published nothing, even
-          # though this step only runs when chart-releaser reported changed
-          # charts - so an empty set is an anomaly, not something to skip past.
-          shopt -s nullglob
-          chart_packages=(.cr-release-packages/*.tgz)
-
-          if [ ${#chart_packages[@]} -eq 0 ]; then
-            echo "::error::chart-releaser reported changed charts but produced no package in .cr-release-packages"
-            exit 1
-          fi
-
-          for chart_package in "${chart_packages[@]}"; do
-            chart_file=$(basename "$chart_package")
-
-            # Push to GHCR (skip if already exists)
-            echo "Publishing ${chart_file} to OCI registry..."
-            if output=$(helm push "$chart_package" "$OCI_REPO" 2>&1); then
-              echo "$output"
-
-              # Read the reference and digest back from helm's own output
-              # rather than rebuilding them from the file name: stripping the
-              # version with `${chart_file%-*}` breaks on any prerelease
-              # version, where the last dash belongs to the identifier
-              # (my-chart-1.2.3-rc.1.tgz would have signed 'my-chart-1.2.3').
-              reference=$(printf '%s\n' "$output" | awk '/^Pushed:/ { print $2 }')
-              digest=$(printf '%s\n' "$output" | awk '/^Digest:/ { print $2 }')
-
-              # An unsigned chart must never be reported as signed. Without
-              # this the empty-digest case reached `cosign sign ...@` and the
-              # loop still printed the success line, because a failing cosign
-              # was not fatal either.
-              if [ -z "$reference" ] || [ -z "$digest" ]; then
-                echo "::error::could not read the reference and digest of ${chart_file} back from helm push"
-                exit 1
-              fi
-
-              echo "Signing ${reference%:*}@${digest}"
-              cosign sign --yes "${reference%:*}@${digest}"
-
-              echo "✓ Published and signed ${chart_file}"
-            elif echo "$output" | grep -q "already exists\|409"; then
-              echo "⊘ ${chart_file} already exists in OCI registry, skipping"
-            else
-              echo "✗ Failed to push ${chart_file}"
-              echo "$output"
-              exit 1
-            fi
-          done
+  # Nothing to attest (an empty list) is a no-op, so this runs on every release.
+  attest:
+    needs: release
+    uses: this-is-tobi/github-workflows/.github/workflows/attest-helm.yml@80dd0214fc1657cfb8740fc93d89ce935ca27404 # v0.42.0
+    permissions:
+      packages: write
+      id-token: write
+      attestations: write
+    with:
+      CHARTS: ${{ needs.release.outputs.published-charts }}
+      SIGN: true
+      PROVENANCE: true
