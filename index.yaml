@@ -3202,6 +3202,41 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/homarr-0.1.0/homarr-0.1.0.tgz
     version: 0.1.0
+  homepage:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
+          description: initial chart, a hardened port of the UnknownIQ homepage chart
+      artifacthub.io/images: |
+        - name: homepage
+          image: ghcr.io/gethomepage/homepage:v2.4.0
+      artifacthub.io/license: Apache-2.0
+    apiVersion: v2
+    appVersion: v2.4.0
+    created: "2026-10-11T16:11:00.641737729Z"
+    description: Secure, plug-and-play Helm chart for Homepage, the customizable application
+      dashboard, with optional Kubernetes service discovery and built-in authentication.
+    digest: 73f72dc24a9989511613717070c768f8459cc1785b1bd56ea31841417c1e9900
+    home: https://github.com/gethomepage/homepage
+    keywords:
+    - homepage
+    - dashboard
+    - startpage
+    - services
+    - kubernetes
+    kubeVersion: '>=1.25.0-0'
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: homepage
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/gethomepage/homepage
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/homepage-0.1.0/homepage-0.1.0.tgz
+    version: 0.1.0
   searxng:
   - annotations:
       artifacthub.io/changes: |
@@ -3882,4 +3917,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-10-10T15:28:48.320848075Z"
+generated: "2026-10-11T16:11:00.641993108Z"
