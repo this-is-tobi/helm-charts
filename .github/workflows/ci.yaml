@@ -1,5 +1,9 @@
 name: Lint and Test Charts
 
+# What every chart repository needs (chart-testing lint and install, the README check, one aggregated status) is
+# the shared workflows' of this-is-tobi/github-workflows, pinned to a release. What only these charts need (the
+# render and security checks of ci/scripts, their end-to-end runs, the Renovate script) stays here.
+
 on:
   pull_request:
     types:
@@ -14,71 +18,108 @@ on:
       - '.github/workflows/**'
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
-  lint-chart:
+  lint-helm-charts:
     if: ${{ !github.event.pull_request.draft }}
-    name: Lint and test chart
+    uses: this-is-tobi/github-workflows/.github/workflows/lint-helm.yml@37743bff7b56f454ea580cd7423a0dcc75bcd6d1 # v0.41.0
+    permissions:
+      contents: read
+    with:
+      CT_CONF_PATH: ci/configs/chart-testing.yaml
+      LINT_CHARTS: true
+      LINT_DOCS: false
+
+  # The whole repository, not only charts/: the template chart's README is generated too.
+  lint-helm-docs:
+    if: ${{ !github.event.pull_request.draft }}
+    uses: this-is-tobi/github-workflows/.github/workflows/lint-helm.yml@37743bff7b56f454ea580cd7423a0dcc75bcd6d1 # v0.41.0
+    permissions:
+      contents: read
+    with:
+      CT_CONF_PATH: ci/configs/chart-testing.yaml
+      CHARTS_DIR: .
+      HELM_DOCS_VERSION: v1.14.2
+      LINT_CHARTS: false
+      LINT_DOCS: true
+
+  test-helm-charts:
+    if: ${{ !github.event.pull_request.draft }}
+    needs:
+      - lint-helm-charts
+      - lint-helm-docs
+    uses: this-is-tobi/github-workflows/.github/workflows/test-helm.yml@37743bff7b56f454ea580cd7423a0dcc75bcd6d1 # v0.41.0
+    permissions:
+      contents: read
+    with:
+      CT_CONF_PATH: ci/configs/chart-testing.yaml
+
+  # Beyond ct's install and readiness check, a chart can have its own end-to-end run (restricted Pod Security
+  # admission, an OpenShift-like arbitrary UID, upgrades, what the chart wires to...): ci/scripts/test-<chart>.sh --e2e.
+  # A chart is tried when it, or its script, changed against the base branch: no list to maintain.
+  e2e:
+    if: ${{ !github.event.pull_request.draft }}
+    name: Test charts end to end
+    needs:
+      - lint-helm-charts
+      - lint-helm-docs
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checks-out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
+      - name: Select the charts to try
+        id: select
+        env:
+          BASE_REF: ${{ github.base_ref || github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+
+          charts=()
+          for script in ci/scripts/test-*.sh; do
+            chart="${script##*/test-}"
+            chart="${chart%.sh}"
+            [ -d "charts/${chart}" ] || continue
+            if ! git diff --quiet "origin/${BASE_REF}...HEAD" -- "charts/${chart}" "${script}"; then
+              charts+=("${chart}")
+            fi
+          done
+
+          echo "charts=${charts[*]:-}" >> "$GITHUB_OUTPUT"
+          echo "Charts to try end to end: ${charts[*]:-none}"
+
       - name: Set up Helm
+        if: ${{ steps.select.outputs.charts != '' }}
         uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
 
-      - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: '3.13'
-
-      - name: Set up chart-testing
-        uses: helm/chart-testing-action@720270857a28afd41e2426521a7801db09e9b510 # v2.9.0
-            
-      - name: Add Helm repos
-        run: |
-          helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm repo add cnpg https://cloudnative-pg.github.io/charts
-          helm repo add hashicorp https://helm.releases.hashicorp.com
-
-      - name: Run chart-testing (lint)
-        run: ct lint --config ./ci/configs/chart-testing.yaml
-
       - name: Create kind cluster
+        if: ${{ steps.select.outputs.charts != '' }}
         uses: helm/kind-action@1544676c07bb3570fcb70166beaa07c4528fd4aa # v1.15.1
 
-      - name: Run chart-testing (install)
-        run: ct install --config ./ci/configs/chart-testing.yaml
-
-      # Beyond ct's install/readiness check: restricted Pod Security admission, Plan validation
-      # against the real CRD, and one full no-op upgrade Job (cordon, run, uncordon).
-      - name: Run system-upgrade-controller e2e
+      - name: Run the end-to-end checks
+        if: ${{ steps.select.outputs.charts != '' }}
+        env:
+          CHARTS: ${{ steps.select.outputs.charts }}
         run: |
-          if ct list-changed --config ./ci/configs/chart-testing.yaml | grep -qx 'charts/system-upgrade-controller'; then
-            ./ci/scripts/test-system-upgrade-controller.sh --e2e
-          fi
+          set -euo pipefail
 
-      # Beyond ct's install/readiness check: restricted Pod Security admission, an OpenShift-like
-      # arbitrary UID, the secret key across upgrades, and valkey with SearXNG waiting for it at startup.
-      - name: Run searxng e2e
-        run: |
-          if ct list-changed --config ./ci/configs/chart-testing.yaml | grep -qx 'charts/searxng'; then
-            ./ci/scripts/test-searxng.sh --e2e
-          fi
-
-      # Beyond ct's install/readiness check: restricted Pod Security admission, host validation, an
-      # OpenShift-like arbitrary UID, service discovery through the chart's RBAC, and the authentication gate.
-      - name: Run homepage e2e
-        run: |
-          if ct list-changed --config ./ci/configs/chart-testing.yaml | grep -qx 'charts/homepage'; then
-            ./ci/scripts/test-homepage.sh --e2e
-          fi
+          for chart in ${CHARTS}; do
+            echo "::group::${chart}"
+            "./ci/scripts/test-${chart}.sh" --e2e
+            echo "::endgroup::"
+          done
 
   lint-template:
     if: ${{ !github.event.pull_request.draft }}
     name: Lint and render template chart
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checks-out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -96,6 +137,8 @@ jobs:
     if: ${{ !github.event.pull_request.draft }}
     name: Test system-upgrade-controller chart
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checks-out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -110,6 +153,8 @@ jobs:
     if: ${{ !github.event.pull_request.draft }}
     name: Test searxng chart
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checks-out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -124,6 +169,8 @@ jobs:
     if: ${{ !github.event.pull_request.draft }}
     name: Test homepage chart
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checks-out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -134,24 +181,33 @@ jobs:
       - name: Run chart checks
         run: ./ci/scripts/test-homepage.sh
 
-  lint-docs:
-    if: ${{ !github.event.pull_request.draft }}
-    name: Lint docs
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checks-out repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Run helm-docs
-        run: ./ci/scripts/helm-docs.sh
-
   test-renovate:
     if: ${{ !github.event.pull_request.draft }}
     name: Test Renovate post-upgrade script
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checks-out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Run script checks
         run: ./ci/scripts/test-renovate-post-upgrade.sh
+
+  # The one status a ruleset has to require: every job above must have passed (a draft skips them all).
+  all-jobs-passed:
+    name: Check jobs status
+    if: ${{ always() }}
+    needs:
+      - lint-helm-charts
+      - lint-helm-docs
+      - test-helm-charts
+      - e2e
+      - lint-template
+      - test-system-upgrade-controller
+      - test-searxng
+      - test-homepage
+      - test-renovate
+    uses: this-is-tobi/github-workflows/.github/workflows/check-jobs.yml@37743bff7b56f454ea580cd7423a0dcc75bcd6d1 # v0.41.0
+    with:
+      NEEDS: ${{ toJson(needs) }}

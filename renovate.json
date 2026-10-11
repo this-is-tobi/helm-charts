@@ -82,6 +82,18 @@
     },
     {
       "customType": "regex",
+      "description": "ci.yaml: the helm-docs version handed to the shared lint-helm workflow, written with the v of the release tag. It moves with the one of ci/scripts/helm-docs.sh, which regenerates the READMEs this version checks",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/ci\\.yaml$/"
+      ],
+      "matchStrings": [
+        "(?:^|\\n)\\s*HELM_DOCS_VERSION:\\s*(?<currentValue>v[0-9][^\\s]*)"
+      ],
+      "depNameTemplate": "norwoodj/helm-docs",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
       "description": "ci/scripts/helm-docs.sh: HELM_DOCS_VERSION, written without the v of the release tag",
       "managerFilePatterns": [
         "/^ci/scripts/helm-docs\\.sh$/"
