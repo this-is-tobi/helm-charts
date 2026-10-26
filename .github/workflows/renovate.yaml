@@ -4,10 +4,11 @@ name: Renovate post-upgrade
 # changes of the new version, the images annotation, and the README.md that helm-docs generates. This job adds
 # them to the pull request in one commit, so that it passes the same checks as any other.
 #
-# No secret and no GitHub App: the job pushes with the token of the workflow, which cannot start the checks of
-# the pull request, so it starts the CI workflow on the branch itself (workflow_dispatch is the one event a
-# GITHUB_TOKEN may trigger). Renovate keeps rebasing the branch: it ignores the commits of github-actions[bot]
-# (gitIgnoredAuthors in renovate.json), and the job runs again on its new commit.
+# The job pushes with a GitHub App token, not with the token of the workflow: a push with GITHUB_TOKEN starts no
+# checks of the pull request (or holds them until someone approves them), while the push of an App starts them
+# like the one of Renovate itself. Renovate keeps rebasing the branch: it ignores the commits of
+# github-actions[bot] (gitIgnoredAuthors in renovate.json), and the job runs again on the new commit, finds
+# nothing to update and stops.
 
 on:
   pull_request:
@@ -31,14 +32,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: write  # push the commit to the branch of Renovate
-      actions: write   # start the CI workflow on it
+      contents: read
     steps:
+      # No credential is left in the git config: the scripts below run from the branch, and only the push gets one.
       - name: Checks-out the branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+          persist-credentials: false
 
       # The title of the pull request is data from a bot's branch: it only reaches the script as a variable.
       - name: Update the Artifact Hub changes and images
@@ -51,10 +53,8 @@ jobs:
       - name: Regenerate the docs
         run: ./ci/scripts/helm-docs.sh
 
-      - name: Push the result and start the checks
-        env:
-          GH_TOKEN: ${{ github.token }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+      - name: Commit the result
+        id: commit
         run: |
           set -euo pipefail
 
@@ -62,11 +62,28 @@ jobs:
           git add -u -- charts template
           if git diff --cached --quiet; then
             echo "Nothing to update"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit --message "chore: update the chart changes and docs"
-          git push origin "HEAD:refs/heads/${HEAD_REF}"
-          gh workflow run ci.yaml --ref "${HEAD_REF}"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      # Minted once the commit exists, and only for what the push writes.
+      - name: Generate GitHub App token
+        id: app-token
+        if: steps.commit.outputs.changed == 'true'
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write
+
+      - name: Push the commit to the branch
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: git push "https://x-access-token:${APP_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/${HEAD_REF}"
