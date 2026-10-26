@@ -12,8 +12,11 @@ deprecated: false
 annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: added
-      description: settingsFromSecrets, to set SearXNG settings such as the metrics password from Secret keys
+    - kind: changed
+      description: Update valkey docker tag to v0.25.16
+      links:
+        - name: Pull Request
+          url: https://github.com/this-is-tobi/helm-charts/pull/126
   artifacthub.io/images: |
     - name: searxng
       image: docker.io/searxng/searxng:2026.9.8-3fdc6d753
