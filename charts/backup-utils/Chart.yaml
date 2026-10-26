@@ -1,8 +1,8 @@
 apiVersion: v2
 name: backup-utils
 type: application
-version: 2.5.6
-appVersion: "1.4.3"
+version: 2.5.7
+appVersion: "1.4.6"
 description: Production-ready Helm chart for automated backups of PostgreSQL, MariaDB, MongoDB, etcd, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules and retention policies.
 deprecated: false
 annotations:
