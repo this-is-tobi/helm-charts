@@ -9,6 +9,11 @@ SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT="${SCRIPTS_DIR}/renovate-post-upgrade.sh"
 FIXTURE="${SCRIPTS_DIR}/../../charts/searxng/Chart.yaml"
 PR_URL="https://github.com/this-is-tobi/helm-charts/pull/1"
+# The versions the scratch commits move the chart to. The chart is the real one, which Renovate keeps moving:
+# they are values it can never hold, so a commit always changes something whatever the chart is on.
+NEW_APP_VERSION="2099.1.1-0000000"
+NEW_CHART_VERSION="99.0.0"
+NEW_DEPENDENCY_VERSION="99.0.0"
 WORK="$(mktemp -d)"
 trap 'rm -rf "${WORK}"' EXIT
 
@@ -41,11 +46,19 @@ new_repo() {
   echo "${dir}"
 }
 
+# Commits what a sed changed in the scratch chart. A sed that matched nothing is the test being out of date, not a
+# commit to skip.
+commit_renovate() {
+  local dir="$1"
+  rm -f "${dir}/charts/searxng/Chart.yaml.bak"
+  git -C "${dir}" diff --quiet && fail "the scratch change did not alter Chart.yaml: its lines are not those of the chart anymore"
+  git -C "${dir}" commit -q -am renovate
+}
+
 renovate_commit() {
   local dir="$1" app_version="$2"
-  sed -i.bak -e "s/^appVersion: .*/appVersion: \"${app_version}\"/" -e 's/^version: 0.2.0$/version: 0.3.0/' "${dir}/charts/searxng/Chart.yaml"
-  rm -f "${dir}/charts/searxng/Chart.yaml.bak"
-  git -C "${dir}" commit -q -am renovate
+  sed -i.bak -e "s/^appVersion: .*/appVersion: \"${app_version}\"/" -e "s/^version: .*/version: ${NEW_CHART_VERSION}/" "${dir}/charts/searxng/Chart.yaml"
+  commit_renovate "${dir}"
 }
 
 run() {
@@ -59,16 +72,16 @@ chart() {
 
 echo "==> a Renovate change is completed: the changes of the new version, the image following appVersion"
 repo="$(new_repo basic)"
-renovate_commit "${repo}" "2026.10.11-ad46ebd7d"
+renovate_commit "${repo}" "${NEW_APP_VERSION}"
 without_blocks "$(chart "${repo}")" >"${WORK}/before.txt"
-run "${repo}" "chore(searxng): update searxng to v2026.10.11-ad46ebd7d"
+run "${repo}" "chore(searxng): update searxng to v${NEW_APP_VERSION}"
 [ "$(yq '.annotations."artifacthub.io/changes" | from_yaml | length' "$(chart "${repo}")")" = 1 ] || fail "expected one changes entry"
 [ "$(yq '.annotations."artifacthub.io/changes" | from_yaml | .[0].kind' "$(chart "${repo}")")" = changed ] || fail "kind is not changed"
-[ "$(yq '.annotations."artifacthub.io/changes" | from_yaml | .[0].description' "$(chart "${repo}")")" = "Update searxng to v2026.10.11-ad46ebd7d" ] \
+[ "$(yq '.annotations."artifacthub.io/changes" | from_yaml | .[0].description' "$(chart "${repo}")")" = "Update searxng to v${NEW_APP_VERSION}" ] \
   || fail "description is not the title of the pull request"
 [ "$(yq '.annotations."artifacthub.io/changes" | from_yaml | .[0].links[0].url' "$(chart "${repo}")")" = "${PR_URL}" ] || fail "no link to the pull request"
 yq '.annotations."artifacthub.io/images" | from_yaml | .[].image' "$(chart "${repo}")" >"${WORK}/images.txt"
-grep -qx 'docker.io/searxng/searxng:2026.10.11-ad46ebd7d' "${WORK}/images.txt" || fail "the searxng image did not follow appVersion: $(cat "${WORK}/images.txt")"
+grep -qx "docker.io/searxng/searxng:${NEW_APP_VERSION}" "${WORK}/images.txt" || fail "the searxng image did not follow appVersion: $(cat "${WORK}/images.txt")"
 grep -q '^docker.io/valkey/valkey:.*@sha256:' "${WORK}/images.txt" || fail "the digest-pinned valkey image was touched: $(cat "${WORK}/images.txt")"
 
 echo "==> nothing else of Chart.yaml moves"
@@ -77,22 +90,21 @@ diff "${WORK}/before.txt" "${WORK}/after.txt" || fail "Chart.yaml changed outsid
 
 echo "==> a second run changes nothing"
 cp "$(chart "${repo}")" "${WORK}/once.txt"
-run "${repo}" "chore(searxng): update searxng to v2026.10.11-ad46ebd7d"
+run "${repo}" "chore(searxng): update searxng to v${NEW_APP_VERSION}"
 cmp -s "${WORK}/once.txt" "$(chart "${repo}")" || fail "a second run changed Chart.yaml"
 
 echo "==> a dependency bump leaves the images annotation alone"
 repo="$(new_repo dependency)"
-sed -i.bak 's/^  version: 0.25.13$/  version: 0.25.14/' "${repo}/charts/searxng/Chart.yaml"
-rm -f "${repo}/charts/searxng/Chart.yaml.bak"
-git -C "${repo}" commit -q -am renovate
+sed -i.bak "s/^  version: .*/  version: ${NEW_DEPENDENCY_VERSION}/" "${repo}/charts/searxng/Chart.yaml"
+commit_renovate "${repo}"
 yq '.annotations."artifacthub.io/images"' "$(chart "${repo}")" >"${WORK}/images-before.txt"
-run "${repo}" "chore(searxng): update valkey to v0.25.14"
+run "${repo}" "chore(searxng): update valkey to v${NEW_DEPENDENCY_VERSION}"
 yq '.annotations."artifacthub.io/images"' "$(chart "${repo}")" >"${WORK}/images-after.txt"
 diff "${WORK}/images-before.txt" "${WORK}/images-after.txt" || fail "the images annotation moved with no appVersion change"
 
 echo "==> a hostile title stays data"
 repo="$(new_repo hostile)"
-renovate_commit "${repo}" "2026.10.11-ad46ebd7d"
+renovate_commit "${repo}" "${NEW_APP_VERSION}"
 # shellcheck disable=SC2016 # the command substitution and the quotes are the point
 hostile=$'chore(x): update `touch pwned` $(touch pwned) "quoted": \'single\' # not a comment\n- kind: security\n  description: injected\n{{ x }} %s'
 run "${repo}" "${hostile}"
@@ -107,7 +119,7 @@ expected='Update `touch pwned` $(touch pwned) "quoted": '"'single'"' # not a com
 
 echo "==> a long title is cut"
 repo="$(new_repo long)"
-renovate_commit "${repo}" "2026.10.11-ad46ebd7d"
+renovate_commit "${repo}" "${NEW_APP_VERSION}"
 run "${repo}" "chore(searxng): update $(printf 'x%.0s' {1..400})"
 [ "$(yq '.annotations."artifacthub.io/changes" | from_yaml | .[0].description | length' "$(chart "${repo}")")" -le 200 ] || fail "the description is longer than 200"
 
@@ -126,7 +138,7 @@ awk '/^  artifacthub.io\/changes: \|$/ { skip = 1; next } skip && /^    / { next
 cp "${WORK}/nochanges.txt" "${repo}/charts/searxng/Chart.yaml"
 git -C "${repo}" commit -q -am "drop changes"
 git -C "${repo}" update-ref refs/remotes/origin/main HEAD
-renovate_commit "${repo}" "2026.10.11-ad46ebd7d"
+renovate_commit "${repo}" "${NEW_APP_VERSION}"
 if output="$(cd "${repo}" && PR_TITLE="chore: x" PR_URL="${PR_URL}" BASE_REF=main "${SCRIPT}" 2>&1)"; then
   fail "a chart without a changes block was accepted"
 fi
