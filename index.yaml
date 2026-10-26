@@ -3240,6 +3240,50 @@ entries:
   searxng:
   - annotations:
       artifacthub.io/changes: |
+        - kind: changed
+          description: Update valkey docker tag to v0.25.16
+          links:
+            - name: Pull Request
+              url: https://github.com/this-is-tobi/helm-charts/pull/126
+      artifacthub.io/images: |
+        - name: searxng
+          image: docker.io/searxng/searxng:2026.9.8-3fdc6d753
+        - name: valkey
+          image: docker.io/valkey/valkey:9.1.0-alpine3.23@sha256:c9b77919daeba2c02ad954d0c844cc4e7142069d177b89c5fd771f405daf9e02
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 2026.9.8-3fdc6d753
+    created: "2026-10-26T19:28:46.53799193Z"
+    dependencies:
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.25.16
+    description: Secure, plug-and-play Helm chart for SearXNG, the privacy-respecting
+      metasearch engine, with optional Valkey for its limiter.
+    digest: e93ebc729eebb7b16edd2685e71bc6d4a766d252a0c1be341300eb99f6432ddb
+    home: https://github.com/searxng/searxng
+    keywords:
+    - searxng
+    - search
+    - metasearch
+    - privacy
+    - valkey
+    kubeVersion: '>=1.25.0-0'
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: searxng
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/searxng/searxng
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/searxng-0.2.1/searxng-0.2.1.tgz
+    version: 0.2.1
+  - annotations:
+      artifacthub.io/changes: |
         - kind: added
           description: settingsFromSecrets, to set SearXNG settings such as the metrics password from Secret keys
       artifacthub.io/images: |
@@ -3917,4 +3961,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-10-11T16:11:00.641993108Z"
+generated: "2026-10-26T19:28:46.538102718Z"
