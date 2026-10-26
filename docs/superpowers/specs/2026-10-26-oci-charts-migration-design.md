@@ -38,7 +38,7 @@ What gets unified is how charts are shipped, not where they are written.
 - A published version changes content. A consumer pins a version and the signature is bound to the digest: versions are
   **copied by digest**, never pushed again from a fresh package.
 - An old path stops working. `helm-charts/<chart>`, `rta/rta-chart` and `homelab/charts/ohmlab` are frozen, never deleted.
-- A deployed release gets its resources renamed (see "Chart names").
+- A deployed rta release loses its volume or secrets when it upgrades to the renamed chart (see "Chart names").
 - `this-is-tobi` details leak into github-workflows: its workflows stay generic, the path is passed by the callers.
 
 ## Current state (2026-10-26)
@@ -103,9 +103,23 @@ What gets unified is how charts are shipped, not where they are written.
 
 ## Chart names
 
-A chart keeps its name. `rta-chart` is not renamed: `rta.fullname` is built from `.Chart.Name`, so a rename would change
-the name of every resource of a deployed release. The extra `-chart` in `charts/rta-chart` is the price of not breaking
-anyone.
+The path is `charts/<name>`, where `<name>` is the `name:` of `Chart.yaml`, so every chart is named for what it deploys,
+with no `-chart` suffix. Only `rta-chart` departs from that: it is renamed **`rta`**, and its directory moves from
+`charts/rta-chart` to `charts/rta` so that the directory, the chart name and the OCI path agree.
+
+The rename has a cost in the chart. `rta.fullname` and the selector labels are built from `.Chart.Name`, and the chart
+creates a Deployment, Services, Secrets and a PersistentVolumeClaim per server. With the release `rta` and the server
+`tobi`, the resources are today `rta-rta-chart-tobi` and become `rta-tobi`. `helm upgrade` of an existing release to the
+renamed chart would therefore create new resources and delete the old ones, and the PersistentVolumeClaim (the instance's
+persistent state, with no keep policy by default) would be replaced by an empty one.
+
+The way out is already in the chart: `nameOverride: rta-chart` makes the new chart render the same names as the old one
+(`rta.name` is `nameOverride | default .Chart.Name`). New installs get the clean names, and existing releases add that one
+value before they upgrade. The upgrade note says so (see step 3), and a check proves it (the resources of the old chart
+and of the new chart with the override carry the same names).
+
+The old versions of `rta-chart` carry that name inside the package, so they are **not** copied to `charts/rta`. They stay
+at `rta/rta-chart`, frozen and still verifiable. `charts/rta` starts at the next version of the same version line.
 
 ## How a version moves (used in steps 1 to 3)
 
@@ -168,7 +182,7 @@ are frozen, which stops their updates, so the open question decides how the free
      - the `cosign verify` and `verify-attestation` examples (lines 83, 92);
      - the dependency and Argo CD examples (lines 114, 138);
      - a note that `ghcr.io/this-is-tobi/helm-charts/<chart>` is frozen at the versions it holds;
-     - a section "Charts built in other repositories" (rta-chart, ohmlab), kept until step 5;
+     - a section "Charts built in other repositories" (rta, ohmlab), kept until step 5;
      - the personal-signature exceptions (see "How a version moves", item 4);
    - updates the README of each of the six charts (`README.md.gotmpl`, then `README.md` through helm-docs), which still
      give the old `oci://` path and `helm repo add tobi`, and are what Artifact Hub displays;
@@ -186,17 +200,35 @@ The order inside each repository: copy first, then switch the release and the re
 new path, the version it pins must already be there.
 
 **rta**
-1. A pull request, closed without merging, copies the 39 versions of `rta/rta-chart` into `charts/rta-chart`. Then the
-   user makes the package public. rta releases several times a day: the copy runs again just after the switch below
-   merges, before the pull request is closed, to catch the versions published in between.
-2. A pull request in rta:
+
+The chart is renamed `rta` in the same pull request that moves it to `charts/` (see "Chart names"). Nothing is copied:
+the 39 versions of `rta/rta-chart` stay where they are.
+
+1. A pull request in rta:
+   - `charts/rta-chart/` moves to `charts/rta/` and `Chart.yaml` gets `name: rta`.
+   - Everything that names the directory or the chart follows (found with `grep -rn 'rta-chart'`; the builder re-runs it):
+     `Makefile:384` (`CHART_DIR`), `internal/app/release_test.go:48`, `.github/ct.yaml`, `.github/workflows/ci.yml:465,493`,
+     `.github/workflows/cd.yml:209,229` (`CHART_NAME: rta`), `values.schema.json` (title), the chart's `README.md.gotmpl` and
+     `README.md`, `ci/test-values.yaml`, and the `release-please` files if they list the path (to check).
    - `.github/workflows/cd.yml`, `chart` job: `REPOSITORY: this-is-tobi/charts`, and replace the comment above it
      (lines 215-219, which explains why the default is kept).
-   - The path in the docs: `docs/10-getting-started/40-other-ways-to-install.md:47`,
-     `docs/90-recipes/10-for-security-teams.md:17`, `docs/90-recipes/30-an-agent-in-a-cluster.md:121`,
-     `docs/95-reference/30-verify-a-download.md:42,48`, `docs/30-boundary/80-kubernetes.md:30,61,64`,
-     `charts/rta-chart/README.md.gotmpl:20` (then regenerate `README.md`).
-3. **Check:** the next rta release publishes and signs `charts/rta-chart`.
+   - The docs: the install and verify commands become `oci://ghcr.io/this-is-tobi/charts/rta`
+     (`docs/10-getting-started/40-other-ways-to-install.md:47`, `docs/90-recipes/10-for-security-teams.md:17`,
+     `docs/90-recipes/30-an-agent-in-a-cluster.md:121`, `docs/95-reference/30-verify-a-download.md:42,48`,
+     `docs/30-boundary/80-kubernetes.md:30,61,64`), the links to `charts/rta-chart` (`docs/30-boundary/70-oidc.md:147`,
+     `docs/30-boundary/80-kubernetes.md:7`), and `kubectl exec deploy/rta-rta-chart-tobi` becomes `deploy/rta-tobi`
+     (`docs/90-recipes/30-an-agent-in-a-cluster.md:142`).
+   - **The upgrade note**, in the chart README, in `docs/30-boundary/80-kubernetes.md` and in the release notes: "An
+     existing release upgrading from `rta/rta-chart` must set `nameOverride: rta-chart`, or its volume is replaced."
+     Whether the chart should also refuse to render in that situation (a `lookup` guard in `templates/validation.yaml`; it
+     sees nothing under `helm template` or Argo CD) is left to the builder.
+2. The French copies of these docs in `this-is-tobi/docs` (`translations/fr/rta/…`, 6 files) follow, by whatever the sync
+   from rta does (to check: `docs/.github/workflows/sync.yml`).
+3. **Check:**
+   - `helm template` of `rta/rta-chart:0.36.0` and of the new chart with `nameOverride: rta-chart` give the same set of
+     resource names (a test in the pull request);
+   - a fresh install with the release `rta` gives `deploy/rta-tobi`;
+   - the first rta release after the merge publishes and signs `charts/rta`.
 
 **homelab**
 1. A pull request, closed without merging, copies the 9 versions of `homelab/charts/ohmlab` into `charts/ohmlab`. Then
@@ -259,7 +291,7 @@ pushed on every release: it is a separate tag (`artifacthub.io`) of the chart's 
 not remove it.
 
 1. **Artifact Hub** (manual, by the user): one Helm repository per chart, named `this-is-tobi-<chart>`, URL
-   `oci://ghcr.io/this-is-tobi/charts/<chart>`. That is 8 repositories (6 + rta-chart + ohmlab). Write down each
+   `oci://ghcr.io/this-is-tobi/charts/<chart>`. That is 8 repositories (6 + rta + ohmlab). Write down each
    `repositoryID`.
 2. **helm-charts**, one pull request:
    - `artifacthub/<chart>.yml` for each of the 8 charts (that chart's `repositoryID`, owners `tobi-or-not` /
@@ -304,7 +336,8 @@ not remove it.
 
 ## Calls made by the author (check them)
 
-- `rta-chart` keeps its name (see "Chart names").
+- `rta-chart` becomes `rta` (the user's decision), its old versions are not copied, and existing releases add
+  `nameOverride: rta-chart` (see "Chart names").
 - Only the versions in OCI move. The older ones stay in the frozen classic Helm repository.
 - Old OCI packages are frozen, not deleted, and nothing is planned to delete them.
 - The copy runs from pull-request workflows that are never merged, one per owning repository.
@@ -321,7 +354,10 @@ not remove it.
   (which would need a `SKIP_EXISTING` input and a changed output contract in github-workflows).
 - homelab's `sourceRepos` change lands, and syncs, before the switch.
 
-## Open question (the user's)
+## Open questions (the user's)
+
+- **Does a release of `rta/rta-chart` run anywhere besides your own?** If it is only yours, the upgrade note is enough. If
+  others run it, the `lookup` guard and a louder release note are worth building.
 
 - **Who are the outside consumers of the classic Helm repository and of `oci://ghcr.io/this-is-tobi/helm-charts`?**
   IA-Generative (4 repositories) and dnum-mi (2 repositories and a docs repository) pin charts there, and
@@ -334,6 +370,7 @@ not remove it.
 
 ## Left to the builder
 
+- Whether the `rta` chart refuses to render when it finds the old resources (the `lookup` guard).
 - The scripts of the copy workflows, and how they report.
 - The script of step 5 and its README section.
 - Whether to add a tag step in step 6.
