@@ -6,7 +6,7 @@ set -euo pipefail
 # current kube context (the kind cluster in CI): restricted Pod Security admission, the secret key
 # across upgrades, an OpenShift-like arbitrary UID, and valkey with the startup wait.
 
-KUBECONFORM_VERSION="0.7.0"
+KUBECONFORM_VERSION="0.8.0"
 KUBERNETES_VERSION="1.31.0"
 CHART_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../charts/searxng" && pwd)"
 OPENSHIFT=(--api-versions security.openshift.io/v1 --api-versions route.openshift.io/v1)
