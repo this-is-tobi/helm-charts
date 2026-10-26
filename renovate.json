@@ -23,7 +23,7 @@
   "semanticCommits": "enabled",
   "semanticCommitType": "chore",
   "prConcurrentLimit": 5,
-  "minimumReleaseAge": "3 days",
+  "minimumReleaseAge": "1 day",
   "internalChecksFilter": "strict",
   "gitIgnoredAuthors": [
     "41898282+github-actions[bot]@users.noreply.github.com"
