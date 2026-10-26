@@ -6,7 +6,7 @@ set -euo pipefail
 # the current kube context (the kind cluster in CI): restricted Pod Security admission, Plan
 # validation, and one full no-op upgrade Job lifecycle.
 
-KUBECONFORM_VERSION="0.7.0"
+KUBECONFORM_VERSION="0.8.0"
 KUBERNETES_VERSION="1.31.0"
 CHART_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../charts/system-upgrade-controller" && pwd)"
 APP_VERSION="$(sed -n 's/^appVersion: "\(.*\)"$/\1/p' "${CHART_DIR}/Chart.yaml")"

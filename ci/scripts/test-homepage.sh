@@ -7,7 +7,7 @@ set -euo pipefail
 # restricted Pod Security admission, host validation, an OpenShift-like arbitrary UID, service
 # discovery through the chart's RBAC, and the authentication gate.
 
-KUBECONFORM_VERSION="0.7.0"
+KUBECONFORM_VERSION="0.8.0"
 KUBERNETES_VERSION="1.31.0"
 CHART_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../charts/homepage" && pwd)"
 OPENSHIFT=(--api-versions security.openshift.io/v1 --api-versions route.openshift.io/v1)

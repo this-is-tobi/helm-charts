@@ -5,7 +5,7 @@ set -euo pipefail
 # validating the output against the Kubernetes API schemas. The chart is excluded from
 # chart-testing (no maintainers, never released), so without this it would ship unchecked.
 
-KUBECONFORM_VERSION="0.7.0"
+KUBECONFORM_VERSION="0.8.0"
 KUBERNETES_VERSION="1.31.0"
 CHART_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../template" && pwd)"
 
