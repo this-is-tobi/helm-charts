@@ -10,7 +10,10 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: changed
-      description: Upgrade backup image to v1.4.3
+      description: Update ghcr.io/this-is-tobi/tools/backup docker tag to v1.4.6
+      links:
+        - name: Pull Request
+          url: https://github.com/this-is-tobi/helm-charts/pull/131
 keywords:
 - backup
 - postgresql
