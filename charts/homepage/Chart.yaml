@@ -12,11 +12,14 @@ deprecated: false
 annotations:
   artifacthub.io/license: Apache-2.0
   artifacthub.io/changes: |
-    - kind: added
-      description: initial chart, a hardened port of the UnknownIQ homepage chart
+    - kind: changed
+      description: Update ghcr.io/gethomepage/homepage docker tag to v2.7.0
+      links:
+        - name: Pull Request
+          url: https://github.com/this-is-tobi/helm-charts/pull/132
   artifacthub.io/images: |
     - name: homepage
-      image: ghcr.io/gethomepage/homepage:v2.4.0
+      image: ghcr.io/gethomepage/homepage:v2.7.0
 keywords:
 - homepage
 - dashboard
