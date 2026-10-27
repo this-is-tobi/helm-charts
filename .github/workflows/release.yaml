@@ -24,7 +24,7 @@ permissions: {}
 
 jobs:
   release:
-    uses: this-is-tobi/github-workflows/.github/workflows/release-helm.yml@63c66d6c929f0ca644c4ebacb54844dfe50f34da # v0.44.1
+    uses: this-is-tobi/github-workflows/.github/workflows/release-helm.yml@f31ceb2eed4d5aac8cdad1c976987a81b2548372 # v0.45.0
     permissions:
       contents: write
       packages: write
@@ -45,7 +45,7 @@ jobs:
   # Nothing to attest (an empty list) is a no-op, so this runs on every release.
   attest:
     needs: release
-    uses: this-is-tobi/github-workflows/.github/workflows/attest-helm.yml@63c66d6c929f0ca644c4ebacb54844dfe50f34da # v0.44.1
+    uses: this-is-tobi/github-workflows/.github/workflows/attest-helm.yml@f31ceb2eed4d5aac8cdad1c976987a81b2548372 # v0.45.0
     permissions:
       packages: write
       id-token: write
