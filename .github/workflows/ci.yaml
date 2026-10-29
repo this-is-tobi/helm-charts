@@ -23,7 +23,7 @@ permissions: {}
 jobs:
   lint-helm-charts:
     if: ${{ !github.event.pull_request.draft }}
-    uses: this-is-tobi/github-workflows/.github/workflows/lint-helm.yml@f31ceb2eed4d5aac8cdad1c976987a81b2548372 # v0.45.0
+    uses: this-is-tobi/github-workflows/.github/workflows/lint-helm.yml@cae676d3c0e91fbddfe7f7d25c73868a6da44184 # v0.46.1
     permissions:
       contents: read
     with:
@@ -34,7 +34,7 @@ jobs:
   # The whole repository, not only charts/: the template chart's README is generated too.
   lint-helm-docs:
     if: ${{ !github.event.pull_request.draft }}
-    uses: this-is-tobi/github-workflows/.github/workflows/lint-helm.yml@f31ceb2eed4d5aac8cdad1c976987a81b2548372 # v0.45.0
+    uses: this-is-tobi/github-workflows/.github/workflows/lint-helm.yml@cae676d3c0e91fbddfe7f7d25c73868a6da44184 # v0.46.1
     permissions:
       contents: read
     with:
@@ -49,7 +49,7 @@ jobs:
     needs:
       - lint-helm-charts
       - lint-helm-docs
-    uses: this-is-tobi/github-workflows/.github/workflows/test-helm.yml@f31ceb2eed4d5aac8cdad1c976987a81b2548372 # v0.45.0
+    uses: this-is-tobi/github-workflows/.github/workflows/test-helm.yml@cae676d3c0e91fbddfe7f7d25c73868a6da44184 # v0.46.1
     permissions:
       contents: read
     with:
@@ -208,6 +208,6 @@ jobs:
       - test-searxng
       - test-homepage
       - test-renovate
-    uses: this-is-tobi/github-workflows/.github/workflows/check-jobs.yml@f31ceb2eed4d5aac8cdad1c976987a81b2548372 # v0.45.0
+    uses: this-is-tobi/github-workflows/.github/workflows/check-jobs.yml@cae676d3c0e91fbddfe7f7d25c73868a6da44184 # v0.46.1
     with:
       NEEDS: ${{ toJson(needs) }}
