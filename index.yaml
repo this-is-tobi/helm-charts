@@ -3247,6 +3247,43 @@ entries:
   homepage:
   - annotations:
       artifacthub.io/changes: |
+        - kind: changed
+          description: Update ghcr.io/gethomepage/homepage docker tag to v2.7.0
+          links:
+            - name: Pull Request
+              url: https://github.com/this-is-tobi/helm-charts/pull/132
+      artifacthub.io/images: |
+        - name: homepage
+          image: ghcr.io/gethomepage/homepage:v2.7.0
+      artifacthub.io/license: Apache-2.0
+    apiVersion: v2
+    appVersion: v2.7.0
+    created: "2026-11-01T02:11:30.12286595Z"
+    description: Secure, plug-and-play Helm chart for Homepage, the customizable application
+      dashboard, with optional Kubernetes service discovery and built-in authentication.
+    digest: 53fd36cebd377e0036ede2de6aac1fd3fa04cefecea461607a91f5e85e57101e
+    home: https://github.com/gethomepage/homepage
+    keywords:
+    - homepage
+    - dashboard
+    - startpage
+    - services
+    - kubernetes
+    kubeVersion: '>=1.25.0-0'
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: homepage
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/gethomepage/homepage
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/homepage-0.2.0/homepage-0.2.0.tgz
+    version: 0.2.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: added
           description: initial chart, a hardened port of the UnknownIQ homepage chart
       artifacthub.io/images: |
@@ -4003,4 +4040,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-11-01T02:10:25.837534278Z"
+generated: "2026-11-01T02:11:30.123097236Z"
