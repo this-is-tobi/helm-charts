@@ -18,6 +18,12 @@ extraObjects: []
 #       # ... other settings
 
 
+vaultStaticSecretDefaults:
+  # -- Mount of every static secret that leaves its own `mount` empty. Rendered through `tpl` with the chart's root context, like the entries' own `mount`.
+  mount: ""
+  # -- Path of every static secret that leaves its own `path` empty. Rendered through `tpl` with the chart's root context, like the entries' own `path`; a template that renders empty leaves the secret without a path, which fails the render.
+  path: ""
+
 # VaultStaticSecret resources for syncing static KV secrets from Vault to Kubernetes Secrets.
 # See: https://developer.hashicorp.com/vault/docs/platform/k8s/vso/api-reference#vaultstaticsecret
 vaultStaticSecrets: {}

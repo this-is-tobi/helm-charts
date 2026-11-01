@@ -1,6 +1,6 @@
 # vso-utils
 
-![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.6.0](https://img.shields.io/badge/AppVersion-1.6.0-informational?style=flat-square)
+![Version: 2.2.0](https://img.shields.io/badge/Version-2.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.6.0](https://img.shields.io/badge/AppVersion-1.6.0-informational?style=flat-square)
 
 Production-ready Helm chart for managing HashiCorp Vault Secret Operator resources - sync static secrets, generate dynamic credentials, issue PKI certificates, and configure Vault authentication.
 
@@ -50,7 +50,7 @@ helm install <release_name> tobi/vso-utils
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/vso-utils --version 2.1.0
+helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/vso-utils --version 2.2.0
 ```
 
 ### ArgoCD
@@ -66,7 +66,7 @@ spec:
   sources:
   - repoURL: https://this-is-tobi.github.io/helm-charts
     chart: vso-utils
-    targetRevision: 2.1.0
+    targetRevision: 2.2.0
     helm:
       releaseName: <release_name>
       values: |
@@ -93,7 +93,7 @@ spec:
   sources:
   - repoURL: ghcr.io/this-is-tobi/helm-charts
     chart: vso-utils
-    targetRevision: 2.1.0
+    targetRevision: 2.2.0
     helm:
       releaseName: <release_name>
       values: |
@@ -116,7 +116,7 @@ spec:
 # Chart.yaml
 dependencies:
 - name: vso-utils
-  version: 2.1.0
+  version: 2.2.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: vso-utils.enabled
 ```
@@ -126,7 +126,7 @@ dependencies:
 # Chart.yaml
 dependencies:
 - name: vso-utils
-  version: 2.1.0
+  version: 2.2.0
   repository: oci://ghcr.io/this-is-tobi/helm-charts
   condition: vso-utils.enabled
 ```
@@ -367,6 +367,8 @@ vaultStaticSecrets:
 | vaultConnection | object | `{}` |  |
 | vaultDynamicSecrets | object | `{}` |  |
 | vaultPKISecrets | object | `{}` |  |
+| vaultStaticSecretDefaults.mount | string | `""` | Mount of every static secret that leaves its own `mount` empty. Rendered through `tpl` with the chart's root context, like the entries' own `mount`. |
+| vaultStaticSecretDefaults.path | string | `""` | Path of every static secret that leaves its own `path` empty. Rendered through `tpl` with the chart's root context, like the entries' own `path`; a template that renders empty leaves the secret without a path, which fails the render. |
 | vaultStaticSecrets | object | `{}` |  |
 | vso.enabled | bool | `false` | Enable deployment of Vault Secrets Operator. |
 

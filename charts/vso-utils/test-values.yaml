@@ -99,6 +99,18 @@ vaultStaticSecrets:
       name: database-config
       create: true
 
+  # Static secret taking its mount and path from vaultStaticSecretDefaults
+  defaulted:
+    vaultAuthRef: default
+    destination:
+      name: defaulted
+      create: true
+
+# Mount and path of the static secrets that leave theirs empty
+vaultStaticSecretDefaults:
+  mount: kv
+  path: shared/config
+
 # Dynamic secrets
 vaultDynamicSecrets:
   # PostgreSQL database credentials
