@@ -19,12 +19,21 @@
         "type": ["object", "string"]
       }
     },
+    "vaultStaticSecretDefaults": {
+      "type": "object",
+      "description": "Mount and path of the static secrets that leave theirs empty, rendered through tpl",
+      "additionalProperties": false,
+      "properties": {
+        "mount": { "type": "string" },
+        "path": { "type": "string" }
+      }
+    },
     "vaultStaticSecrets": {
       "type": "object",
       "description": "VaultStaticSecret resources for syncing static KV secrets from Vault",
       "additionalProperties": {
         "type": "object",
-        "required": ["mount", "vaultAuthRef", "path", "destination"],
+        "required": ["vaultAuthRef", "destination"],
         "properties": {
           "annotations": { "type": "object" },
           "labels": { "type": "object" },
