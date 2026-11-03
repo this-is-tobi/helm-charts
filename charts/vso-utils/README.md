@@ -1,6 +1,6 @@
 # vso-utils
 
-![Version: 2.2.1](https://img.shields.io/badge/Version-2.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.6.0](https://img.shields.io/badge/AppVersion-1.6.0-informational?style=flat-square)
+![Version: 2.2.2](https://img.shields.io/badge/Version-2.2.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.6.0](https://img.shields.io/badge/AppVersion-1.6.0-informational?style=flat-square)
 
 Production-ready Helm chart for managing HashiCorp Vault Secret Operator resources - sync static secrets, generate dynamic credentials, issue PKI certificates, and configure Vault authentication.
 
@@ -41,48 +41,12 @@ This Helm chart provides a comprehensive and production-ready solution for deplo
 
 ### CLI
 
-**Using Traditional Helm Repository:**
 ```sh
-helm repo add tobi https://this-is-tobi.github.io/helm-charts
-helm repo update
-helm install <release_name> tobi/vso-utils
-```
-
-**Using OCI Registry (Recommended):**
-```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/charts/vso-utils --version 2.2.1
+helm install <release_name> oci://ghcr.io/this-is-tobi/charts/vso-utils --version 2.2.2
 ```
 
 ### ArgoCD
 
-**Using Helm Repository:**
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: vso-utils
-spec:
-  project: default
-  sources:
-  - repoURL: https://this-is-tobi.github.io/helm-charts
-    chart: vso-utils
-    targetRevision: 2.2.1
-    helm:
-      releaseName: <release_name>
-      values: |
-        vaultStaticSecrets:
-          appConfig:
-            mount: secret
-            vaultAuthRef: default
-            path: app/config
-            destination:
-              name: app-config
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: default
-```
-
-**Using OCI Registry:**
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -93,7 +57,7 @@ spec:
   sources:
   - repoURL: ghcr.io/this-is-tobi/charts
     chart: vso-utils
-    targetRevision: 2.2.1
+    targetRevision: 2.2.2
     helm:
       releaseName: <release_name>
       values: |
@@ -111,22 +75,11 @@ spec:
 
 ### Helm Dependency
 
-**Using Helm Repository:**
 ```yaml
 # Chart.yaml
 dependencies:
 - name: vso-utils
-  version: 2.2.1
-  repository: https://this-is-tobi.github.io/helm-charts
-  condition: vso-utils.enabled
-```
-
-**Using OCI Registry:**
-```yaml
-# Chart.yaml
-dependencies:
-- name: vso-utils
-  version: 2.2.1
+  version: 2.2.2
   repository: oci://ghcr.io/this-is-tobi/charts
   condition: vso-utils.enabled
 ```

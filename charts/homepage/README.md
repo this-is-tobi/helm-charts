@@ -1,6 +1,6 @@
 # homepage
 
-![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.7.0](https://img.shields.io/badge/AppVersion-v2.7.0-informational?style=flat-square)
+![Version: 0.2.2](https://img.shields.io/badge/Version-0.2.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.7.0](https://img.shields.io/badge/AppVersion-v2.7.0-informational?style=flat-square)
 
 Secure, plug-and-play Helm chart for Homepage, the customizable application dashboard, with optional Kubernetes service discovery and built-in authentication.
 
@@ -21,16 +21,8 @@ Kubernetes: `>=1.25.0-0`
 
 ## Installing the Chart
 
-**Using Traditional Helm Repository:**
 ```sh
-helm repo add tobi https://this-is-tobi.github.io/helm-charts
-helm repo update
-helm install homepage tobi/homepage --namespace homepage --create-namespace
-```
-
-**Using OCI Registry (Recommended):**
-```sh
-helm install homepage oci://ghcr.io/this-is-tobi/charts/homepage --version 0.2.1 \
+helm install homepage oci://ghcr.io/this-is-tobi/charts/homepage --version 0.2.2 \
   --namespace homepage --create-namespace
 ```
 
@@ -49,7 +41,7 @@ spec:
   sources:
   - repoURL: ghcr.io/this-is-tobi/charts
     chart: homepage
-    targetRevision: 0.2.1
+    targetRevision: 0.2.2
     helm:
       releaseName: homepage
       values: |

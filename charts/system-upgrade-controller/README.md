@@ -1,6 +1,6 @@
 # system-upgrade-controller
 
-![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.20.2](https://img.shields.io/badge/AppVersion-v0.20.2-informational?style=flat-square)
+![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.20.2](https://img.shields.io/badge/AppVersion-v0.20.2-informational?style=flat-square)
 
 Secure, plug-and-play Helm chart for the Rancher system-upgrade-controller, with a one-value k3s upgrade preset and generic upgrade Plans.
 
@@ -16,16 +16,8 @@ The [system-upgrade-controller](https://github.com/rancher/system-upgrade-contro
 
 ## Installing the Chart
 
-**Using Traditional Helm Repository:**
 ```sh
-helm repo add tobi https://this-is-tobi.github.io/helm-charts
-helm repo update
-helm install system-upgrade tobi/system-upgrade-controller --namespace system-upgrade --create-namespace
-```
-
-**Using OCI Registry (Recommended):**
-```sh
-helm install system-upgrade oci://ghcr.io/this-is-tobi/charts/system-upgrade-controller --version 0.1.1 \
+helm install system-upgrade oci://ghcr.io/this-is-tobi/charts/system-upgrade-controller --version 0.1.2 \
   --namespace system-upgrade --create-namespace
 ```
 
@@ -56,7 +48,7 @@ spec:
   sources:
   - repoURL: ghcr.io/this-is-tobi/charts
     chart: system-upgrade-controller
-    targetRevision: 0.1.1
+    targetRevision: 0.1.2
     helm:
       releaseName: system-upgrade
       values: |

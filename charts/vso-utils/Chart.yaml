@@ -1,7 +1,7 @@
 apiVersion: v2
 name: vso-utils
 type: application
-version: 2.2.1
+version: 2.2.2
 appVersion: "1.6.0"
 description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator resources - sync static secrets, generate dynamic credentials, issue PKI certificates, and configure Vault authentication.
 deprecated: false
@@ -10,7 +10,7 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: changed
-      description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/vso-utils; every earlier version is there too, with the same digest"
+      description: "The README installs from the OCI registry only: the Helm repository at github.io is frozen"
 keywords:
 - vault
 - secrets

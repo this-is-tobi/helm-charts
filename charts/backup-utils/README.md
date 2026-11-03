@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 2.5.8](https://img.shields.io/badge/Version-2.5.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.4.6](https://img.shields.io/badge/AppVersion-1.4.6-informational?style=flat-square)
+![Version: 2.5.9](https://img.shields.io/badge/Version-2.5.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.4.6](https://img.shields.io/badge/AppVersion-1.4.6-informational?style=flat-square)
 
 Production-ready Helm chart for automated backups of PostgreSQL, MariaDB, MongoDB, etcd, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules and retention policies.
 
@@ -43,50 +43,12 @@ This Helm chart provides a **production-ready solution** for deploying automated
 
 ### CLI
 
-**Using Traditional Helm Repository:**
 ```sh
-helm repo add tobi https://this-is-tobi.github.io/helm-charts
-helm repo update
-helm install <release_name> tobi/backup-utils
-```
-
-**Using OCI Registry (Recommended):**
-```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/charts/backup-utils --version 2.5.8
+helm install <release_name> oci://ghcr.io/this-is-tobi/charts/backup-utils --version 2.5.9
 ```
 
 ### ArgoCD
 
-**Using Traditional Helm Repository:**
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: backup-utils
-spec:
-  project: default
-  sources:
-  - repoURL: https://this-is-tobi.github.io/helm-charts
-    chart: backup-utils
-    targetRevision: 2.5.8
-    helm:
-      releaseName: <release_name>
-      values: |
-        backups:
-          postgres-prod:
-            enabled: true
-            type: postgres
-            job:
-              schedule: "0 2 * * *"
-            secrets:
-              DB_HOST: "postgres.default.svc"
-              # ... other config
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: default
-```
-
-**Using OCI Registry (Recommended):**
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -97,7 +59,7 @@ spec:
   sources:
   - repoURL: ghcr.io/this-is-tobi/charts
     chart: backup-utils
-    targetRevision: 2.5.8
+    targetRevision: 2.5.9
     helm:
       releaseName: <release_name>
       values: |
@@ -117,22 +79,11 @@ spec:
 
 ### Helm Dependency
 
-**Using Traditional Helm Repository:**
 ```yaml
 # Chart.yaml
 dependencies:
 - name: backup-utils
-  version: 2.5.8
-  repository: https://this-is-tobi.github.io/helm-charts
-  condition: backup-utils.enabled
-```
-
-**Using OCI Registry (Recommended):**
-```yaml
-# Chart.yaml
-dependencies:
-- name: backup-utils
-  version: 2.5.8
+  version: 2.5.9
   repository: oci://ghcr.io/this-is-tobi/charts
   condition: backup-utils.enabled
 ```

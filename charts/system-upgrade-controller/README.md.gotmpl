@@ -16,14 +16,6 @@ The [system-upgrade-controller](https://github.com/rancher/system-upgrade-contro
 
 ## Installing the Chart
 
-**Using Traditional Helm Repository:**
-```sh
-helm repo add tobi https://this-is-tobi.github.io/helm-charts
-helm repo update
-helm install system-upgrade tobi/{{ template "chart.name" . }} --namespace system-upgrade --create-namespace
-```
-
-**Using OCI Registry (Recommended):**
 ```sh
 helm install system-upgrade oci://ghcr.io/this-is-tobi/charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }} \
   --namespace system-upgrade --create-namespace
