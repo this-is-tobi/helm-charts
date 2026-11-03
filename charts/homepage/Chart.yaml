@@ -1,7 +1,7 @@
 apiVersion: v2
 name: homepage
 type: application
-version: 0.2.0
+version: 0.2.1
 appVersion: "v2.7.0"
 description: Secure, plug-and-play Helm chart for Homepage, the customizable application dashboard, with optional Kubernetes service discovery and built-in authentication.
 # Floor set by the APIs the chart renders (autoscaling/v2, policy/v1) and by the `restricted` Pod
@@ -13,10 +13,7 @@ annotations:
   artifacthub.io/license: Apache-2.0
   artifacthub.io/changes: |
     - kind: changed
-      description: Update ghcr.io/gethomepage/homepage docker tag to v2.7.0
-      links:
-        - name: Pull Request
-          url: https://github.com/this-is-tobi/helm-charts/pull/132
+      description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/homepage; every earlier version is there too, with the same digest"
   artifacthub.io/images: |
     - name: homepage
       image: ghcr.io/gethomepage/homepage:v2.7.0

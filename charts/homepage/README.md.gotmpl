@@ -30,7 +30,7 @@ helm install homepage tobi/{{ template "chart.name" . }} --namespace homepage --
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install homepage oci://ghcr.io/this-is-tobi/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }} \
+helm install homepage oci://ghcr.io/this-is-tobi/charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }} \
   --namespace homepage --create-namespace
 ```
 
@@ -47,7 +47,7 @@ spec:
     server: https://kubernetes.default.svc
     namespace: homepage
   sources:
-  - repoURL: ghcr.io/this-is-tobi/helm-charts
+  - repoURL: ghcr.io/this-is-tobi/charts
     chart: {{ template "chart.name" . }}
     targetRevision: {{ template "chart.version" . }}
     helm:

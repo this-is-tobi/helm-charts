@@ -25,7 +25,7 @@ helm install system-upgrade tobi/{{ template "chart.name" . }} --namespace syste
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install system-upgrade oci://ghcr.io/this-is-tobi/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }} \
+helm install system-upgrade oci://ghcr.io/this-is-tobi/charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }} \
   --namespace system-upgrade --create-namespace
 ```
 
@@ -54,7 +54,7 @@ spec:
     server: https://kubernetes.default.svc
     namespace: system-upgrade
   sources:
-  - repoURL: ghcr.io/this-is-tobi/helm-charts
+  - repoURL: ghcr.io/this-is-tobi/charts
     chart: {{ template "chart.name" . }}
     targetRevision: {{ template "chart.version" . }}
     helm:

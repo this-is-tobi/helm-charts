@@ -48,7 +48,7 @@ helm install <release_name> tobi/{{ template "chart.name" . }}
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }}
+helm install <release_name> oci://ghcr.io/this-is-tobi/charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }}
 ```
 
 ### ArgoCD
@@ -89,7 +89,7 @@ metadata:
 spec:
   project: default
   sources:
-  - repoURL: ghcr.io/this-is-tobi/helm-charts
+  - repoURL: ghcr.io/this-is-tobi/charts
     chart: {{ template "chart.name" . }}
     targetRevision: {{ template "chart.version" . }}
     helm:
@@ -125,7 +125,7 @@ dependencies:
 dependencies:
 - name: {{ template "chart.name" . }}
   version: {{ template "chart.version" . }}
-  repository: oci://ghcr.io/this-is-tobi/helm-charts
+  repository: oci://ghcr.io/this-is-tobi/charts
   condition: {{ template "chart.name" . }}.enabled
 ```
 
