@@ -11,7 +11,8 @@ Done:
 - **ohmlab**: `charts/ohmlab` since 2026-10-29. Its 29 older versions were copied by digest and verified, and the old
   packages were deleted by the owner on 2026-11-02.
 - **rta**: `charts/rta` 0.43.0 was published and signed on 2026-11-03 (rta#437 and rta#438). The chart is renamed `rta`; an existing release adds `nameOverride: rta-chart`, which renders what `rta-chart` 0.42.1 renders, object for object. The first push failed once on a transient GHCR 404 after the upload (`failed to perform "Tag" on destination`, Helm 4 fetches the manifest back by digest to tag it); re-running the failed jobs fixed it.
-- **helm-charts, the copy**: the 102 versions of the seven old packages are at `charts/*` (the owner ran the script on 2026-11-03). The six new packages are public and linked to this repository, and the anonymous check finds, for every version, the same manifest digest, the same referrer digests and a signature that verifies as it did before. What is left of step 2 is the merge of helm-charts#140.
+- **helm-charts, the copy**: the 102 versions of the seven old packages are at `charts/*` (the owner ran the script on 2026-11-03). The six new packages are public and linked to this repository, and the anonymous check finds, for every version, the same manifest digest, the same referrer digests and a signature that verifies as it did before.
+- **helm-charts, step 2**: helm-charts#140 was merged the same day. Its release pushed backup-utils 2.5.8, cnpg-cluster 2.3.1, homepage 0.2.1, searxng 0.3.1, system-upgrade-controller 0.1.1 and vso-utils 2.2.1 to `charts/*` and attested them, and an anonymous check of the six passes: the cosign signature, the SLSA provenance and `helm pull --verify` against the GPG key.
 
 What changed from the plan:
 
