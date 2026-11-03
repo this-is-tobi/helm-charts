@@ -32,12 +32,9 @@ jobs:
       CHARTS_DIR: charts
       CREATE_GITHUB_RELEASE: true
       PUBLISH_OCI: true
-      # Every chart of this-is-tobi is published at ghcr.io/this-is-tobi/charts/<chart name>, whichever repository builds
-      # it. The default, this repository's own path, is where the first versions went: ghcr.io/this-is-tobi/helm-charts/<chart>
-      # keeps them, frozen, and nothing pushes there any more. Those versions were copied to the new path by digest, with
-      # their signatures, before this line was merged, which is what lets SKIP_EXISTING below stay safe: it looks at the
-      # destination, so a chart that changed without a version bump is left alone instead of being pushed a second time
-      # under a new digest, which would change what that version means and orphan its signature.
+      # Every chart of this-is-tobi lives at ghcr.io/this-is-tobi/charts/<chart>; ghcr.io/this-is-tobi/helm-charts/<chart>
+      # keeps the first versions, frozen. They were copied here by digest first, which keeps SKIP_EXISTING safe: it looks
+      # at the destination, and a chart pushed again would change what its version means.
       REPOSITORY: this-is-tobi/charts
       # A merge that changes a chart without releasing it (a README, a comment) is not a failed release.
       SKIP_EXISTING: true
