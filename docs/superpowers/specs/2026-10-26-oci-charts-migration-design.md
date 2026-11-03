@@ -1,6 +1,48 @@
 # One home for every chart: migration to `ghcr.io/this-is-tobi/charts`
 
-Status: draft, 2026-10-26. Spans helm-charts, github-workflows, rta, homelab and template-monorepo-ts.
+Status: in progress, updated 2026-11-03 (drafted 2026-10-26). Spans helm-charts, github-workflows, rta, ohmlab (the
+former homelab) and template-monorepo-ts. "Progress" says what is done and what changed from the plan; the sections
+below are the plan as it was drafted, corrected where the registry proved it wrong.
+
+## Progress (2026-11-03)
+
+Done:
+
+- **ohmlab**: `charts/ohmlab` since 2026-10-29. Its 29 older versions were copied by digest and verified, and the old
+  packages were deleted by the owner on 2026-11-02.
+- **rta**: `charts/rta` 0.43.0 was published and signed on 2026-11-03 (rta#437 and rta#438). The chart is renamed `rta`;
+  an existing release adds `nameOverride: rta-chart`, which renders what `rta-chart` 0.42.1 renders, object for object.
+  The 47 older versions stay at `rta/rta-chart`, frozen: each carries the old name inside, so copying them would give
+  `charts/rta` a history that mixes the two names and recreates the volume trap in the registry itself. The first push
+  failed once on a transient GHCR 404 after the upload (`failed to perform "Tag" on destination`, Helm 4 fetches the
+  manifest back by digest to tag it); re-running the failed jobs fixed it. The shared release workflows have a single
+  `helm push`, with no retry.
+
+What changed from the plan:
+
+- Step 1 (the spike) is dropped: the ohmlab move and rta's first release answered what it was for. `oras copy -r` keeps
+  the digest, the signature and the provenance. A package created by a workflow is linked to its repository and writable
+  by it; a package made by hand is neither, and needs the repository under "Manage Actions access", and a change of
+  visibility to be pulled anonymously.
+- The copy of the helm-charts versions is a script the owner runs with their own token (dry run by default, safe to
+  re-run), not a pull-request workflow that is never merged. It also copies the cosign 2 `sha256-<digest>.sig` tag of
+  the 23 older versions, which `oras copy -r` leaves behind. A second script checks anonymously, for every version, that
+  the digest, the referrers and the signature are the same at both ends.
+- helm-charts has 55 released versions in OCI, not 51: backup-utils 23, cnpg-cluster 14, vso-utils 11, searxng 4,
+  homepage 2, system-upgrade-controller 1. 48 are signed by a workflow and 7 by the maintainer by hand (backup-utils
+  2.2.0 to 2.2.2, cnpg-cluster 1.5.0 and 1.5.1, vso-utils 1.1.0 and 1.1.1).
+- Step 2 goes in an order that matters: copy, package access (public, and `helm-charts` with the Write role), verify,
+  then merge the pull request that sets `REPOSITORY: this-is-tobi/charts`. `SKIP_EXISTING` looks at the destination:
+  merged before the copy, a chart that changed without a version bump would be pushed again under a new digest.
+
+Later, on the owner's call:
+
+- Steps 4 (our consumers leave the classic Helm repository), 5 (Artifact Hub) and 6 (the classic repository retires).
+- **Cleaning the old OCI packages, `rta/rta-chart` and the six `helm-charts/<chart>`, much later, once people have
+  migrated.** The owner thinks nobody consumes the OCI charts; the download counts of the packages, on their pages,
+  would say before anything is deleted. Two things to remember then: deleting `rta/rta-chart` loses its 47 versions for
+  good, since they are copied nowhere (GitHub restores a deleted package for 30 days, only while its name is unused);
+  and the six `helm-charts/<chart>` can go once the copy is verified, because every version is at the new path.
 
 ## Intent
 
@@ -73,7 +115,8 @@ What gets unified is how charts are shipped, not where they are written.
   `sha256-<digest>.sig` and no referrer: 11 in backup-utils, 5 in cnpg-cluster, 7 in vso-utils (23 in all). Of those, at
   least vso-utils 1.1.1 is signed by a person, not a workflow (`this-is-tobi@proton.me`, issuer
   `https://github.com/login/oauth`), and the subagent review found six more: cnpg-cluster 1.5.0 and 1.5.1, vso-utils 1.1.0,
-  backup-utils 2.2.0, 2.2.1 and 2.2.2 (not all re-checked by the author; vso-utils 1.1.0 has no signature at all).
+  backup-utils 2.2.0, 2.2.1 and 2.2.2 (re-checked on 2026-11-03: all seven are signed by the maintainer, vso-utils 1.1.0
+  included, and no version of the six charts is unsigned).
   The README's identity regexp accepts both the old workflow identity
   (`helm-charts/.github/workflows/release.yaml@refs/heads/main`) and the shared one
   (`github-workflows/.github/workflows/attest-helm.yml@.+`), and none of these personal signatures.
@@ -339,10 +382,12 @@ not remove it.
 - `rta-chart` becomes `rta` (the user's decision), its old versions are not copied, and existing releases add
   `nameOverride: rta-chart` (see "Chart names").
 - Only the versions in OCI move. The older ones stay in the frozen classic Helm repository.
-- Old OCI packages are frozen, not deleted, and nothing is planned to delete them.
-- The copy runs from pull-request workflows that are never merged, one per owning repository.
-- Versions signed by a person are copied and documented as exceptions, not left out (51 versions in helm-charts stay 51).
-- Step 1 uses vso-utils 1.1.2, not 1.1.1.
+- Old OCI packages are frozen, not deleted. Cleaning them is a much later call, once people have migrated (see
+  "Progress").
+- The copy of the helm-charts versions is a script the owner runs locally; ohmlab's was done the same way, and rta
+  copies nothing (see "Progress").
+- Versions signed by a person are copied and documented as exceptions, not left out (55 versions in helm-charts stay 55).
+- Step 1 is dropped (see "Progress").
 - All six helm-charts charts get a patch bump in step 2, to ship READMEs that show the new path (and Renovate proposes
   those bumps downstream early).
 - Artifact Hub metadata lives in helm-charts under `artifacthub/<chart>.yml`, is pushed once by a script, and no shared
@@ -361,7 +406,8 @@ not remove it.
 
 - **Who are the outside consumers of the classic Helm repository and of `oci://ghcr.io/this-is-tobi/helm-charts`?**
   IA-Generative (4 repositories) and dnum-mi (2 repositories and a docs repository) pin charts there, and
-  `lynh7/home-cluster` copies a README.
+  `lynh7/home-cluster` copies a README. The owner thinks nobody consumes the OCI charts (2026-11-03): the pins above
+  are on the classic Helm repository, which is the question that matters for step 6.
   - If they are yours to migrate, step 4 covers them, the freeze of the old paths costs nothing, and step 6 goes ahead.
   - If they are third parties, step 6 does not happen (chart-releaser, the GitHub Releases and the GPG signature keep
     running, so the classic Helm repository stays alive), and the old OCI paths need either a notice only, or a period
