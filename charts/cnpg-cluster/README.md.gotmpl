@@ -8,6 +8,29 @@
 
 {{ template "chart.requirementsSection" . }}
 
+> [!WARNING]
+> **This chart is deprecated.** The official [`cluster` chart](https://github.com/cloudnative-pg/charts/tree/main/charts/cluster) of CloudNativePG ([Artifact Hub](https://artifacthub.io/packages/helm/cloudnative-pg/cluster)) replaces it. The versions already published stay available.
+
+## Migrating to the official chart
+
+Moving a release to the `cluster` chart is a `helm upgrade` of the same release, as long as the `Cluster` keeps its name: otherwise Helm deletes it and creates another one. The official chart names it `<release>-cluster`, so set `fullnameOverride` to the name you have today (`kubectl get clusters.postgresql.cnpg.io`), or alias the dependency when the cluster is part of a larger chart.
+
+| This chart | `cluster` chart |
+| ---------- | --------------- |
+| `dbName`, `credentials.username` | `cluster.initdb.database`, `cluster.initdb.owner` |
+| `credentials.existingSecrets.app.secretName` | `cluster.initdb.secret.name` |
+| `credentials.existingSecrets.postgres.secretName`, `enableSuperuserAccess` | `cluster.superuserSecret`, `cluster.enableSuperuserAccess` |
+| `instances`, `imageName`, `resources`, `affinity` | the same keys under `cluster:` |
+| `storageClass`, `pvcSize.data`, `pvcSize.wal` | `cluster.storage.{storageClass,size}`, `cluster.walStorage.{enabled,storageClass,size}` |
+| `parameters`, `pgHba` | `cluster.postgresql.parameters`, `cluster.postgresql.pg_hba` |
+| `monitoring.enabled` | `cluster.monitoring.enabled` |
+| `backup.*` | `backups.*` |
+| `pooler` | `poolers`, a list |
+| `infosSecret` | none: the operator's `<cluster>-app` secret holds the host, port, database, user, password and URI |
+| `extraObjects` | none: put the objects in the chart that installs the cluster |
+
+[template-monorepo-ts#5](https://github.com/this-is-tobi/template-monorepo-ts/pull/5) is a worked example.
+
 ## Installing the Chart
 
 ### CLI
