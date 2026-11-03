@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 2.5.7](https://img.shields.io/badge/Version-2.5.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.4.6](https://img.shields.io/badge/AppVersion-1.4.6-informational?style=flat-square)
+![Version: 2.5.8](https://img.shields.io/badge/Version-2.5.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.4.6](https://img.shields.io/badge/AppVersion-1.4.6-informational?style=flat-square)
 
 Production-ready Helm chart for automated backups of PostgreSQL, MariaDB, MongoDB, etcd, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules and retention policies.
 
@@ -52,7 +52,7 @@ helm install <release_name> tobi/backup-utils
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/backup-utils --version 2.5.7
+helm install <release_name> oci://ghcr.io/this-is-tobi/charts/backup-utils --version 2.5.8
 ```
 
 ### ArgoCD
@@ -68,7 +68,7 @@ spec:
   sources:
   - repoURL: https://this-is-tobi.github.io/helm-charts
     chart: backup-utils
-    targetRevision: 2.5.7
+    targetRevision: 2.5.8
     helm:
       releaseName: <release_name>
       values: |
@@ -95,9 +95,9 @@ metadata:
 spec:
   project: default
   sources:
-  - repoURL: ghcr.io/this-is-tobi/helm-charts
+  - repoURL: ghcr.io/this-is-tobi/charts
     chart: backup-utils
-    targetRevision: 2.5.7
+    targetRevision: 2.5.8
     helm:
       releaseName: <release_name>
       values: |
@@ -122,7 +122,7 @@ spec:
 # Chart.yaml
 dependencies:
 - name: backup-utils
-  version: 2.5.7
+  version: 2.5.8
   repository: https://this-is-tobi.github.io/helm-charts
   condition: backup-utils.enabled
 ```
@@ -132,8 +132,8 @@ dependencies:
 # Chart.yaml
 dependencies:
 - name: backup-utils
-  version: 2.5.7
-  repository: oci://ghcr.io/this-is-tobi/helm-charts
+  version: 2.5.8
+  repository: oci://ghcr.io/this-is-tobi/charts
   condition: backup-utils.enabled
 ```
 

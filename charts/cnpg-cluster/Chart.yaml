@@ -1,7 +1,7 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 2.3.0
+version: 2.3.1
 appVersion: "1.29.0"
 description: A Helm Chart to deploy easily a CNPG cluster
 home: https://cloudnative-pg.io
@@ -10,10 +10,8 @@ annotations:
   artifacthub.io/category: database
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: added
-      description: Add backup.dataAdditionalCommandArgs and backup.walAdditionalCommandArgs to pass extra arguments to barman-cloud-backup and barman-cloud-wal-archive (e.g. --min-chunk-size to avoid the S3 1000 multipart chunks limit).
-    - kind: added
-      description: Add backup/recovery/replica extraConfiguration values deep-merged into the barman object store configuration to support any field not explicitly exposed by the chart.
+    - kind: changed
+      description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/cnpg-cluster; every earlier version is there too, with the same digest"
 keywords:
 - postgresql
 - postgres

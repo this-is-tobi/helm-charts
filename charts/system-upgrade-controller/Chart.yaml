@@ -1,7 +1,7 @@
 apiVersion: v2
 name: system-upgrade-controller
 type: application
-version: 0.1.0
+version: 0.1.1
 appVersion: "v0.20.2"
 description: Secure, plug-and-play Helm chart for the Rancher system-upgrade-controller, with a one-value k3s upgrade preset and generic upgrade Plans.
 # Floor set by the APIs the chart renders (apiextensions/v1, coordination/v1 leases, batch/v1
@@ -13,8 +13,8 @@ annotations:
   artifacthub.io/category: integration-delivery
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: added
-      description: Initial release (system-upgrade-controller v0.20.2)
+    - kind: changed
+      description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/system-upgrade-controller; every earlier version is there too, with the same digest"
   artifacthub.io/images: |
     - name: system-upgrade-controller
       image: docker.io/rancher/system-upgrade-controller:v0.20.2

@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 2.3.0](https://img.shields.io/badge/Version-2.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.29.0](https://img.shields.io/badge/AppVersion-1.29.0-informational?style=flat-square)
+![Version: 2.3.1](https://img.shields.io/badge/Version-2.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.29.0](https://img.shields.io/badge/AppVersion-1.29.0-informational?style=flat-square)
 
 A Helm Chart to deploy easily a CNPG cluster
 
@@ -17,7 +17,7 @@ helm install <release_name> tobi/cnpg-cluster
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 2.3.0
+helm install <release_name> oci://ghcr.io/this-is-tobi/charts/cnpg-cluster --version 2.3.1
 ```
 
 ### ArgoCD
@@ -28,7 +28,7 @@ helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster 
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 2.3.0
+  targetRevision: 2.3.1
   helm:
     releaseName: <release_name>
     parameters: []
@@ -39,9 +39,9 @@ sources:
 ```yaml
 [...]
 sources:
-- repoURL: ghcr.io/this-is-tobi/helm-charts
+- repoURL: ghcr.io/this-is-tobi/charts
   chart: cnpg-cluster
-  targetRevision: 2.3.0
+  targetRevision: 2.3.1
   helm:
     releaseName: <release_name>
     parameters: []
@@ -56,7 +56,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 2.3.0
+  version: 2.3.1
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -67,8 +67,8 @@ dependencies:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 2.3.0
-  repository: oci://ghcr.io/this-is-tobi/helm-charts
+  version: 2.3.1
+  repository: oci://ghcr.io/this-is-tobi/charts
   condition: cnpg-cluster.enabled
 ```
 
@@ -88,7 +88,7 @@ Deploy a basic 3-instance PostgreSQL cluster. The CNPG operator auto-generates s
 
 ```bash
 # Deploy cluster (passwords managed by the operator, stable across helm upgrades)
-helm install my-postgres oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster
+helm install my-postgres oci://ghcr.io/this-is-tobi/charts/cnpg-cluster
 
 # Retrieve the generated application password
 kubectl get secret my-postgres-cnpg-cluster-app -o jsonpath='{.data.password}' | base64 -d
@@ -117,7 +117,7 @@ kubectl create secret generic postgres-admin-credentials \
   --type=kubernetes.io/basic-auth
 
 # Deploy using existing secrets
-helm install my-postgres oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster \
+helm install my-postgres oci://ghcr.io/this-is-tobi/charts/cnpg-cluster \
   --set credentials.username=myapp \
   --set credentials.existingSecrets.enabled=true \
   --set credentials.existingSecrets.app.secretName=postgres-app-credentials \

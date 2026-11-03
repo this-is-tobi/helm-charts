@@ -28,7 +28,7 @@ helm install searxng tobi/{{ template "chart.name" . }} --namespace searxng --cr
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install searxng oci://ghcr.io/this-is-tobi/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }} \
+helm install searxng oci://ghcr.io/this-is-tobi/charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }} \
   --namespace searxng --create-namespace
 ```
 
@@ -47,7 +47,7 @@ spec:
     server: https://kubernetes.default.svc
     namespace: searxng
   sources:
-  - repoURL: ghcr.io/this-is-tobi/helm-charts
+  - repoURL: ghcr.io/this-is-tobi/charts
     chart: {{ template "chart.name" . }}
     targetRevision: {{ template "chart.version" . }}
     helm:

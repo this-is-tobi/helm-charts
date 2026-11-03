@@ -21,7 +21,7 @@ helm install <release_name> tobi/{{ template "chart.name" . }}
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }}
+helm install <release_name> oci://ghcr.io/this-is-tobi/charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }}
 ```
 
 ### ArgoCD
@@ -43,7 +43,7 @@ sources:
 ```yaml
 [...]
 sources:
-- repoURL: ghcr.io/this-is-tobi/helm-charts
+- repoURL: ghcr.io/this-is-tobi/charts
   chart: {{ template "chart.name" . }}
   targetRevision: {{ template "chart.version" . }}
   helm:
@@ -72,7 +72,7 @@ dependencies:
 dependencies:
 - name: {{ template "chart.name" . }}
   version: {{ template "chart.version" . }}
-  repository: oci://ghcr.io/this-is-tobi/helm-charts
+  repository: oci://ghcr.io/this-is-tobi/charts
   condition: {{ template "chart.name" . }}.enabled
 ```
 
@@ -92,7 +92,7 @@ Deploy a basic 3-instance PostgreSQL cluster. The CNPG operator auto-generates s
 
 ```bash
 # Deploy cluster (passwords managed by the operator, stable across helm upgrades)
-helm install my-postgres oci://ghcr.io/this-is-tobi/helm-charts/{{ template "chart.name" . }}
+helm install my-postgres oci://ghcr.io/this-is-tobi/charts/{{ template "chart.name" . }}
 
 # Retrieve the generated application password
 kubectl get secret my-postgres-{{ template "chart.name" . }}-app -o jsonpath='{.data.password}' | base64 -d
@@ -121,7 +121,7 @@ kubectl create secret generic postgres-admin-credentials \
   --type=kubernetes.io/basic-auth
 
 # Deploy using existing secrets
-helm install my-postgres oci://ghcr.io/this-is-tobi/helm-charts/{{ template "chart.name" . }} \
+helm install my-postgres oci://ghcr.io/this-is-tobi/charts/{{ template "chart.name" . }} \
   --set credentials.username=myapp \
   --set credentials.existingSecrets.enabled=true \
   --set credentials.existingSecrets.app.secretName=postgres-app-credentials \
