@@ -139,6 +139,13 @@
       "semanticCommitScope": "deps"
     },
     {
+      "description": "No wait for this owner's own reusable workflows: a fix released there has to reach this repository's CI and release at once. The wait stays for everything else",
+      "matchDepNames": [
+        "this-is-tobi/github-workflows"
+      ],
+      "minimumReleaseAge": null
+    },
+    {
       "description": "A major update can break what runs on it: label it and read the release notes first. Never merged without a review, as nothing is",
       "matchUpdateTypes": [
         "major"
