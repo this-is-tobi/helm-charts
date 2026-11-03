@@ -79,6 +79,16 @@ helm verify <chart-name>-<version>.tgz
 helm install --verify <release-name> <chart-name>
 ```
 
+**Verifying a chart pulled from the OCI registry (GPG):**
+
+The OCI package carries the same `.prov` file, so a pull checks the signature too. Helm reads a binary keyring, not the armored key. Every version has it but backup-utils 2.2.0, cnpg-cluster 1.5.0 and vso-utils 1.1.0.
+
+```sh
+curl -s https://raw.githubusercontent.com/this-is-tobi/helm-charts/main/ci/configs/helm-charts-signing-key.asc | gpg --dearmor > helm-charts.gpg
+
+helm pull oci://ghcr.io/this-is-tobi/charts/<chart-name> --version <version> --verify --keyring helm-charts.gpg
+```
+
 **Verifying OCI Images:**
 
 OCI artifacts are signed using [Cosign](https://docs.sigstore.dev/cosign/overview/) with keyless signing (OIDC).
