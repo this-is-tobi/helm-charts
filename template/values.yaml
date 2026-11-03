@@ -1225,22 +1225,24 @@ extraObjects: {}
 
 
 ## Additional services comming from dependencies can be configured below.
-## Ref: https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/cnpg-cluster
+## Ref: https://artifacthub.io/packages/helm/cloudnative-pg/cluster
 # cnpg:
 #   enabled: false
 #   fullnameOverride: servicename-pg-cluster
-#   imageName: ghcr.io/cloudnative-pg/postgresql:17.6
-#   mode: primary
-#   dbName: servicename
-#   credentials:
-#     username: servicename
-#   pvcSize:
-#     data: 3Gi
-#     wal: 2Gi
-#   resources:
-#     requests:
-#       cpu: 250m
-#       memory: 512Mi
-#     limits:
-#       cpu: 500m
-#       memory: 1Gi
+#   cluster:
+#     imageName: ghcr.io/cloudnative-pg/postgresql:17.6
+#     initdb:
+#       database: servicename
+#       owner: servicename
+#     storage:
+#       size: 3Gi
+#     walStorage:
+#       enabled: true
+#       size: 2Gi
+#     resources:
+#       requests:
+#         cpu: 250m
+#         memory: 512Mi
+#       limits:
+#         cpu: 500m
+#         memory: 1Gi
