@@ -2,10 +2,13 @@
 
 This repository hosts a set of personal Helm Charts available through:
 - **Helm Repository**: [https://this-is-tobi.github.io/helm-charts](https://this-is-tobi.github.io/helm-charts) (GitHub Pages)
-- **OCI Registry**: `ghcr.io/this-is-tobi/helm-charts` (GitHub Container Registry)
+- **OCI Registry**: `ghcr.io/this-is-tobi/charts` (GitHub Container Registry), the one namespace of every chart of this-is-tobi, whichever repository builds it
 
 > [!TIP]
 > See charts details [here](https://this-is-tobi.github.io/helm-charts/index.yaml).
+
+> [!NOTE]
+> The first versions of these charts were published at `ghcr.io/this-is-tobi/helm-charts/<chart_name>`. They are also at the path above, with the same digests and signatures. The old path stays as it is and receives no new version.
 
 ## Chart list
 
@@ -17,6 +20,17 @@ This repository hosts a set of personal Helm Charts available through:
 | [searxng](./charts/searxng)           | [SearXNG](https://github.com/searxng/searxng)                           | Easy SearXNG deployment.      | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/searxng)      |
 | [system-upgrade-controller](./charts/system-upgrade-controller) | [SUC](https://github.com/rancher/system-upgrade-controller) | Easy node upgrades (k3s, RKE2, OS). | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/system-upgrade-controller) |
 | [vso-utils](./charts/vso-utils)       | [VSO](https://developer.hashicorp.com/vault/docs/deploy/kubernetes/vso) | Easy VSO objects deployment.  | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/vso-utils)    |
+
+### Charts built in other repositories
+
+A chart of an application is released with the application, from its own repository, to the same OCI namespace:
+
+| Chart                                                                    | Description                                                      | OCI                                        |
+| ------------------------------------------------------------------------ | ---------------------------------------------------------------- | ------------------------------------------ |
+| [rta](https://github.com/this-is-tobi/rta/tree/main/charts/rta)          | Deploy rta MCP servers into Kubernetes, one instance per person. | `oci://ghcr.io/this-is-tobi/charts/rta`    |
+| [ohmlab](https://github.com/this-is-tobi/ohmlab/tree/main/charts/ohmlab) | A Helm chart to deploy ohmlab.                                   | `oci://ghcr.io/this-is-tobi/charts/ohmlab` |
+
+The versions of rta up to 0.42.1 were published as `rta-chart`, at `ghcr.io/this-is-tobi/rta/rta-chart`, and stay there: the chart carries a new name, and its README says what a release made by the old one sets before it upgrades.
 
 ## Usage
 
@@ -36,10 +50,10 @@ helm install <release_name> tobi/<chart_name>
 
 ```sh
 # Install directly from OCI registry
-helm install <release_name> oci://ghcr.io/this-is-tobi/helm-charts/<chart_name> --version <version>
+helm install <release_name> oci://ghcr.io/this-is-tobi/charts/<chart_name> --version <version>
 
 # Example
-helm install my-db oci://ghcr.io/this-is-tobi/helm-charts/cnpg-cluster --version 1.5.0
+helm install my-db oci://ghcr.io/this-is-tobi/charts/cnpg-cluster --version 2.3.0
 ```
 
 > [!TIP]
@@ -69,7 +83,7 @@ helm install --verify <release-name> <chart-name>
 
 OCI artifacts are signed using [Cosign](https://docs.sigstore.dev/cosign/overview/) with keyless signing (OIDC).
 
-The identity of a keyless signature is the workflow that made it, and it changed once: the first versions were signed by this repository's `release.yaml`, the later ones by the shared `attest-helm.yml` of [`this-is-tobi/github-workflows`](https://github.com/this-is-tobi/github-workflows), which now does the release (a shared workflow signs under its own identity, not its caller's). The command below accepts both, so it verifies any version.
+The identity of a keyless signature is the workflow that made it, and it changed once: the first versions were signed by this repository's `release.yaml`, the later ones by the shared `attest-helm.yml` of [`this-is-tobi/github-workflows`](https://github.com/this-is-tobi/github-workflows), which now does the release (a shared workflow signs under its own identity, not its caller's). The command below accepts both, so it verifies any version but seven.
 
 ```sh
 # Install cosign (if not already installed)
@@ -80,7 +94,16 @@ The identity of a keyless signature is the workflow that made it, and it changed
 cosign verify \
   --certificate-identity-regexp='^https://github\.com/this-is-tobi/(helm-charts/\.github/workflows/release\.yaml@refs/heads/main|github-workflows/\.github/workflows/attest-helm\.yml@.+)$' \
   --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
-  ghcr.io/this-is-tobi/helm-charts/<chart-name>:<version>
+  ghcr.io/this-is-tobi/charts/<chart-name>:<version>
+```
+
+Seven early versions were signed by hand, with the maintainer's GitHub identity, rather than by a workflow: backup-utils 2.2.0, 2.2.1 and 2.2.2, cnpg-cluster 1.5.0 and 1.5.1, vso-utils 1.1.0 and 1.1.1. They verify with that identity instead:
+
+```sh
+cosign verify \
+  --certificate-identity="this-is-tobi@proton.me" \
+  --certificate-oidc-issuer="https://github.com/login/oauth" \
+  ghcr.io/this-is-tobi/charts/<chart-name>:<version>
 ```
 
 Versions released through the shared workflows also carry a SLSA build provenance attestation, which says which repository and commit built the chart:
@@ -89,7 +112,7 @@ Versions released through the shared workflows also carry a SLSA build provenanc
 cosign verify-attestation --type slsaprovenance1 \
   --certificate-identity-regexp='^https://github\.com/this-is-tobi/github-workflows/\.github/workflows/attest-helm\.yml@.+$' \
   --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
-  ghcr.io/this-is-tobi/helm-charts/<chart-name>:<version>
+  ghcr.io/this-is-tobi/charts/<chart-name>:<version>
 ```
 
 ### Helm Dependencies
@@ -111,7 +134,7 @@ dependencies:
 dependencies:
   - name: <chart_name>
     version: "<version>"
-    repository: "oci://ghcr.io/this-is-tobi/helm-charts"
+    repository: "oci://ghcr.io/this-is-tobi/charts"
 ```
 
 Then update dependencies:
@@ -135,7 +158,7 @@ sources:
 **Using OCI Registry:**
 ```yaml
 sources:
-- repoURL: ghcr.io/this-is-tobi/helm-charts
+- repoURL: ghcr.io/this-is-tobi/charts
   chart: <chart_name>
   targetRevision: <version>
   helm:
