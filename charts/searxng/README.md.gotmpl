@@ -19,14 +19,6 @@
 
 ## Installing the Chart
 
-**Using Traditional Helm Repository:**
-```sh
-helm repo add tobi https://this-is-tobi.github.io/helm-charts
-helm repo update
-helm install searxng tobi/{{ template "chart.name" . }} --namespace searxng --create-namespace
-```
-
-**Using OCI Registry (Recommended):**
 ```sh
 helm install searxng oci://ghcr.io/this-is-tobi/charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }} \
   --namespace searxng --create-namespace

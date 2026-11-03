@@ -1,6 +1,6 @@
 # cnpg-cluster
 
-![Version: 2.4.0](https://img.shields.io/badge/Version-2.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.29.0](https://img.shields.io/badge/AppVersion-1.29.0-informational?style=flat-square)
+![Version: 2.4.1](https://img.shields.io/badge/Version-2.4.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.29.0](https://img.shields.io/badge/AppVersion-1.29.0-informational?style=flat-square)
 
 DEPRECATED - use the official CloudNativePG cluster chart. A Helm Chart to deploy easily a CNPG cluster
 
@@ -31,40 +31,18 @@ Moving a release to the `cluster` chart is a `helm upgrade` of the same release,
 
 ### CLI
 
-**Using Traditional Helm Repository:**
 ```sh
-helm repo add tobi https://this-is-tobi.github.io/helm-charts
-helm repo update
-helm install <release_name> tobi/cnpg-cluster
-```
-
-**Using OCI Registry (Recommended):**
-```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/charts/cnpg-cluster --version 2.4.0
+helm install <release_name> oci://ghcr.io/this-is-tobi/charts/cnpg-cluster --version 2.4.1
 ```
 
 ### ArgoCD
 
-**Using Helm Repository:**
-```yaml
-[...]
-sources:
-- repoURL: https://this-is-tobi.github.io/helm-charts
-  chart: cnpg-cluster
-  targetRevision: 2.4.0
-  helm:
-    releaseName: <release_name>
-    parameters: []
-    values: ""
-```
-
-**Using OCI Registry:**
 ```yaml
 [...]
 sources:
 - repoURL: ghcr.io/this-is-tobi/charts
   chart: cnpg-cluster
-  targetRevision: 2.4.0
+  targetRevision: 2.4.1
   helm:
     releaseName: <release_name>
     parameters: []
@@ -73,24 +51,12 @@ sources:
 
 ### Helm dependency
 
-**Using Helm Repository:**
 ```yaml
 # Chart.yaml
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 2.4.0
-  repository: https://this-is-tobi.github.io/helm-charts
-  condition: cnpg-cluster.enabled
-```
-
-**Using OCI Registry:**
-```yaml
-# Chart.yaml
-[...]
-dependencies:
-- name: cnpg-cluster
-  version: 2.4.0
+  version: 2.4.1
   repository: oci://ghcr.io/this-is-tobi/charts
   condition: cnpg-cluster.enabled
 ```

@@ -1,7 +1,7 @@
 apiVersion: v2
 name: backup-utils
 type: application
-version: 2.5.8
+version: 2.5.9
 appVersion: "1.4.6"
 description: Production-ready Helm chart for automated backups of PostgreSQL, MariaDB, MongoDB, etcd, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules and retention policies.
 deprecated: false
@@ -10,7 +10,7 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: changed
-      description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/backup-utils; every earlier version is there too, with the same digest"
+      description: "The README installs from the OCI registry only: the Helm repository at github.io is frozen"
 keywords:
 - backup
 - postgresql

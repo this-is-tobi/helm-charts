@@ -1,7 +1,7 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 2.4.0
+version: 2.4.1
 appVersion: "1.29.0"
 description: "DEPRECATED - use the official CloudNativePG cluster chart. A Helm Chart to deploy easily a CNPG cluster"
 home: https://cloudnative-pg.io
@@ -10,11 +10,8 @@ annotations:
   artifacthub.io/category: database
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: deprecated
-      description: "The chart is deprecated: the official cluster chart of CloudNativePG replaces it, and the README maps the values"
-      links:
-      - name: Official cluster chart
-        url: https://github.com/cloudnative-pg/charts/tree/main/charts/cluster
+    - kind: changed
+      description: "The README installs from the OCI registry only: the Helm repository at github.io is frozen"
 keywords:
 - postgresql
 - postgres

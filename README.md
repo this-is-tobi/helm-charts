@@ -1,11 +1,9 @@
 # Helm charts :anchor:
 
-This repository hosts a set of personal Helm Charts available through:
-- **Helm Repository**: [https://this-is-tobi.github.io/helm-charts](https://this-is-tobi.github.io/helm-charts) (GitHub Pages)
-- **OCI Registry**: `ghcr.io/this-is-tobi/charts` (GitHub Container Registry), the one namespace of every chart of this-is-tobi, whichever repository builds it
+This repository hosts a set of personal Helm Charts, published to an OCI registry: `ghcr.io/this-is-tobi/charts` (GitHub Container Registry), the one namespace of every chart of this-is-tobi, whichever repository builds it.
 
-> [!TIP]
-> See charts details [here](https://this-is-tobi.github.io/helm-charts/index.yaml).
+> [!NOTE]
+> The Helm repository at [https://this-is-tobi.github.io/helm-charts](https://this-is-tobi.github.io/helm-charts) is frozen: it lists the versions released before it stopped being updated, and receives no new one.
 
 > [!NOTE]
 > The first versions of these charts were published at `ghcr.io/this-is-tobi/helm-charts/<chart_name>`. They are also at the path above, with the same digests and signatures. The old path stays as it is and receives no new version.
@@ -34,18 +32,6 @@ The versions of rta up to 0.42.1 were published as `rta-chart`, at `ghcr.io/this
 
 ## Usage
 
-### Traditional Helm Repository
-
-```sh
-# Add repository
-helm repo add tobi https://this-is-tobi.github.io/helm-charts
-helm repo update
-
-# Search and install
-helm search repo tobi
-helm install <release_name> tobi/<chart_name>
-```
-
 ### OCI Registry
 
 ```sh
@@ -56,9 +42,6 @@ helm install <release_name> oci://ghcr.io/this-is-tobi/charts/<chart_name> --ver
 helm install my-backups oci://ghcr.io/this-is-tobi/charts/backup-utils --version 2.5.8
 ```
 
-> [!TIP]
-> OCI installation doesn't require `helm repo add` and provides better performance and security.
-
 ### Chart Signatures
 
 All charts are signed using GPG for authenticity and integrity verification.
@@ -67,7 +50,7 @@ All charts are signed using GPG for authenticity and integrity verification.
 - Key ID: `54029E3057EBFE1FA2781C066F5BD8A9D2134DCF`
 - Public key: [ci/configs/helm-charts-signing-key.asc](./ci/configs/helm-charts-signing-key.asc)
 
-**Verifying Traditional Helm Charts (.tgz):**
+**Verifying a chart downloaded from a GitHub Release (.tgz):**
 ```sh
 # Import the public key
 curl -s https://raw.githubusercontent.com/this-is-tobi/helm-charts/main/ci/configs/helm-charts-signing-key.asc | gpg --import
@@ -129,16 +112,6 @@ cosign verify-attestation --type slsaprovenance1 \
 
 You can use these charts as dependencies in your own Helm charts.
 
-**Using Traditional Helm Repository:**
-```yaml
-# Chart.yaml
-dependencies:
-  - name: <chart_name>
-    version: "<version>"
-    repository: "https://this-is-tobi.github.io/helm-charts"
-```
-
-**Using OCI Registry (Recommended):**
 ```yaml
 # Chart.yaml
 dependencies:
@@ -154,18 +127,6 @@ helm dependency update
 
 ### ArgoCD
 
-**Using Helm Repository:**
-```yaml
-sources:
-- repoURL: https://this-is-tobi.github.io/helm-charts
-  chart: <chart_name>
-  targetRevision: <version>
-  helm:
-    releaseName: <release_name>
-    values: ""
-```
-
-**Using OCI Registry:**
 ```yaml
 sources:
 - repoURL: ghcr.io/this-is-tobi/charts
