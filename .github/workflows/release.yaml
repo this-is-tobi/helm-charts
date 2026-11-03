@@ -49,9 +49,11 @@ jobs:
       GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
-  # Nothing to attest (an empty list) is a no-op, so this runs on every release.
+  # Nothing to attest (an empty list) is a no-op, so this runs on every release, a failed one included: the charts
+  # pushed before the failure are listed, and a later run leaves them out as already published.
   attest:
     needs: release
+    if: ${{ !cancelled() }}
     uses: this-is-tobi/github-workflows/.github/workflows/attest-helm.yml@2204ef5b41c4a86152f81d6ed0ebbdd00562ac49 # v0.47.0
     permissions:
       packages: write
