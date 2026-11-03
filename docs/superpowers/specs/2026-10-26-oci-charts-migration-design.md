@@ -10,13 +10,7 @@ Done:
 
 - **ohmlab**: `charts/ohmlab` since 2026-10-29. Its 29 older versions were copied by digest and verified, and the old
   packages were deleted by the owner on 2026-11-02.
-- **rta**: `charts/rta` 0.43.0 was published and signed on 2026-11-03 (rta#437 and rta#438). The chart is renamed `rta`;
-  an existing release adds `nameOverride: rta-chart`, which renders what `rta-chart` 0.42.1 renders, object for object.
-  The 47 older versions stay at `rta/rta-chart`, frozen: each carries the old name inside, so copying them would give
-  `charts/rta` a history that mixes the two names and recreates the volume trap in the registry itself. The first push
-  failed once on a transient GHCR 404 after the upload (`failed to perform "Tag" on destination`, Helm 4 fetches the
-  manifest back by digest to tag it); re-running the failed jobs fixed it. The shared release workflows have a single
-  `helm push`, with no retry.
+- **rta**: `charts/rta` 0.43.0 was published and signed on 2026-11-03 (rta#437 and rta#438). The chart is renamed `rta`; an existing release adds `nameOverride: rta-chart`, which renders what `rta-chart` 0.42.1 renders, object for object. The first push failed once on a transient GHCR 404 after the upload (`failed to perform "Tag" on destination`, Helm 4 fetches the manifest back by digest to tag it); re-running the failed jobs fixed it.
 
 What changed from the plan:
 
@@ -31,6 +25,10 @@ What changed from the plan:
 - helm-charts has 55 released versions in OCI, not 51: backup-utils 23, cnpg-cluster 14, vso-utils 11, searxng 4,
   homepage 2, system-upgrade-controller 1. 48 are signed by a workflow and 7 by the maintainer by hand (backup-utils
   2.2.0 to 2.2.2, cnpg-cluster 1.5.0 and 1.5.1, vso-utils 1.1.0 and 1.1.1).
+- **rta's 47 older versions are copied too** (the owner's call, 2026-11-03; the plan below kept them at `rta/rta-chart`). They go by digest with their signatures, like the others, and still carry `name: rta-chart` inside: a release moving to `charts/rta` at the same version keeps its object names, and `nameOverride: rta-chart` is needed once it upgrades to 0.43.0 or later. One script copies the seven packages, 102 versions (all 47 of rta are signed by a workflow, none with a cosign 2 signature), and a second one verifies them.
+- **A release that fails.** The shared release workflows are changed (in preparation in github-workflows) to push each chart up to three times, 15 and 30 seconds apart, and to write `published-charts` however the step ends. Without that, a failure on the third of six charts left the first two published and never listed: the attest job was skipped, and the re-run found their versions in the registry and left them out for good. In helm-charts#140 the `attest` job runs after a failed release (`if: ${{ !cancelled() }}`). The copy also removes the first-push case, since the six packages exist by then.
+- **chart-releaser's own OCI push was read and not adopted.** `cr push` (chart-releaser v1.9.0, `oci_registry_url` in the action since v1.8.0) runs the same Helm push code, without a retry, and prints no machine-readable digest for `attest-helm.yml`.
+- **The GPG `.prov` file already travels to OCI.** `helm push` sends the file found beside a package as an extra layer, so `helm pull --verify oci://…` checks the GPG signature: 52 of the 55 helm-charts versions have it (not backup-utils 2.2.0, cnpg-cluster 1.5.0, vso-utils 1.1.0). The workflow notes saying the opposite are corrected.
 - Step 2 goes in an order that matters: copy, package access (public, and `helm-charts` with the Write role), verify,
   then merge the pull request that sets `REPOSITORY: this-is-tobi/charts`. `SKIP_EXISTING` looks at the destination:
   merged before the copy, a chart that changed without a version bump would be pushed again under a new digest.
@@ -40,9 +38,9 @@ Later, on the owner's call:
 - Steps 4 (our consumers leave the classic Helm repository), 5 (Artifact Hub) and 6 (the classic repository retires).
 - **Cleaning the old OCI packages, `rta/rta-chart` and the six `helm-charts/<chart>`, much later, once people have
   migrated.** The owner thinks nobody consumes the OCI charts; the download counts of the packages, on their pages,
-  would say before anything is deleted. Two things to remember then: deleting `rta/rta-chart` loses its 47 versions for
-  good, since they are copied nowhere (GitHub restores a deleted package for 30 days, only while its name is unused);
-  and the six `helm-charts/<chart>` can go once the copy is verified, because every version is at the new path.
+  would say before anything is deleted. Every version of the seven old packages is at the new path by then, so nothing
+  is lost once the copy is verified (GitHub restores a deleted package for 30 days, only while its name is unused).
+- **Step 6, what the survey of 2026-11-03 adds.** (a) Helm follows an `oci://` URL in a classic `index.yaml` (tested with Helm 4.3.1: `helm repo add` on a static index, then `helm pull` of `charts/rta:0.43.0`), so `helm repo add` can outlive chart-releaser on a static index whose entries point at the registry. (b) Dropping chart-releaser ends the GPG signature, since only it signs, unless the OCI-only path learns `helm package --sign`. (c) Stopping only the public index needs no code: chart-releaser keeps running with `PAGES_BRANCH` on a branch nobody serves (docs/51-release-helm.md of github-workflows, option 2), and releases, tags and signatures go on. (d) Artifact Hub registers an OCI chart per repository (`oci://registry/ns/chart`): step 5 makes 8 (6 + rta + ohmlab), where one classic repository lists the six today.
 
 ## Intent
 
@@ -79,7 +77,7 @@ What gets unified is how charts are shipped, not where they are written.
 
 - A published version changes content. A consumer pins a version and the signature is bound to the digest: versions are
   **copied by digest**, never pushed again from a fresh package.
-- An old path stops working. `helm-charts/<chart>`, `rta/rta-chart` and `homelab/charts/ohmlab` are frozen, never deleted.
+- An old path stops working. `helm-charts/<chart>`, `rta/rta-chart` and `homelab/charts/ohmlab` are frozen, never deleted. GHCR has no redirect or alias between packages, so the frozen package, holding the same digests as the new one, is the only bridge.
 - A deployed rta release loses its volume or secrets when it upgrades to the renamed chart (see "Chart names").
 - `this-is-tobi` details leak into github-workflows: its workflows stay generic, the path is passed by the callers.
 
@@ -161,8 +159,7 @@ The way out is already in the chart: `nameOverride: rta-chart` makes the new cha
 value before they upgrade. The upgrade note says so (see step 3), and a check proves it (the resources of the old chart
 and of the new chart with the override carry the same names).
 
-The old versions of `rta-chart` carry that name inside the package, so they are **not** copied to `charts/rta`. They stay
-at `rta/rta-chart`, frozen and still verifiable. `charts/rta` starts at the next version of the same version line.
+The old versions of `rta-chart` carry that name inside the package. They are copied to `charts/rta` all the same (see "Progress"), so the history is in one place: up to 0.42.1 they render the old names, and 0.43.0 is the first that needs the override.
 
 ## How a version moves (used in steps 1 to 3)
 
@@ -244,8 +241,7 @@ new path, the version it pins must already be there.
 
 **rta**
 
-The chart is renamed `rta` in the same pull request that moves it to `charts/` (see "Chart names"). Nothing is copied:
-the 39 versions of `rta/rta-chart` stay where they are.
+The chart is renamed `rta` in the same pull request that moves it to `charts/` (see "Chart names"). Nothing was copied with it; the versions of `rta/rta-chart` are copied afterwards (see "Progress").
 
 1. A pull request in rta:
    - `charts/rta-chart/` moves to `charts/rta/` and `Chart.yaml` gets `name: rta`.
@@ -379,13 +375,13 @@ not remove it.
 
 ## Calls made by the author (check them)
 
-- `rta-chart` becomes `rta` (the user's decision), its old versions are not copied, and existing releases add
-  `nameOverride: rta-chart` (see "Chart names").
+- `rta-chart` becomes `rta` (the user's decision), its old versions are copied too (see "Progress"), and existing
+  releases add `nameOverride: rta-chart` before 0.43.0 (see "Chart names").
 - Only the versions in OCI move. The older ones stay in the frozen classic Helm repository.
 - Old OCI packages are frozen, not deleted. Cleaning them is a much later call, once people have migrated (see
   "Progress").
-- The copy of the helm-charts versions is a script the owner runs locally; ohmlab's was done the same way, and rta
-  copies nothing (see "Progress").
+- The copy of the helm-charts and rta versions is a script the owner runs locally; ohmlab's was done the same way
+  (see "Progress").
 - Versions signed by a person are copied and documented as exceptions, not left out (55 versions in helm-charts stay 55).
 - Step 1 is dropped (see "Progress").
 - All six helm-charts charts get a patch bump in step 2, to ship READMEs that show the new path (and Renovate proposes
