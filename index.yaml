@@ -5,6 +5,45 @@ entries:
       artifacthub.io/category: storage
       artifacthub.io/changes: |
         - kind: changed
+          description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/backup-utils; every earlier version is there too, with the same digest"
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.4.6
+    created: "2026-11-03T03:23:56.999865896Z"
+    description: Production-ready Helm chart for automated backups of PostgreSQL,
+      MariaDB, MongoDB, etcd, Vault, Qdrant, and S3 buckets to S3-compatible storage
+      with configurable schedules and retention policies.
+    digest: 21336d022697bf95e4e06b18a8a9495913f30fa58d819726ae489fdd60bb9da6
+    keywords:
+    - backup
+    - postgresql
+    - mariadb
+    - mongodb
+    - etcd
+    - vault
+    - qdrant
+    - s3
+    - rclone
+    - cronjob
+    - kubernetes
+    - database
+    - snapshots
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: backup-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/this-is-tobi/tools
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-2.5.8/backup-utils-2.5.8.tgz
+    version: 2.5.8
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/changes: |
+        - kind: changed
           description: Update ghcr.io/this-is-tobi/tools/backup docker tag to v1.4.6
           links:
             - name: Pull Request
@@ -1371,6 +1410,41 @@ entries:
     - https://github.com/this-is-tobi/helm-charts/releases/download/backup-utils-0.1.0/backup-utils-0.1.0.tgz
     version: 0.1.0
   cnpg-cluster:
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |
+        - kind: changed
+          description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/cnpg-cluster; every earlier version is there too, with the same digest"
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.29.0
+    created: "2026-11-03T03:23:57.191036248Z"
+    description: A Helm Chart to deploy easily a CNPG cluster
+    digest: 807335b5b1bf59ddfa55c572c46e920ea663435e120577c0bc99bab38cd0a9e7
+    home: https://cloudnative-pg.io
+    keywords:
+    - postgresql
+    - postgres
+    - cnpg
+    - cloudnative-pg
+    - database
+    - operator
+    - high-availability
+    - backup
+    - replication
+    - kubernetes
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: cnpg-cluster
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/cloudnative-pg/cloudnative-pg
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/cnpg-cluster-2.3.1/cnpg-cluster-2.3.1.tgz
+    version: 2.3.1
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |
@@ -3248,6 +3322,40 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: changed
+          description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/homepage; every earlier version is there too, with the same digest"
+      artifacthub.io/images: |
+        - name: homepage
+          image: ghcr.io/gethomepage/homepage:v2.7.0
+      artifacthub.io/license: Apache-2.0
+    apiVersion: v2
+    appVersion: v2.7.0
+    created: "2026-11-03T03:23:57.303825552Z"
+    description: Secure, plug-and-play Helm chart for Homepage, the customizable application
+      dashboard, with optional Kubernetes service discovery and built-in authentication.
+    digest: 20cc4bfedb03d1c485c10d8664d39f7cfea417261e73c0f11f05278da8937aad
+    home: https://github.com/gethomepage/homepage
+    keywords:
+    - homepage
+    - dashboard
+    - startpage
+    - services
+    - kubernetes
+    kubeVersion: '>=1.25.0-0'
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: homepage
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/gethomepage/homepage
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/homepage-0.2.1/homepage-0.2.1.tgz
+    version: 0.2.1
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
           description: Update ghcr.io/gethomepage/homepage docker tag to v2.7.0
           links:
             - name: Pull Request
@@ -3317,6 +3425,47 @@ entries:
     - https://github.com/this-is-tobi/helm-charts/releases/download/homepage-0.1.0/homepage-0.1.0.tgz
     version: 0.1.0
   searxng:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
+          description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/searxng; every earlier version is there too, with the same digest"
+      artifacthub.io/images: |
+        - name: searxng
+          image: docker.io/searxng/searxng:2026.10.25-54ca1d9cf
+        - name: valkey
+          image: docker.io/valkey/valkey:9.1.0-alpine3.23@sha256:c9b77919daeba2c02ad954d0c844cc4e7142069d177b89c5fd771f405daf9e02
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 2026.10.25-54ca1d9cf
+    created: "2026-11-03T03:23:57.398772202Z"
+    dependencies:
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.25.16
+    description: Secure, plug-and-play Helm chart for SearXNG, the privacy-respecting
+      metasearch engine, with optional Valkey for its limiter.
+    digest: d17880aa475696698a3a1dcf1f6461175265929142ffd9c3a9108b52146213cd
+    home: https://github.com/searxng/searxng
+    keywords:
+    - searxng
+    - search
+    - metasearch
+    - privacy
+    - valkey
+    kubeVersion: '>=1.25.0-0'
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: searxng
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/searxng/searxng
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/searxng-0.3.1/searxng-0.3.1.tgz
+    version: 0.3.1
   - annotations:
       artifacthub.io/changes: |
         - kind: changed
@@ -3491,6 +3640,68 @@ entries:
   - annotations:
       artifacthub.io/category: integration-delivery
       artifacthub.io/changes: |
+        - kind: changed
+          description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/system-upgrade-controller; every earlier version is there too, with the same digest"
+      artifacthub.io/crds: |
+        - kind: Plan
+          version: v1
+          name: plans.upgrade.cattle.io
+          displayName: Plan
+          description: A set of nodes to upgrade and how to upgrade them.
+      artifacthub.io/crdsExamples: |
+        - apiVersion: upgrade.cattle.io/v1
+          kind: Plan
+          metadata:
+            name: server-plan
+          spec:
+            concurrency: 1
+            cordon: true
+            nodeSelector:
+              matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: In
+                values: ["true"]
+            serviceAccountName: system-upgrade-controller
+            upgrade:
+              image: docker.io/rancher/k3s-upgrade
+            version: v1.36.4+k3s1
+      artifacthub.io/images: |
+        - name: system-upgrade-controller
+          image: docker.io/rancher/system-upgrade-controller:v0.20.2
+        - name: kubectl
+          image: docker.io/rancher/kubectl:v1.30.3
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v0.20.2
+    created: "2026-11-03T03:23:57.519178562Z"
+    description: Secure, plug-and-play Helm chart for the Rancher system-upgrade-controller,
+      with a one-value k3s upgrade preset and generic upgrade Plans.
+    digest: 1f349c1ccb41a52ecc24fd031a1f922f30034c792b26a283428dcd9fe3f0abb5
+    home: https://github.com/rancher/system-upgrade-controller
+    keywords:
+    - system-upgrade-controller
+    - k3s
+    - rke2
+    - upgrade
+    - kubernetes
+    - nodes
+    - plan
+    kubeVersion: '>=1.25.0-0'
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: system-upgrade-controller
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/rancher/system-upgrade-controller
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/system-upgrade-controller-0.1.1/system-upgrade-controller-0.1.1.tgz
+    version: 0.1.1
+  - annotations:
+      artifacthub.io/category: integration-delivery
+      artifacthub.io/changes: |
         - kind: added
           description: Initial release (system-upgrade-controller v0.20.2)
       artifacthub.io/crds: |
@@ -3551,6 +3762,49 @@ entries:
     - https://github.com/this-is-tobi/helm-charts/releases/download/system-upgrade-controller-0.1.0/system-upgrade-controller-0.1.0.tgz
     version: 0.1.0
   vso-utils:
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |
+        - kind: changed
+          description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/vso-utils; every earlier version is there too, with the same digest"
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.6.0
+    created: "2026-11-03T03:23:57.648689906Z"
+    dependencies:
+    - alias: vso
+      condition: vso.enabled
+      name: vault-secrets-operator
+      repository: https://helm.releases.hashicorp.com
+      version: '>=1.0.0'
+    description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator
+      resources - sync static secrets, generate dynamic credentials, issue PKI certificates,
+      and configure Vault authentication.
+    digest: 885d8040d9c6161da15600c608740a5bd678284f5caf5b854d4f4835f3e50cf1
+    keywords:
+    - vault
+    - secrets
+    - hashicorp
+    - vso
+    - vault-secrets-operator
+    - kubernetes
+    - security
+    - pki
+    - dynamic-secrets
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: vso-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator
+    - https://developer.hashicorp.com/vault/docs/platform/k8s/vso
+    - https://github.com/hashicorp/vault-secrets-operator
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-2.2.1/vso-utils-2.2.1.tgz
+    version: 2.2.1
   - annotations:
       artifacthub.io/category: security
       artifacthub.io/changes: |
@@ -4127,4 +4381,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-11-01T02:30:19.767654206Z"
+generated: "2026-11-03T03:23:57.649021249Z"
