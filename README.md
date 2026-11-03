@@ -15,7 +15,7 @@ This repository hosts a set of personal Helm Charts available through:
 | Chart                                 | Application                                                             | Description                   | ArtifactHub                                                                        |
 | ------------------------------------- | ----------------------------------------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------- |
 | [backup-utils](./charts/backup-utils) | -                                                                       | Easy backup tools deployment. | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/backup-utils) |
-| [cnpg-cluster](./charts/cnpg-cluster) | [CNPG](https://cloudnative-pg.io)                                       | Easy CNPG cluster deployment. | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/cnpg-cluster) |
+| [cnpg-cluster](./charts/cnpg-cluster) | [CNPG](https://cloudnative-pg.io)                                       | Deprecated, use the [official chart](https://github.com/cloudnative-pg/charts/tree/main/charts/cluster). | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/cnpg-cluster) |
 | [homepage](./charts/homepage)         | [Homepage](https://github.com/gethomepage/homepage)                     | Easy Homepage deployment.     | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/homepage)     |
 | [searxng](./charts/searxng)           | [SearXNG](https://github.com/searxng/searxng)                           | Easy SearXNG deployment.      | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/searxng)      |
 | [system-upgrade-controller](./charts/system-upgrade-controller) | [SUC](https://github.com/rancher/system-upgrade-controller) | Easy node upgrades (k3s, RKE2, OS). | [link](https://artifacthub.io/packages/helm/this-is-tobi-helm-charts/system-upgrade-controller) |
@@ -53,7 +53,7 @@ helm install <release_name> tobi/<chart_name>
 helm install <release_name> oci://ghcr.io/this-is-tobi/charts/<chart_name> --version <version>
 
 # Example
-helm install my-db oci://ghcr.io/this-is-tobi/charts/cnpg-cluster --version 2.3.0
+helm install my-backups oci://ghcr.io/this-is-tobi/charts/backup-utils --version 2.5.8
 ```
 
 > [!TIP]

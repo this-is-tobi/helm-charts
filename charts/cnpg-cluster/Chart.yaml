@@ -1,17 +1,20 @@
 apiVersion: v2
 name: cnpg-cluster
 type: application
-version: 2.3.1
+version: 2.4.0
 appVersion: "1.29.0"
-description: A Helm Chart to deploy easily a CNPG cluster
+description: "DEPRECATED - use the official CloudNativePG cluster chart. A Helm Chart to deploy easily a CNPG cluster"
 home: https://cloudnative-pg.io
-deprecated: false
+deprecated: true
 annotations:
   artifacthub.io/category: database
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: changed
-      description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/cnpg-cluster; every earlier version is there too, with the same digest"
+    - kind: deprecated
+      description: "The chart is deprecated: the official cluster chart of CloudNativePG replaces it, and the README maps the values"
+      links:
+      - name: Official cluster chart
+        url: https://github.com/cloudnative-pg/charts/tree/main/charts/cluster
 keywords:
 - postgresql
 - postgres

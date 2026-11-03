@@ -1,8 +1,31 @@
 # cnpg-cluster
 
-![Version: 2.3.1](https://img.shields.io/badge/Version-2.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.29.0](https://img.shields.io/badge/AppVersion-1.29.0-informational?style=flat-square)
+![Version: 2.4.0](https://img.shields.io/badge/Version-2.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.29.0](https://img.shields.io/badge/AppVersion-1.29.0-informational?style=flat-square)
 
-A Helm Chart to deploy easily a CNPG cluster
+DEPRECATED - use the official CloudNativePG cluster chart. A Helm Chart to deploy easily a CNPG cluster
+
+> [!WARNING]
+> **This chart is deprecated.** The official [`cluster` chart](https://github.com/cloudnative-pg/charts/tree/main/charts/cluster) of CloudNativePG ([Artifact Hub](https://artifacthub.io/packages/helm/cloudnative-pg/cluster)) replaces it. The versions already published stay available.
+
+## Migrating to the official chart
+
+Moving a release to the `cluster` chart is a `helm upgrade` of the same release, as long as the `Cluster` keeps its name: otherwise Helm deletes it and creates another one. The official chart names it `<release>-cluster`, so set `fullnameOverride` to the name you have today (`kubectl get clusters.postgresql.cnpg.io`), or alias the dependency when the cluster is part of a larger chart.
+
+| This chart | `cluster` chart |
+| ---------- | --------------- |
+| `dbName`, `credentials.username` | `cluster.initdb.database`, `cluster.initdb.owner` |
+| `credentials.existingSecrets.app.secretName` | `cluster.initdb.secret.name` |
+| `credentials.existingSecrets.postgres.secretName`, `enableSuperuserAccess` | `cluster.superuserSecret`, `cluster.enableSuperuserAccess` |
+| `instances`, `imageName`, `resources`, `affinity` | the same keys under `cluster:` |
+| `storageClass`, `pvcSize.data`, `pvcSize.wal` | `cluster.storage.{storageClass,size}`, `cluster.walStorage.{enabled,storageClass,size}` |
+| `parameters`, `pgHba` | `cluster.postgresql.parameters`, `cluster.postgresql.pg_hba` |
+| `monitoring.enabled` | `cluster.monitoring.enabled` |
+| `backup.*` | `backups.*` |
+| `pooler` | `poolers`, a list |
+| `infosSecret` | none: the operator's `<cluster>-app` secret holds the host, port, database, user, password and URI |
+| `extraObjects` | none: put the objects in the chart that installs the cluster |
+
+[template-monorepo-ts#5](https://github.com/this-is-tobi/template-monorepo-ts/pull/5) is a worked example.
 
 ## Installing the Chart
 
@@ -17,7 +40,7 @@ helm install <release_name> tobi/cnpg-cluster
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/charts/cnpg-cluster --version 2.3.1
+helm install <release_name> oci://ghcr.io/this-is-tobi/charts/cnpg-cluster --version 2.4.0
 ```
 
 ### ArgoCD
@@ -28,7 +51,7 @@ helm install <release_name> oci://ghcr.io/this-is-tobi/charts/cnpg-cluster --ver
 sources:
 - repoURL: https://this-is-tobi.github.io/helm-charts
   chart: cnpg-cluster
-  targetRevision: 2.3.1
+  targetRevision: 2.4.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -41,7 +64,7 @@ sources:
 sources:
 - repoURL: ghcr.io/this-is-tobi/charts
   chart: cnpg-cluster
-  targetRevision: 2.3.1
+  targetRevision: 2.4.0
   helm:
     releaseName: <release_name>
     parameters: []
@@ -56,7 +79,7 @@ sources:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 2.3.1
+  version: 2.4.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: cnpg-cluster.enabled
 ```
@@ -67,7 +90,7 @@ dependencies:
 [...]
 dependencies:
 - name: cnpg-cluster
-  version: 2.3.1
+  version: 2.4.0
   repository: oci://ghcr.io/this-is-tobi/charts
   condition: cnpg-cluster.enabled
 ```
