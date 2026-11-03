@@ -1,7 +1,7 @@
 name: Release Charts
 
 # The release is the shared workflows' of this-is-tobi/github-workflows, pinned to a release by commit: chart-releaser
-# (the GitHub Releases and the index of the Helm repository on gh-pages, GPG-signed), the push to the OCI registry, then
+# (the GitHub Releases and the index of the Helm repository, GPG-signed), the push to the OCI registry, then
 # the cosign signature and the build provenance of every chart that was pushed.
 #
 # Signatures made through a shared workflow carry ITS identity, not this repository's: see "Chart Signatures" in the README.
@@ -14,7 +14,7 @@ on:
       - 'charts/**'
   workflow_dispatch:
 
-# One release at a time: two runs would race for the same gh-pages branch and the same tags. A run that is waiting is
+# One release at a time: two runs would race for the same index branch and the same tags. A run that is waiting is
 # replaced by a newer one, which is safe: chart-releaser releases everything that changed since the last tag.
 concurrency:
   group: release
@@ -31,6 +31,9 @@ jobs:
     with:
       CHARTS_DIR: charts
       CREATE_GITHUB_RELEASE: true
+      # The index goes to a branch no site serves, so the Helm repository at github.io stays online, frozen at the last
+      # version it lists. The branch starts as a copy of gh-pages, which keeps the index's history.
+      PAGES_BRANCH: charts-index
       PUBLISH_OCI: true
       # Every chart of this-is-tobi lives at ghcr.io/this-is-tobi/charts/<chart>; ghcr.io/this-is-tobi/helm-charts/<chart>
       # keeps the first versions, frozen. They were copied here by digest first, which keeps SKIP_EXISTING safe: it looks
