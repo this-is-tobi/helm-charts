@@ -3,7 +3,9 @@ set -euo pipefail
 
 # Checks of the vso-utils chart: lint, then the mount and path of static secrets, which an entry
 # sets itself or takes from vaultStaticSecretDefaults (both rendered through tpl), and the errors
-# for a secret that ends up without either. Only those two fields of a render are read.
+# for a secret that ends up without either. Only those two fields of a render are read. Then the
+# spec of VaultAuth objects: method and mount from the entry or vaultAuthDefaults, and login
+# rendered under the method they resolve to.
 
 CHART_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../charts/vso-utils" && pwd)"
 
@@ -85,5 +87,59 @@ expect_failure "a path template that renders empty" "path is required for VaultS
   --set-json "vaultStaticSecrets={\"app\":${SECRET}}" --values "${work}/empty-path.yaml"
 expect_failure "no mount on the entry nor in the defaults" "mount is required for VaultStaticSecret app" \
   --set-json "vaultStaticSecrets={\"app\":${SECRET}}" --set vaultStaticSecretDefaults.path=p
+
+cat >"${work}/login.yaml" <<'YAML'
+global: {m: jwt, p: jwt-dev}
+vaultAuthDefaults:
+  method: '{{ .Values.global.m }}'
+  mount: '{{ .Values.global.p }}'
+vaultAuth:
+  default:
+    login: {role: gitea, serviceAccount: vso, audiences: [vault]}
+YAML
+
+# auth_spec <helm args...>: the spec of every VaultAuth, as JSON with sorted keys, one per line.
+auth_spec() {
+  helm template release-name "${CHART_DIR}" "$@" \
+    | yq -o=json -I=0 'select(.kind == "VaultAuth") | .spec' \
+    | jq -cS .
+}
+
+expect_auth() {
+  local label="$1" want
+  want="$(jq -cS . <<<"$2")"
+  shift 2
+  echo "==> ${label}"
+  local got
+  got="$(auth_spec "$@")"
+  if [ "${got}" != "${want}" ]; then
+    echo "ERROR: expected '${want}', got '${got}'" >&2
+    exit 1
+  fi
+}
+
+LOGIN='"role":"gitea","serviceAccount":"vso","audiences":["vault"]'
+expect_auth "login under the method the defaults resolve to" \
+  "{\"method\":\"jwt\",\"mount\":\"jwt-dev\",\"jwt\":{${LOGIN}}}" \
+  --values "${work}/login.yaml"
+expect_auth "login under kubernetes when the defaults resolve to it" \
+  "{\"method\":\"kubernetes\",\"mount\":\"kubernetes\",\"kubernetes\":{${LOGIN}}}" \
+  --values "${work}/login.yaml" --set global.m=kubernetes --set global.p=kubernetes
+expect_auth "the method's own block is merged over login" \
+  '{"method":"kubernetes","mount":"kubernetes","kubernetes":{"role":"override","serviceAccount":"vso","audiences":["vault"]}}' \
+  --values "${work}/login.yaml" --set global.m=kubernetes --set global.p=kubernetes --set vaultAuth.default.kubernetes.role=override
+expect_auth "with login, another method's block is left out" \
+  "{\"method\":\"jwt\",\"mount\":\"jwt-dev\",\"jwt\":{${LOGIN}}}" \
+  --values "${work}/login.yaml" --set vaultAuth.default.kubernetes.role=override
+expect_auth "an entry with its own method, mount and block renders as before" \
+  '{"method":"kubernetes","mount":"kubernetes","kubernetes":{"role":"x"}}' \
+  --set-json 'vaultAuth={"default":{"method":"kubernetes","mount":"kubernetes","kubernetes":{"role":"x"}}}'
+
+expect_failure "no method on the VaultAuth entry nor in the defaults" "method is required for VaultAuth default" \
+  --set-json 'vaultAuth={"default":{"mount":"kubernetes","login":{"role":"x"}}}'
+expect_failure "no mount on the VaultAuth entry nor in the defaults" "mount is required for VaultAuth default" \
+  --set-json 'vaultAuth={"default":{"method":"kubernetes","login":{"role":"x"}}}'
+expect_failure "login with a method other than kubernetes or jwt" "login needs the kubernetes or jwt method" \
+  --set-json 'vaultAuth={"default":{"method":"appRole","mount":"approle","login":{"role":"x"}}}'
 
 echo "==> all vso-utils checks passed"

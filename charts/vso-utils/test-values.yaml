@@ -36,6 +36,19 @@ vaultAuth:
       name: default-global
       allowDefault: false
 
+  # VaultAuth taking its method and mount from vaultAuthDefaults, its credentials from login
+  defaulted:
+    login:
+      role: "my-app-role"
+      serviceAccount: "default"
+      audiences:
+      - "vault"
+
+# Method and mount of the VaultAuth entries that leave theirs empty
+vaultAuthDefaults:
+  method: kubernetes
+  mount: kubernetes
+
 # Static KV secrets
 vaultStaticSecrets:
   # Basic static secret
