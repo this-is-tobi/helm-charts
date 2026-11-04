@@ -256,6 +256,23 @@ vaultStaticSecrets:
 
 Complete configuration including Vault connection, authentication, and secret sync.
 
+#### 5. Login Method from a Global
+
+```yaml
+vaultAuthDefaults:
+  method: '{{ "{{" }} .Values.global.vaultAuthMethod | default "kubernetes" {{ "}}" }}'
+  mount: '{{ "{{" }} .Values.global.vaultAuthMount | default "kubernetes" {{ "}}" }}'
+
+vaultAuth:
+  default:
+    login:
+      role: my-app-role
+      serviceAccount: default
+      audiences: ["vault"]
+```
+
+`method` and `mount` go through `tpl`, so one global switches every VaultAuth between the kubernetes and jwt methods. `login` is rendered under the method they resolve to; a block of that method's own name, when set, is merged over it, and its keys win.
+
 ## Advanced Features
 
 ### Secret Transformation

@@ -177,7 +177,6 @@
       "description": "VaultAuth resources for configuring Vault authentication",
       "additionalProperties": {
         "type": "object",
-        "required": ["method", "mount"],
         "properties": {
           "annotations": { "type": "object" },
           "labels": { "type": "object" },
@@ -187,6 +186,23 @@
             "enum": ["kubernetes", "jwt", "appRole", "aws", "gcp"]
           },
           "mount": { "type": "string" },
+          "login": {
+            "type": "object",
+            "description": "Credentials rendered under the method the entry resolves to (kubernetes or jwt); that method's own block, when set, is merged over them",
+            "additionalProperties": false,
+            "properties": {
+              "role": { "type": "string" },
+              "serviceAccount": { "type": "string" },
+              "audiences": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "tokenExpirationSeconds": {
+                "type": "integer",
+                "minimum": 600
+              }
+            }
+          },
           "kubernetes": {
             "type": "object",
             "description": "Kubernetes auth method configuration",
@@ -265,11 +281,20 @@
           "vaultAuthGlobalRef": { "type": "object" },
           "storageEncryption": { "type": "object" },
           "vaultAuthGlobalRef": { "type": "object" },
-          "allowedNamespaces": { 
+          "allowedNamespaces": {
             "type": "array",
             "items": { "type": "string" }
           }
         }
+      }
+    },
+    "vaultAuthDefaults": {
+      "type": "object",
+      "description": "Method and mount of the VaultAuth entries that leave theirs empty, rendered through tpl",
+      "additionalProperties": false,
+      "properties": {
+        "method": { "type": "string" },
+        "mount": { "type": "string" }
       }
     },
     "vaultConnection": {
