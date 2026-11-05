@@ -53,6 +53,23 @@ Convert a string to kebab-case (lowercase with hyphens)
 
 
 {{/*
+Whether an entry renders, called with (list $root $entry): "true" unless its
+`enabled`, a boolean or a string rendered through tpl with the root context,
+is false, "false" or empty. An entry without `enabled` renders.
+*/}}
+{{- define "vso-utils.enabled" -}}
+{{- $root := index . 0 }}
+{{- $entry := index . 1 | default dict }}
+{{- if or (not (hasKey $entry "enabled")) (kindIs "invalid" $entry.enabled) }}true
+{{- else }}
+{{- $on := $entry.enabled }}
+{{- if kindIs "string" $on }}{{- $on = tpl $on $root | trim }}{{- end }}
+{{- if and $on (ne (lower (toString $on)) "false") }}true{{- end }}
+{{- end }}
+{{- end }}
+
+
+{{/*
 Define a file checksum to trigger rollout on configmap of secret change
 */}}
 {{- define "checksum" -}}

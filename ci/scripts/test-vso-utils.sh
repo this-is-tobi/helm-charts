@@ -5,7 +5,8 @@ set -euo pipefail
 # sets itself or takes from vaultStaticSecretDefaults (both rendered through tpl), and the errors
 # for a secret that ends up without either. Only those two fields of a render are read. Then the
 # spec of VaultAuth objects: method and mount from the entry or vaultAuthDefaults, login
-# rendered under the method they resolve to, and the README's login example on its own.
+# rendered under the method they resolve to, the README's login example on its own, and
+# entries left out by `enabled`.
 
 CHART_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../charts/vso-utils" && pwd)"
 
@@ -33,11 +34,12 @@ vaultStaticSecretDefaults:
   path: '{{ with dig "none" "" (.Values.global | default dict) }}{{ . }}/app{{ end }}'
 YAML
 
-# mount_path <helm args...>: "<mount> <path>" of every VaultStaticSecret, one per line, sorted.
+# mount_path <helm args...>: "<mount> <path>" of every VaultStaticSecret, one per line, sorted;
+# nothing when none renders.
 mount_path() {
   helm template release-name "${CHART_DIR}" "$@" \
     | yq -r 'select(.kind == "VaultStaticSecret") | .spec.mount + " " + .spec.path' \
-    | grep -v '^---$' | sort
+    | { grep -v '^---$' || true; } | sort
 }
 
 expect() {
@@ -170,5 +172,45 @@ expect_failure "a method the defaults resolve to that VaultAuth does not have" \
   --values "${work}/login.yaml" --set global.m=JWT
 expect_failure "login with a method other than kubernetes or jwt" "login needs the kubernetes or jwt method" \
   --set-json 'vaultAuth={"default":{"method":"appRole","mount":"approle","login":{"role":"x"}}}'
+
+# An entry renders unless its `enabled`, a boolean or a template, is false or empty.
+expect "an entry with enabled false renders nothing" "" \
+  --set-json "vaultStaticSecrets={\"app\":$(jq -c '. + {mount: "kv", path: "a/b", enabled: false}' <<<"${SECRET}")}"
+expect "an entry with enabled true renders as before" "kv a/b" \
+  --set-json "vaultStaticSecrets={\"app\":$(jq -c '. + {mount: "kv", path: "a/b", enabled: true}' <<<"${SECRET}")}"
+cat >"${work}/enabled.yaml" <<'YAML'
+global: {on: "false"}
+vaultStaticSecrets:
+  app: {vaultAuthRef: default, destination: {name: s}, mount: kv, path: a/b, enabled: '{{ .Values.global.on }}'}
+YAML
+expect "an entry whose enabled template renders false renders nothing" "" --values "${work}/enabled.yaml"
+expect "an entry whose enabled template renders true renders" "kv a/b" --values "${work}/enabled.yaml" --set global.on=true
+expect "a disabled entry skips the template's checks (no mount, no defaults)" "" \
+  --set-json 'vaultStaticSecrets={"app":{"vaultAuthRef":"default","destination":{"name":"s"},"enabled":false}}'
+
+# specs <helm args...>: kind, name and spec of every object, as JSON with sorted keys, one per line, sorted.
+specs() {
+  helm template release-name "${CHART_DIR}" "$@" \
+    | yq -o=json -I=0 'select(.kind != null) | {"kind": .kind, "name": .metadata.name, "spec": .spec}' \
+    | jq -cS . | sort
+}
+# switch <true|false>: a values file that sets enabled on every entry of test-values.yaml.
+switch() {
+  yq "with_entries(select(.key | test(\"^vault(StaticSecrets|DynamicSecrets|PKISecrets|Auth|Connection)\$\")) | .value |= map_values({\"enabled\": $1}))" \
+    "${CHART_DIR}/test-values.yaml" >"${work}/enabled-$1.yaml"
+}
+switch true
+switch false
+echo "==> every entry of test-values.yaml with enabled true renders as without it"
+if [ "$(specs --values "${CHART_DIR}/test-values.yaml" --values "${work}/enabled-true.yaml")" != "$(specs --values "${CHART_DIR}/test-values.yaml")" ]; then
+  echo "ERROR: enabled: true changes what test-values.yaml renders" >&2
+  exit 1
+fi
+echo "==> every entry of test-values.yaml with enabled false renders nothing"
+got="$(specs --values "${CHART_DIR}/test-values.yaml" --values "${work}/enabled-false.yaml" | jq -r .kind | grep '^Vault' || true)"
+if [ -n "${got}" ]; then
+  echo "ERROR: disabled entries still render: ${got}" >&2
+  exit 1
+fi
 
 echo "==> all vso-utils checks passed"
