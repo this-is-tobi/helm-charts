@@ -260,8 +260,8 @@ Complete configuration including Vault connection, authentication, and secret sy
 
 ```yaml
 vaultAuthDefaults:
-  method: '{{ "{{" }} .Values.global.vaultAuthMethod | default "kubernetes" {{ "}}" }}'
-  mount: '{{ "{{" }} .Values.global.vaultAuthMount | default "kubernetes" {{ "}}" }}'
+  method: '{{ "{{" }} dig "vaultAuthMethod" "kubernetes" (.Values.global | default dict) {{ "}}" }}'
+  mount: '{{ "{{" }} dig "vaultAuthMount" "kubernetes" (.Values.global | default dict) {{ "}}" }}'
 
 vaultAuth:
   default:
@@ -271,7 +271,7 @@ vaultAuth:
       audiences: ["vault"]
 ```
 
-`method` and `mount` go through `tpl`, so one global switches every VaultAuth between the kubernetes and jwt methods. `login` is rendered under the method they resolve to; a block of that method's own name, when set, is merged over it, and its keys win.
+`method` and `mount` go through `tpl`, so one global switches every VaultAuth between the kubernetes and jwt methods; `(.Values.global | default dict)` keeps them working when the chart is installed on its own, without a parent chart's global. The defaults' mount goes only to an entry of their method: an entry that names another method names its mount too. `login` is rendered under the method they resolve to; each key of a block of that method's own name, when set, replaces login's, even an empty one.
 
 ## Advanced Features
 
