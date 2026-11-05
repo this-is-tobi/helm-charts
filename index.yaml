@@ -3805,6 +3805,49 @@ entries:
   - annotations:
       artifacthub.io/category: security
       artifacthub.io/changes: |
+        - kind: added
+          description: "vaultAuthDefaults gives the method and mount of VaultAuth entries that leave theirs empty, through tpl; an entry's login is rendered under the method it resolves to (kubernetes or jwt)"
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.6.0
+    created: "2026-11-05T00:24:30.894052183Z"
+    dependencies:
+    - alias: vso
+      condition: vso.enabled
+      name: vault-secrets-operator
+      repository: https://helm.releases.hashicorp.com
+      version: '>=1.0.0'
+    description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator
+      resources - sync static secrets, generate dynamic credentials, issue PKI certificates,
+      and configure Vault authentication.
+    digest: e64c5584ad315fa60dbbb44d352efc39cc14c467fa6c9545b3737b1a882ce24d
+    keywords:
+    - vault
+    - secrets
+    - hashicorp
+    - vso
+    - vault-secrets-operator
+    - kubernetes
+    - security
+    - pki
+    - dynamic-secrets
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: vso-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator
+    - https://developer.hashicorp.com/vault/docs/platform/k8s/vso
+    - https://github.com/hashicorp/vault-secrets-operator
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-2.3.0/vso-utils-2.3.0.tgz
+    version: 2.3.0
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |
         - kind: changed
           description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/vso-utils; every earlier version is there too, with the same digest"
       artifacthub.io/license: MIT
@@ -4421,4 +4464,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-11-03T03:58:49.720747894Z"
+generated: "2026-11-05T00:24:30.894237772Z"
