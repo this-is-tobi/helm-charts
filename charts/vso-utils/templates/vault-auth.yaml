@@ -1,5 +1,6 @@
 {{- $defaults := .Values.vaultAuthDefaults | default dict }}
 {{- range $authName, $auth := .Values.vaultAuth }}
+{{- if include "vso-utils.enabled" (list $ $auth) }}
 {{- $method := tpl ($auth.method | default "") $ }}
 {{- $mount := tpl ($auth.mount | default "") $ }}
 {{- /* The defaults fill what the entry leaves empty, and their mount goes with their method only. */}}
@@ -91,4 +92,5 @@ spec:
   storageEncryption:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+{{- end }}
 {{- end }}

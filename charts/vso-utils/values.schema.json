@@ -35,6 +35,7 @@
         "type": "object",
         "required": ["vaultAuthRef", "destination"],
         "properties": {
+          "enabled": { "type": ["boolean", "string"], "description": "false, or a template that renders false or empty, leaves the entry out" },
           "annotations": { "type": "object" },
           "labels": { "type": "object" },
           "namespace": { "type": "string" },
@@ -79,6 +80,7 @@
         "type": "object",
         "required": ["mount", "vaultAuthRef", "path", "destination"],
         "properties": {
+          "enabled": { "type": ["boolean", "string"], "description": "false, or a template that renders false or empty, leaves the entry out" },
           "annotations": { "type": "object" },
           "labels": { "type": "object" },
           "namespace": { "type": "string" },
@@ -125,6 +127,7 @@
         "type": "object",
         "required": ["mount", "vaultAuthRef", "role", "commonName", "destination"],
         "properties": {
+          "enabled": { "type": ["boolean", "string"], "description": "false, or a template that renders false or empty, leaves the entry out" },
           "annotations": { "type": "object" },
           "labels": { "type": "object" },
           "namespace": { "type": "string" },
@@ -178,6 +181,7 @@
       "additionalProperties": {
         "type": "object",
         "properties": {
+          "enabled": { "type": ["boolean", "string"], "description": "false, or a template that renders false or empty, leaves the entry out" },
           "annotations": { "type": "object" },
           "labels": { "type": "object" },
           "namespace": { "type": "string" },
@@ -305,6 +309,7 @@
         "type": "object",
         "required": ["address"],
         "properties": {
+          "enabled": { "type": ["boolean", "string"], "description": "false, or a template that renders false or empty, leaves the entry out" },
           "annotations": { "type": "object" },
           "labels": { "type": "object" },
           "address": { "type": "string" },

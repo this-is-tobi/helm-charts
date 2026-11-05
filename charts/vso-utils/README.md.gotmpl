@@ -151,6 +151,7 @@ Each VSO resource type (`vaultStaticSecrets`, `vaultDynamicSecrets`, etc.) is co
 - **Each top-level key** represents one resource instance
 - **The key name** becomes part of the Kubernetes resource name (converted to kebab-case)
 - **The value** contains the resource-specific configuration
+- **`enabled`**, optional: `false`, or a template that renders `false` or empty (rendered through `tpl` with the chart's root context, so it can follow a global), leaves the entry out; without it the entry renders
 
 Example:
 ```yaml
