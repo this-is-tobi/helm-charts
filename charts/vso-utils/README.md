@@ -1,6 +1,6 @@
 # vso-utils
 
-![Version: 2.3.0](https://img.shields.io/badge/Version-2.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.6.0](https://img.shields.io/badge/AppVersion-1.6.0-informational?style=flat-square)
+![Version: 2.3.1](https://img.shields.io/badge/Version-2.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.6.0](https://img.shields.io/badge/AppVersion-1.6.0-informational?style=flat-square)
 
 Production-ready Helm chart for managing HashiCorp Vault Secret Operator resources - sync static secrets, generate dynamic credentials, issue PKI certificates, and configure Vault authentication.
 
@@ -50,7 +50,7 @@ helm install <release_name> tobi/vso-utils
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/charts/vso-utils --version 2.3.0
+helm install <release_name> oci://ghcr.io/this-is-tobi/charts/vso-utils --version 2.3.1
 ```
 
 ### ArgoCD
@@ -66,7 +66,7 @@ spec:
   sources:
   - repoURL: https://this-is-tobi.github.io/helm-charts
     chart: vso-utils
-    targetRevision: 2.3.0
+    targetRevision: 2.3.1
     helm:
       releaseName: <release_name>
       values: |
@@ -93,7 +93,7 @@ spec:
   sources:
   - repoURL: ghcr.io/this-is-tobi/charts
     chart: vso-utils
-    targetRevision: 2.3.0
+    targetRevision: 2.3.1
     helm:
       releaseName: <release_name>
       values: |
@@ -116,7 +116,7 @@ spec:
 # Chart.yaml
 dependencies:
 - name: vso-utils
-  version: 2.3.0
+  version: 2.3.1
   repository: https://this-is-tobi.github.io/helm-charts
   condition: vso-utils.enabled
 ```
@@ -126,7 +126,7 @@ dependencies:
 # Chart.yaml
 dependencies:
 - name: vso-utils
-  version: 2.3.0
+  version: 2.3.1
   repository: oci://ghcr.io/this-is-tobi/charts
   condition: vso-utils.enabled
 ```
@@ -262,8 +262,8 @@ Complete configuration including Vault connection, authentication, and secret sy
 
 ```yaml
 vaultAuthDefaults:
-  method: '{{ .Values.global.vaultAuthMethod | default "kubernetes" }}'
-  mount: '{{ .Values.global.vaultAuthMount | default "kubernetes" }}'
+  method: '{{ dig "vaultAuthMethod" "kubernetes" (.Values.global | default dict) }}'
+  mount: '{{ dig "vaultAuthMount" "kubernetes" (.Values.global | default dict) }}'
 
 vaultAuth:
   default:
@@ -273,7 +273,7 @@ vaultAuth:
       audiences: ["vault"]
 ```
 
-`method` and `mount` go through `tpl`, so one global switches every VaultAuth between the kubernetes and jwt methods. `login` is rendered under the method they resolve to; a block of that method's own name, when set, is merged over it, and its keys win.
+`method` and `mount` go through `tpl`, so one global switches every VaultAuth between the kubernetes and jwt methods; `(.Values.global | default dict)` keeps them working when the chart is installed on its own, without a parent chart's global. The defaults' mount goes only to an entry of their method: an entry that names another method names its mount too. `login` is rendered under the method they resolve to; each key of a block of that method's own name, when set, replaces login's, even an empty one.
 
 ## Advanced Features
 
@@ -381,8 +381,8 @@ vaultStaticSecrets:
 | fullnameOverride | string | `""` | String to fully override the default application name. |
 | nameOverride | string | `""` | Provide a name in place of the default application name. |
 | vaultAuth | object | `{}` |  |
-| vaultAuthDefaults.method | string | `""` | Method of every VaultAuth that leaves its own `method` empty. Rendered through `tpl` with the chart's root context, so it can follow a global, e.g. `{{ .Values.global.vaultAuthMethod }}`. |
-| vaultAuthDefaults.mount | string | `""` | Mount of every VaultAuth that leaves its own `mount` empty. Rendered through `tpl` with the chart's root context. |
+| vaultAuthDefaults.method | string | `""` | Method of every VaultAuth that leaves its own `method` empty. Rendered through `tpl` with the chart's root context, so it can follow a global (see "Login Method from a Global"). |
+| vaultAuthDefaults.mount | string | `""` | Mount of every VaultAuth that leaves its own `mount` empty and resolves to the method above; an entry that names another method names its mount too. Rendered through `tpl` with the chart's root context. |
 | vaultConnection | object | `{}` |  |
 | vaultDynamicSecrets | object | `{}` |  |
 | vaultPKISecrets | object | `{}` |  |

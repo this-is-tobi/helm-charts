@@ -1,13 +1,34 @@
+{{- $defaults := .Values.vaultAuthDefaults | default dict }}
 {{- range $authName, $auth := .Values.vaultAuth }}
-{{- $method := tpl ($auth.method | default $.Values.vaultAuthDefaults.method | default "") $ | required (printf "method is required for VaultAuth %s" $authName) }}
-{{- $mount := tpl ($auth.mount | default $.Values.vaultAuthDefaults.mount | default "") $ | required (printf "mount is required for VaultAuth %s" $authName) }}
-{{- /* With login, only the resolved method's block renders: login, under that method's own block. */}}
+{{- $method := tpl ($auth.method | default "") $ }}
+{{- $mount := tpl ($auth.mount | default "") $ }}
+{{- /* The defaults fill what the entry leaves empty, and their mount goes with their method only. */}}
+{{- if not (and $method $mount) }}
+{{- $defaultMethod := tpl ($defaults.method | default "") $ }}
+{{- $method = $method | default $defaultMethod }}
+{{- if not $mount }}
+{{- if and $defaults.mount $defaultMethod (ne $method $defaultMethod) }}
+{{- fail (printf "mount is required for VaultAuth %s: vaultAuthDefaults.mount belongs to the %s method, not %s" $authName $defaultMethod $method) }}
+{{- end }}
+{{- $mount = tpl ($defaults.mount | default "") $ }}
+{{- end }}
+{{- end }}
+{{- $method = $method | required (printf "method is required for VaultAuth %s" $authName) }}
+{{- $mount = $mount | required (printf "mount is required for VaultAuth %s" $authName) }}
+{{- if not (has $method (list "kubernetes" "jwt" "appRole" "aws" "gcp")) }}
+{{- fail (printf "method %s of VaultAuth %s is not one of kubernetes, jwt, appRole, aws, gcp" $method $authName) }}
+{{- end }}
+{{- /* With login, only the resolved method's block renders: login, with that block's own keys over it, empty ones too. */}}
 {{- $blocks := pick $auth "kubernetes" "jwt" "appRole" "aws" "gcp" }}
 {{- with $auth.login }}
 {{- if not (has $method (list "kubernetes" "jwt")) }}
 {{- fail (printf "login needs the kubernetes or jwt method, not %s, for VaultAuth %s" $method $authName) }}
 {{- end }}
-{{- $blocks = dict $method (merge (deepCopy (get $auth $method | default dict)) .) }}
+{{- $login := deepCopy . }}
+{{- range $key, $value := get $auth $method | default dict }}
+{{- $_ := set $login $key $value }}
+{{- end }}
+{{- $blocks = dict $method $login }}
 {{- end }}
 ---
 apiVersion: secrets.hashicorp.com/v1beta1

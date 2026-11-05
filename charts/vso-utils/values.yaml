@@ -230,9 +230,9 @@ vaultPKISecrets: {}
 
 
 vaultAuthDefaults:
-  # -- Method of every VaultAuth that leaves its own `method` empty. Rendered through `tpl` with the chart's root context, so it can follow a global, e.g. `{{ .Values.global.vaultAuthMethod }}`.
+  # -- Method of every VaultAuth that leaves its own `method` empty. Rendered through `tpl` with the chart's root context, so it can follow a global (see "Login Method from a Global").
   method: ""
-  # -- Mount of every VaultAuth that leaves its own `mount` empty. Rendered through `tpl` with the chart's root context.
+  # -- Mount of every VaultAuth that leaves its own `mount` empty and resolves to the method above; an entry that names another method names its mount too. Rendered through `tpl` with the chart's root context.
   mount: ""
 
 # VaultAuth resources for configuring Vault authentication.
@@ -246,7 +246,7 @@ vaultAuth: {}
   #     role: "my-app-role"
   #     serviceAccount: "default"
   #     audiences: ["vault"]
-  #   # -- Optional: merged over login when the method resolves to kubernetes; its keys win.
+  #   # -- Optional: when the method resolves to kubernetes, each key set here replaces login's, even empty.
   #   kubernetes:
   #     role: "my-other-role"
   #

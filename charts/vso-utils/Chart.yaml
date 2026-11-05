@@ -1,7 +1,7 @@
 apiVersion: v2
 name: vso-utils
 type: application
-version: 2.3.0
+version: 2.3.1
 appVersion: "1.6.0"
 description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator resources - sync static secrets, generate dynamic credentials, issue PKI certificates, and configure Vault authentication.
 deprecated: false
@@ -9,8 +9,18 @@ annotations:
   artifacthub.io/category: security
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: added
-      description: "vaultAuthDefaults gives the method and mount of VaultAuth entries that leave theirs empty, through tpl; an entry's login is rendered under the method it resolves to (kubernetes or jwt)"
+    - kind: fixed
+      description: "vaultAuthDefaults.mount goes only to entries of the defaults' method: an entry that names another method and no mount fails the render, rather than pairing that method with another one's mount"
+    - kind: fixed
+      description: "vaultAuthDefaults or vaultStaticSecretDefaults set to null no longer fails the render with a nil pointer"
+    - kind: fixed
+      description: "the schema accepts an empty method on a VaultAuth entry, which takes vaultAuthDefaults.method as the docs say"
+    - kind: fixed
+      description: "each key of the method's own block replaces login's, an empty one too"
+    - kind: fixed
+      description: "a method vaultAuthDefaults resolves to that VaultAuth does not have fails the render, not the apply"
+    - kind: fixed
+      description: "the README's login example works with the chart installed on its own"
 keywords:
 - vault
 - secrets

@@ -4,8 +4,8 @@ set -euo pipefail
 # Checks of the vso-utils chart: lint, then the mount and path of static secrets, which an entry
 # sets itself or takes from vaultStaticSecretDefaults (both rendered through tpl), and the errors
 # for a secret that ends up without either. Only those two fields of a render are read. Then the
-# spec of VaultAuth objects: method and mount from the entry or vaultAuthDefaults, and login
-# rendered under the method they resolve to.
+# spec of VaultAuth objects: method and mount from the entry or vaultAuthDefaults, login
+# rendered under the method they resolve to, and the README's login example on its own.
 
 CHART_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../charts/vso-utils" && pwd)"
 
@@ -77,6 +77,9 @@ expect "an entry without mount and path takes the defaults" "kv2 p/q" \
   --set vaultStaticSecretDefaults.mount=kv2 --set vaultStaticSecretDefaults.path=p/q
 expect "the defaults render through tpl with the chart's root context" "kv platforms/x/app" \
   --set-json "vaultStaticSecrets={\"app\":${SECRET}}" --values "${work}/templated.yaml"
+expect "without vaultStaticSecretDefaults, an entry's own mount and path" "kv a/b" \
+  --set-json "vaultStaticSecrets={\"app\":$(jq -c '. + {mount: "kv", path: "a/b"}' <<<"${SECRET}")}" \
+  --set vaultStaticSecretDefaults=null
 
 # Every entry of test-values.yaml renders the mount and path it sets, else the defaults.
 want="$(yq -r '.vaultStaticSecretDefaults as $d | .vaultStaticSecrets[] | (.mount // $d.mount) + " " + (.path // $d.path)' "${CHART_DIR}/test-values.yaml" | sort)"
@@ -134,11 +137,37 @@ expect_auth "with login, another method's block is left out" \
 expect_auth "an entry with its own method, mount and block renders as before" \
   '{"method":"kubernetes","mount":"kubernetes","kubernetes":{"role":"x"}}' \
   --set-json 'vaultAuth={"default":{"method":"kubernetes","mount":"kubernetes","kubernetes":{"role":"x"}}}'
+expect_auth "an empty key of the method's own block wins over login" \
+  '{"method":"kubernetes","mount":"kubernetes","kubernetes":{"role":"gitea","serviceAccount":"vso","audiences":[]}}' \
+  --values "${work}/login.yaml" --set global.m=kubernetes --set global.p=kubernetes --set-json 'vaultAuth.default.kubernetes={"audiences":[]}'
+expect_auth "an entry that names the defaults' method takes their mount" \
+  "{\"method\":\"jwt\",\"mount\":\"jwt-dev\",\"jwt\":{${LOGIN}}}" \
+  --values "${work}/login.yaml" --set vaultAuth.default.method=jwt
+expect_auth "an empty method takes the defaults'" \
+  "{\"method\":\"jwt\",\"mount\":\"jwt-dev\",\"jwt\":{${LOGIN}}}" \
+  --values "${work}/login.yaml" --set vaultAuth.default.method=
+expect_auth "without vaultAuthDefaults, an entry's own method and mount" \
+  '{"method":"kubernetes","mount":"kubernetes","kubernetes":{"role":"x"}}' \
+  --set-json 'vaultAuth={"default":{"method":"kubernetes","mount":"kubernetes","kubernetes":{"role":"x"}}}' \
+  --set vaultAuthDefaults=null
+
+# The README's login example, as written there, on its own: no parent chart gives it a global.
+awk '/^#### 5\. Login Method from a Global/ {f = 1} f && /^```yaml/ {p = 1; next} p && /^```/ {exit} p' \
+  "${CHART_DIR}/README.md" >"${work}/readme-login.yaml"
+expect_auth "the README's login example renders without a global" \
+  '{"method":"kubernetes","mount":"kubernetes","kubernetes":{"role":"my-app-role","serviceAccount":"default","audiences":["vault"]}}' \
+  --values "${work}/readme-login.yaml"
 
 expect_failure "no method on the VaultAuth entry nor in the defaults" "method is required for VaultAuth default" \
   --set-json 'vaultAuth={"default":{"mount":"kubernetes","login":{"role":"x"}}}'
 expect_failure "no mount on the VaultAuth entry nor in the defaults" "mount is required for VaultAuth default" \
   --set-json 'vaultAuth={"default":{"method":"kubernetes","login":{"role":"x"}}}'
+expect_failure "another method than the defaults' without its own mount" \
+  "mount is required for VaultAuth default: vaultAuthDefaults.mount belongs to the jwt method, not kubernetes" \
+  --values "${work}/login.yaml" --set vaultAuth.default.method=kubernetes
+expect_failure "a method the defaults resolve to that VaultAuth does not have" \
+  "method JWT of VaultAuth default is not one of kubernetes, jwt, appRole, aws, gcp" \
+  --values "${work}/login.yaml" --set global.m=JWT
 expect_failure "login with a method other than kubernetes or jwt" "login needs the kubernetes or jwt method" \
   --set-json 'vaultAuth={"default":{"method":"appRole","mount":"approle","login":{"role":"x"}}}'
 

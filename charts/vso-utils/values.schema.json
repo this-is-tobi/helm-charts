@@ -181,14 +181,15 @@
           "annotations": { "type": "object" },
           "labels": { "type": "object" },
           "namespace": { "type": "string" },
-          "method": { 
+          "method": {
             "type": "string",
-            "enum": ["kubernetes", "jwt", "appRole", "aws", "gcp"]
+            "description": "Empty takes vaultAuthDefaults.method",
+            "enum": ["", "kubernetes", "jwt", "appRole", "aws", "gcp"]
           },
           "mount": { "type": "string" },
           "login": {
             "type": "object",
-            "description": "Credentials rendered under the method the entry resolves to (kubernetes or jwt); that method's own block, when set, is merged over them",
+            "description": "Credentials rendered under the method the entry resolves to (kubernetes or jwt); each key of that method's own block, when set, replaces theirs, even empty",
             "additionalProperties": false,
             "properties": {
               "role": { "type": "string" },
