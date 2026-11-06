@@ -3805,6 +3805,49 @@ entries:
   - annotations:
       artifacthub.io/category: security
       artifacthub.io/changes: |
+        - kind: added
+          description: "every entry of vaultStaticSecrets, vaultDynamicSecrets, vaultPKISecrets, vaultAuth and vaultConnection takes enabled: false, or a template that renders false or empty, leaves it out"
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 1.6.0
+    created: "2026-11-06T02:14:26.226256456Z"
+    dependencies:
+    - alias: vso
+      condition: vso.enabled
+      name: vault-secrets-operator
+      repository: https://helm.releases.hashicorp.com
+      version: '>=1.0.0'
+    description: Production-ready Helm chart for managing HashiCorp Vault Secret Operator
+      resources - sync static secrets, generate dynamic credentials, issue PKI certificates,
+      and configure Vault authentication.
+    digest: 163d0e9965c94c4ff00ff236e0b920245ad42c6081434e78714372465cce48d5
+    keywords:
+    - vault
+    - secrets
+    - hashicorp
+    - vso
+    - vault-secrets-operator
+    - kubernetes
+    - security
+    - pki
+    - dynamic-secrets
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: vso-utils
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator
+    - https://developer.hashicorp.com/vault/docs/platform/k8s/vso
+    - https://github.com/hashicorp/vault-secrets-operator
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-2.4.0/vso-utils-2.4.0.tgz
+    version: 2.4.0
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |
         - kind: fixed
           description: "vaultAuthDefaults.mount goes only to entries of the defaults' method: an entry that names another method and no mount fails the render, rather than pairing that method with another one's mount"
         - kind: fixed
@@ -4517,4 +4560,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-11-05T01:46:19.475254174Z"
+generated: "2026-11-06T02:14:26.226914094Z"
