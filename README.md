@@ -46,6 +46,9 @@ helm search repo tobi
 helm install <release_name> tobi/<chart_name>
 ```
 
+> [!NOTE]
+> The index lists the first versions of each chart at their GitHub Release and the later ones at the OCI registry (`oci://ghcr.io/this-is-tobi/charts/<chart_name>`). Helm follows both and gets the same package, signed the same way, so the commands above do not change. The versions listed at the registry need Helm 3.8 or newer.
+
 ### OCI Registry
 
 ```sh

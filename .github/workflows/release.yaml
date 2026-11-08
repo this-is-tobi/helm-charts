@@ -1,8 +1,9 @@
 name: Release Charts
 
 # The release is the shared workflows' of this-is-tobi/github-workflows, pinned to a release by commit: chart-releaser
-# (the GitHub Releases and the index of the Helm repository, GPG-signed), the push to the OCI registry, then
-# the cosign signature and the build provenance of every chart that was pushed.
+# (the GitHub Releases and their own index, GPG-signed), the push to the OCI registry, then the cosign signature and
+# the build provenance of every chart that was pushed. The index of the Helm repository at github.io is this file's:
+# see the `index` job.
 #
 # Signatures made through a shared workflow carry ITS identity, not this repository's: see "Chart Signatures" in the README.
 
@@ -31,8 +32,9 @@ jobs:
     with:
       CHARTS_DIR: charts
       CREATE_GITHUB_RELEASE: true
-      # The index goes to a branch no site serves, so the Helm repository at github.io stays online, frozen at the last
-      # version it lists. The branch starts as a copy of gh-pages, which keeps the index's history.
+      # chart-releaser's index lists the GitHub Releases, and goes to a branch no site serves: the index of github.io
+      # is the `index` job's, whose entries point at the registry. The branch starts as a copy of gh-pages, which keeps
+      # the history of the index.
       PAGES_BRANCH: charts-index
       PUBLISH_OCI: true
       # Every chart of this-is-tobi lives at ghcr.io/this-is-tobi/charts/<chart>; ghcr.io/this-is-tobi/helm-charts/<chart>
@@ -63,3 +65,48 @@ jobs:
       CHARTS: ${{ needs.release.outputs.published-charts }}
       SIGN: true
       PROVENANCE: true
+
+  # The Helm repository at github.io (`helm repo add`, and the one repository Artifact Hub reads) is an index whose
+  # entries for the new versions point at the registry, not at a GitHub Release. This job adds to the served index
+  # every version the registry holds and the index does not list; the entries already there stay as they are.
+  #
+  # It lists what the registry holds, whatever this run did, so it runs after a failed release too, and a manual run
+  # of the workflow repairs an index that missed a version. It waits for the signatures: a version is listed signed.
+  index:
+    needs:
+      - release
+      - attest
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checks-out the scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: source
+          persist-credentials: false
+
+      - name: Checks-out the index
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: gh-pages
+          path: pages
+
+      - name: Add the new versions to the index
+        run: |
+          mapfile -t charts < <(ls source/charts)
+          ./source/ci/scripts/update-helm-index.sh pages/index.yaml "${charts[@]}"
+
+      - name: Publish the index
+        working-directory: pages
+        run: |
+          if git diff --quiet; then
+            echo "The index lists every version of the registry."
+            exit 0
+          fi
+          git diff --stat
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --all --message "chore: add the new chart versions to the index"
+          git push origin HEAD:gh-pages
