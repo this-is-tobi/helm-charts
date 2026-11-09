@@ -13,10 +13,13 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: changed
-      description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/searxng; every earlier version is there too, with the same digest"
+      description: Update searxng docker tag to v2026.11.9-57ff753ad
+      links:
+        - name: Pull Request
+          url: https://github.com/this-is-tobi/helm-charts/pull/153
   artifacthub.io/images: |
     - name: searxng
-      image: docker.io/searxng/searxng:2026.10.25-54ca1d9cf
+      image: docker.io/searxng/searxng:2026.11.9-57ff753ad
     - name: valkey
       image: docker.io/valkey/valkey:9.1.0-alpine3.23@sha256:c9b77919daeba2c02ad954d0c844cc4e7142069d177b89c5fd771f405daf9e02
 keywords:
