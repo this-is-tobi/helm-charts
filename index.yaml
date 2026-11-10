@@ -3510,6 +3510,50 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: changed
+          description: Update valkey docker tag to v0.26.0
+          links:
+            - name: Pull Request
+              url: https://github.com/this-is-tobi/helm-charts/pull/154
+      artifacthub.io/images: |
+        - name: searxng
+          image: docker.io/searxng/searxng:2026.11.9-57ff753ad
+        - name: valkey
+          image: docker.io/valkey/valkey:9.1.0-alpine3.23@sha256:c9b77919daeba2c02ad954d0c844cc4e7142069d177b89c5fd771f405daf9e02
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: 2026.11.9-57ff753ad
+    created: "2026-11-10T19:01:10.278460317Z"
+    dependencies:
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.26.0
+    description: Secure, plug-and-play Helm chart for SearXNG, the privacy-respecting
+      metasearch engine, with optional Valkey for its limiter.
+    digest: 810d37032a2d42dc6adc1c065f1a80d86478b23c647dac3983cc7f993013ad85
+    home: https://github.com/searxng/searxng
+    keywords:
+    - searxng
+    - search
+    - metasearch
+    - privacy
+    - valkey
+    kubeVersion: '>=1.25.0-0'
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: searxng
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/searxng/searxng
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/searxng-0.5.0/searxng-0.5.0.tgz
+    version: 0.5.0
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
           description: Update searxng docker tag to v2026.11.9-57ff753ad
           links:
             - name: Pull Request
@@ -4646,4 +4690,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-11-09T23:52:58.234564863Z"
+generated: "2026-11-10T19:01:10.278633002Z"
