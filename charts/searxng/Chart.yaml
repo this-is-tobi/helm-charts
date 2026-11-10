@@ -13,10 +13,10 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: changed
-      description: Update searxng docker tag to v2026.11.9-57ff753ad
+      description: Update valkey docker tag to v0.26.0
       links:
         - name: Pull Request
-          url: https://github.com/this-is-tobi/helm-charts/pull/153
+          url: https://github.com/this-is-tobi/helm-charts/pull/154
   artifacthub.io/images: |
     - name: searxng
       image: docker.io/searxng/searxng:2026.11.9-57ff753ad
