@@ -1,7 +1,7 @@
 apiVersion: v2
 name: searxng
 type: application
-version: 0.4.0
+version: 0.5.0
 appVersion: "2026.11.9-57ff753ad"
 description: Secure, plug-and-play Helm chart for SearXNG, the privacy-respecting metasearch engine, with optional Valkey for its limiter.
 # Floor set by the APIs the chart renders (autoscaling/v2, policy/v1) and by the `restricted` Pod
@@ -30,7 +30,7 @@ keywords:
 - valkey
 dependencies:
 - name: valkey
-  version: 0.25.16
+  version: 0.26.0
   repository: oci://registry-1.docker.io/cloudpirates
   condition: valkey.enabled
 sources:
