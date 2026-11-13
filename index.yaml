@@ -3485,6 +3485,43 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: changed
+          description: Update ghcr.io/gethomepage/homepage docker tag to v2.8.0
+          links:
+            - name: Pull Request
+              url: https://github.com/this-is-tobi/helm-charts/pull/159
+      artifacthub.io/images: |
+        - name: homepage
+          image: ghcr.io/gethomepage/homepage:v2.8.0
+      artifacthub.io/license: Apache-2.0
+    apiVersion: v2
+    appVersion: v2.8.0
+    created: "2026-11-13T20:33:38.436707458Z"
+    description: Secure, plug-and-play Helm chart for Homepage, the customizable application
+      dashboard, with optional Kubernetes service discovery and built-in authentication.
+    digest: 00bba25345d7ae82f7264b344c9a506c6c3dc1adf61fc7bb59e08cc1ae0f095e
+    home: https://github.com/gethomepage/homepage
+    keywords:
+    - homepage
+    - dashboard
+    - startpage
+    - services
+    - kubernetes
+    kubeVersion: '>=1.25.0-0'
+    maintainers:
+    - email: this-is-tobi@proton.me
+      name: this-is-tobi
+      url: https://this-is-tobi.com
+    name: homepage
+    sources:
+    - https://github.com/this-is-tobi/helm-charts
+    - https://github.com/gethomepage/homepage
+    type: application
+    urls:
+    - https://github.com/this-is-tobi/helm-charts/releases/download/homepage-0.3.0/homepage-0.3.0.tgz
+    version: 0.3.0
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
           description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/homepage; every earlier version is there too, with the same digest"
       artifacthub.io/images: |
         - name: homepage
@@ -4815,4 +4852,4 @@ entries:
     urls:
     - https://github.com/this-is-tobi/helm-charts/releases/download/vso-utils-0.0.1/vso-utils-0.0.1.tgz
     version: 0.0.1
-generated: "2026-11-13T20:32:02.886916668Z"
+generated: "2026-11-13T20:33:38.436923046Z"
