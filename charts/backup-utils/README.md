@@ -1,6 +1,6 @@
 # backup-utils
 
-![Version: 2.5.9](https://img.shields.io/badge/Version-2.5.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.4.8](https://img.shields.io/badge/AppVersion-1.4.8-informational?style=flat-square)
+![Version: 2.6.0](https://img.shields.io/badge/Version-2.6.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.4.8](https://img.shields.io/badge/AppVersion-1.4.8-informational?style=flat-square)
 
 Production-ready Helm chart for automated backups of PostgreSQL, MariaDB, MongoDB, etcd, Vault, Qdrant, and S3 buckets to S3-compatible storage with configurable schedules and retention policies.
 
@@ -52,7 +52,7 @@ helm install <release_name> tobi/backup-utils
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install <release_name> oci://ghcr.io/this-is-tobi/charts/backup-utils --version 2.5.9
+helm install <release_name> oci://ghcr.io/this-is-tobi/charts/backup-utils --version 2.6.0
 ```
 
 ### ArgoCD
@@ -68,7 +68,7 @@ spec:
   sources:
   - repoURL: https://this-is-tobi.github.io/helm-charts
     chart: backup-utils
-    targetRevision: 2.5.9
+    targetRevision: 2.6.0
     helm:
       releaseName: <release_name>
       values: |
@@ -97,7 +97,7 @@ spec:
   sources:
   - repoURL: ghcr.io/this-is-tobi/charts
     chart: backup-utils
-    targetRevision: 2.5.9
+    targetRevision: 2.6.0
     helm:
       releaseName: <release_name>
       values: |
@@ -122,7 +122,7 @@ spec:
 # Chart.yaml
 dependencies:
 - name: backup-utils
-  version: 2.5.9
+  version: 2.6.0
   repository: https://this-is-tobi.github.io/helm-charts
   condition: backup-utils.enabled
 ```
@@ -132,7 +132,7 @@ dependencies:
 # Chart.yaml
 dependencies:
 - name: backup-utils
-  version: 2.5.9
+  version: 2.6.0
   repository: oci://ghcr.io/this-is-tobi/charts
   condition: backup-utils.enabled
 ```
@@ -646,6 +646,40 @@ backups:
         name: backup-common-config
     - secretRef:
         name: postgres-credentials
+```
+
+### Service Account and Extra Volumes
+
+Run a backup as a ServiceAccount of its own and mount extra volumes into it, for example a CA bundle and a projected token to log in to Vault:
+
+```yaml
+backups:
+  vaultSnapshot:
+    enabled: true
+    type: vault
+    serviceAccountName: vault-backup
+    automountServiceAccountToken: false
+    extraVolumes:
+    - name: vault-ca
+      secret:
+        secretName: vault-tls
+        items:
+        - key: ca.crt
+          path: ca.crt
+    - name: vault-token
+      projected:
+        sources:
+        - serviceAccountToken:
+            audience: vault
+            expirationSeconds: 600
+            path: token
+    extraVolumeMounts:
+    - name: vault-ca
+      mountPath: /etc/vault-ca
+      readOnly: true
+    - name: vault-token
+      mountPath: /var/run/secrets/vault
+      readOnly: true
 ```
 
 ## Best Practices
