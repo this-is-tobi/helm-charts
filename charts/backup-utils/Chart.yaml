@@ -9,8 +9,11 @@ annotations:
   artifacthub.io/category: storage
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: added
-      description: "each backup takes serviceAccountName, automountServiceAccountToken, extraVolumes and extraVolumeMounts for its pod"
+    - kind: changed
+      description: Update ghcr.io/this-is-tobi/tools/backup docker tag to v1.4.9
+      links:
+        - name: Pull Request
+          url: https://github.com/this-is-tobi/helm-charts/pull/157
 keywords:
 - backup
 - postgresql
