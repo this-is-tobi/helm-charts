@@ -1,6 +1,6 @@
 # searxng
 
-![Version: 0.5.0](https://img.shields.io/badge/Version-0.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2026.11.9-57ff753ad](https://img.shields.io/badge/AppVersion-2026.11.9--57ff753ad-informational?style=flat-square)
+![Version: 0.5.1](https://img.shields.io/badge/Version-0.5.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2026.11.13-219b63b20](https://img.shields.io/badge/AppVersion-2026.11.13--219b63b20-informational?style=flat-square)
 
 Secure, plug-and-play Helm chart for SearXNG, the privacy-respecting metasearch engine, with optional Valkey for its limiter.
 
@@ -34,7 +34,7 @@ helm install searxng tobi/searxng --namespace searxng --create-namespace
 
 **Using OCI Registry (Recommended):**
 ```sh
-helm install searxng oci://ghcr.io/this-is-tobi/charts/searxng --version 0.5.0 \
+helm install searxng oci://ghcr.io/this-is-tobi/charts/searxng --version 0.5.1 \
   --namespace searxng --create-namespace
 ```
 
@@ -55,7 +55,7 @@ spec:
   sources:
   - repoURL: ghcr.io/this-is-tobi/charts
     chart: searxng
-    targetRevision: 0.5.0
+    targetRevision: 0.5.1
     helm:
       releaseName: searxng
       values: |
