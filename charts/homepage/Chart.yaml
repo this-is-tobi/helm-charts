@@ -13,10 +13,13 @@ annotations:
   artifacthub.io/license: Apache-2.0
   artifacthub.io/changes: |
     - kind: changed
-      description: "The OCI address is oci://ghcr.io/this-is-tobi/charts/homepage; every earlier version is there too, with the same digest"
+      description: Update ghcr.io/gethomepage/homepage docker tag to v2.8.0
+      links:
+        - name: Pull Request
+          url: https://github.com/this-is-tobi/helm-charts/pull/159
   artifacthub.io/images: |
     - name: homepage
-      image: ghcr.io/gethomepage/homepage:v2.7.0
+      image: ghcr.io/gethomepage/homepage:v2.8.0
 keywords:
 - homepage
 - dashboard
