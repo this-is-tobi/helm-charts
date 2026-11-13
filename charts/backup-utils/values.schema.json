@@ -158,6 +158,28 @@
           "podSecurityContext": {
             "type": "object"
           },
+          "serviceAccountName": {
+            "type": "string",
+            "description": "ServiceAccount the backup pod runs as"
+          },
+          "automountServiceAccountToken": {
+            "type": "boolean",
+            "description": "Mount the ServiceAccount's API token in the backup pod"
+          },
+          "extraVolumes": {
+            "type": "array",
+            "description": "Extra volumes of the backup pod",
+            "items": {
+              "type": "object"
+            }
+          },
+          "extraVolumeMounts": {
+            "type": "array",
+            "description": "Extra volume mounts of the backup container",
+            "items": {
+              "type": "object"
+            }
+          },
           "container": {
             "type": "object",
             "properties": {

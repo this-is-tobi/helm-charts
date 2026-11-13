@@ -652,6 +652,40 @@ backups:
         name: postgres-credentials
 ```
 
+### Service Account and Extra Volumes
+
+Run a backup as a ServiceAccount of its own and mount extra volumes into it, for example a CA bundle and a projected token to log in to Vault:
+
+```yaml
+backups:
+  vaultSnapshot:
+    enabled: true
+    type: vault
+    serviceAccountName: vault-backup
+    automountServiceAccountToken: false
+    extraVolumes:
+    - name: vault-ca
+      secret:
+        secretName: vault-tls
+        items:
+        - key: ca.crt
+          path: ca.crt
+    - name: vault-token
+      projected:
+        sources:
+        - serviceAccountToken:
+            audience: vault
+            expirationSeconds: 600
+            path: token
+    extraVolumeMounts:
+    - name: vault-ca
+      mountPath: /etc/vault-ca
+      readOnly: true
+    - name: vault-token
+      mountPath: /var/run/secrets/vault
+      readOnly: true
+```
+
 ## Best Practices
 
 ### 1. Security

@@ -116,6 +116,24 @@ backups: {}
   #     # fsGroup: 2000
   #     # runAsNonRoot: true
   #     # runAsUser: 1000
+  #   # -- ServiceAccount the backup pod runs as (optional). Unset runs as the namespace's `default`.
+  #   # @section -- Backups
+  #   serviceAccountName: ""
+  #   # -- Mount the ServiceAccount's API token in the pod (optional). Unset keeps the Kubernetes default (true).
+  #   # @section -- Backups
+  #   automountServiceAccountToken: false
+  #   # -- Extra volumes of the backup pod (optional), such as a CA bundle or a projected token.
+  #   # @section -- Backups
+  #   extraVolumes: []
+  #   # - name: ca
+  #   #   secret:
+  #   #     secretName: my-ca
+  #   # -- Extra volume mounts of the backup container (optional).
+  #   # @section -- Backups
+  #   extraVolumeMounts: []
+  #   # - name: ca
+  #   #   mountPath: /etc/ssl/custom
+  #   #   readOnly: true
   #   container:
   #     # -- Container port (used for health checks or communication, typically 8080).
   #     # @section -- Backups
