@@ -24,7 +24,7 @@ permissions: {}
 
 jobs:
   release:
-    uses: this-is-tobi/github-workflows/.github/workflows/release-helm.yml@d6938174527f067bc870ff10a83d36b57a49360f # v0.48.2
+    uses: this-is-tobi/github-workflows/.github/workflows/release-helm.yml@55d9e5bfded7ed785088ed5807dbbb46b7c1aa76 # v0.48.3
     permissions:
       contents: write
       packages: write
@@ -51,7 +51,7 @@ jobs:
   attest:
     needs: release
     if: ${{ !cancelled() }}
-    uses: this-is-tobi/github-workflows/.github/workflows/attest-helm.yml@d6938174527f067bc870ff10a83d36b57a49360f # v0.48.2
+    uses: this-is-tobi/github-workflows/.github/workflows/attest-helm.yml@55d9e5bfded7ed785088ed5807dbbb46b7c1aa76 # v0.48.3
     permissions:
       packages: write
       id-token: write
